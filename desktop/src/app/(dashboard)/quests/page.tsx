@@ -1,9 +1,14 @@
 import { getDashboardData } from "@/actions/dashboard";
 import { getActiveQuests } from "@/actions/quests";
+import { getCurrentMember } from "@/actions/members";
+import { redirect } from "next/navigation";
 
 export default async function Page() {
-  const dbData = await getDashboardData(1);
-  const activeQuests = await getActiveQuests(1);
+  const currentMember = await getCurrentMember();
+  if (!currentMember) redirect("/login");
+
+  const dbData = await getDashboardData(currentMember.id);
+  const activeQuests = await getActiveQuests(currentMember.id);
 
   const xp = dbData?.progress?.xp || 0;
   const level = dbData?.progress?.level || 1;

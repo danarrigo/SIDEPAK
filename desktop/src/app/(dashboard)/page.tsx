@@ -1,16 +1,23 @@
 import React from "react";
 import Link from "next/link";
 import { getDashboardData } from "@/actions/dashboard";
-import { getMemberData } from "@/actions/members";
+import { getCurrentMember } from "@/actions/members";
+import { getFinancialsData } from "@/actions/financials";
+import { getKoperasiStats } from "@/actions/governance";
+import { redirect } from "next/navigation";
 import MissionList from "@/components/MissionList";
 
 export default async function DesktopDashboard() {
-  const dbData = await getDashboardData(1);
-  const member = await getMemberData(1);
+  const currentMember = await getCurrentMember();
+  if (!currentMember) redirect("/login");
+
+  const dbData = await getDashboardData(currentMember.id);
+  const financials = await getFinancialsData(currentMember.id);
+  const koperasiStats = await getKoperasiStats();
   
   const points = dbData?.progress?.pointsBalance || 0;
   const streak = dbData?.progress?.currentStreak || 0;
-  const memberName = member?.namaLengkap ? member.namaLengkap.split(' ')[0] : "Anggota";
+  const memberName = currentMember?.namaLengkap ? currentMember.namaLengkap.split(' ')[0] : "Anggota";
 
   return (
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">
@@ -40,21 +47,21 @@ export default async function DesktopDashboard() {
             <div className="p-6 flex-1 flex flex-col justify-between gap-6">
               <div>
                 <span className="text-on-surface-variant text-xs font-semibold">Saldo Terkonsolidasi</span>
-                <h2 className="text-3xl font-black text-on-surface mt-1">Rp 8.754.000,00</h2>
+                <h2 className="text-3xl font-black text-on-surface mt-1">Rp {financials.totalSavings.toLocaleString('id-ID')}</h2>
               </div>
               
               <div className="grid grid-cols-3 gap-4 border-t border-outline-variant/30 pt-6">
                 <div className="bg-surface-container-low p-3 rounded-lg border border-outline-variant/50">
                   <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">Simpanan Pokok</p>
-                  <p className="text-xs font-bold text-on-surface mt-1">Rp 750.000</p>
+                  <p className="text-xs font-bold text-on-surface mt-1">Rp {financials.simpananPokok.toLocaleString('id-ID')}</p>
                 </div>
                 <div className="bg-surface-container-low p-3 rounded-lg border border-outline-variant/50">
                   <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">Simpanan Wajib</p>
-                  <p className="text-xs font-bold text-on-surface mt-1">Rp 750.000</p>
+                  <p className="text-xs font-bold text-on-surface mt-1">Rp {financials.simpananWajib.toLocaleString('id-ID')}</p>
                 </div>
                 <div className="bg-surface-container-low p-3 rounded-lg border border-outline-variant/50">
                   <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">Simpanan Sukarela</p>
-                  <p className="text-xs font-bold text-on-surface mt-1">Rp 7.254.000</p>
+                  <p className="text-xs font-bold text-on-surface mt-1">Rp {financials.simpananSukarela.toLocaleString('id-ID')}</p>
                 </div>
               </div>
 
@@ -102,7 +109,7 @@ export default async function DesktopDashboard() {
         </div>
 
         {/* Row 3: Missions, Stats Preview, and Announcements */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Missions Preview */}
           <div className="glass-card border border-outline-variant rounded-2xl p-6 flex flex-col justify-between">
@@ -128,23 +135,13 @@ export default async function DesktopDashboard() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/30">
                   <span className="material-symbols-outlined text-primary text-base">swap_horiz</span>
-                  <p className="text-xl font-black text-on-surface mt-1">37</p>
+                  <p className="text-xl font-black text-on-surface mt-1">{koperasiStats.transaksi}</p>
                   <p className="text-[9px] font-bold text-on-surface-variant">Transaksi</p>
                 </div>
                 <div className="bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/30">
-                  <span className="material-symbols-outlined text-primary text-base">attach_money</span>
-                  <p className="text-sm font-black text-on-surface mt-1 truncate">Rp 14,53 Jt</p>
-                  <p className="text-[9px] font-bold text-on-surface-variant">Omzet Harian</p>
-                </div>
-                <div className="bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/30">
                   <span className="material-symbols-outlined text-primary text-base">groups</span>
-                  <p className="text-xl font-black text-on-surface mt-1">8</p>
+                  <p className="text-xl font-black text-on-surface mt-1">{koperasiStats.anggotaBaru}</p>
                   <p className="text-[9px] font-bold text-on-surface-variant">Anggota Baru</p>
-                </div>
-                <div className="bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/30">
-                  <span className="material-symbols-outlined text-primary text-base">storefront</span>
-                  <p className="text-xl font-black text-on-surface mt-1">12</p>
-                  <p className="text-[9px] font-bold text-on-surface-variant">UMKM Aktif</p>
                 </div>
               </div>
             </div>
@@ -153,26 +150,6 @@ export default async function DesktopDashboard() {
                 <span>Statistik & Governance</span>
                 <span className="material-symbols-outlined text-xs">arrow_forward</span>
               </Link>
-            </div>
-          </div>
-
-          {/* Announcement Widget */}
-          <div className="glass-card border border-outline-variant rounded-2xl p-6 flex flex-col justify-between">
-            <div>
-              <h3 className="font-bold text-on-surface mb-4">Pengumuman</h3>
-              <div className="space-y-3">
-                <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/30">
-                  <h4 className="font-bold text-xs text-on-surface leading-tight">RAT Buku 2025 - Hadiri & Dukung Koperasi</h4>
-                  <p className="text-[9px] text-on-surface-variant font-medium mt-1">Pelaksanaan: 15 Juli 2026</p>
-                </div>
-                <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/30">
-                  <h4 className="font-bold text-xs text-on-surface leading-tight">Pembagian SHU Tahun Buku 2024 Bagi Seluruh Anggota...</h4>
-                  <p className="text-[9px] text-on-surface-variant font-medium mt-1">Pelaksanaan: 1 Juli 2026</p>
-                </div>
-              </div>
-            </div>
-            <div className="text-[10px] text-on-surface-variant text-center font-medium pt-3 mt-4 border-t border-outline-variant/30">
-              Sistem Pembaruan Otomatis
             </div>
           </div>
 

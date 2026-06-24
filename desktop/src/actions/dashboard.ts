@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { memberProgress, pointTransactions } from "@/db/schema/gamification";
 import { eq, desc } from "drizzle-orm";
 
-export async function getDashboardData(memberId: number = 1) {
+export async function getDashboardData(memberId: number) {
   try {
     const [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
     

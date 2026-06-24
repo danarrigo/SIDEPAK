@@ -1,17 +1,11 @@
-import { pgTable, serial, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, timestamp, boolean } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: varchar("email", { length: 255 }).notNull().unique(),
-  nik: varchar("nik", { length: 20 }).notNull().unique(),
-  namaLengkap: varchar("nama_lengkap", { length: 255 }).notNull(),
-  jenisKelamin: varchar("jenis_kelamin", { length: 20 }),
-  nomorHp: varchar("nomor_hp", { length: 30 }),
   kataSandi: varchar("kata_sandi", { length: 255 }).notNull(),
-  provinsi: varchar("provinsi", { length: 100 }),
-  kabupaten: varchar("kabupaten", { length: 100 }),
-  kecamatan: varchar("kecamatan", { length: 100 }),
-  desa: varchar("desa", { length: 100 }),
-  koperasi: varchar("koperasi", { length: 255 }),
+  role: varchar("role", { length: 20 }).default('member').notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

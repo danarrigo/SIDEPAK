@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { signup } from "@/actions/auth";
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { getAllCooperatives } from "@/actions/cooperatives";
 
 const initialState = {
   error: "",
@@ -10,6 +11,11 @@ const initialState = {
 
 export default function SignupPage() {
   const [state, formAction, pending] = useActionState(signup, initialState);
+  const [cooperatives, setCooperatives] = useState<{ id: number; name: string; desa: string | null }[]>([]);
+
+  useEffect(() => {
+    getAllCooperatives().then(setCooperatives);
+  }, []);
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-background p-6">
@@ -126,14 +132,21 @@ export default function SignupPage() {
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-bold text-on-surface mb-2" htmlFor="koperasi">Nama Koperasi</label>
-                <input
+                <select
                   id="koperasi"
                   name="koperasi"
-                  type="text"
                   required
-                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface"
-                  placeholder="Nama koperasi harus terdaftar di desa Anda"
-                />
+                  defaultValue=""
+                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface appearance-none"
+                >
+                  <option value="" disabled>Pilih Koperasi yang tersedia di Desa Anda</option>
+                  {cooperatives.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name} (Desa {c.desa})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-on-surface-variant mt-1 ml-1">Koperasi yang dipilih harus berada di desa yang sama dengan domisili Anda.</p>
               </div>
             </div>
           </div>

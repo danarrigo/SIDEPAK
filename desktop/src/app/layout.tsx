@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Sidebar from "@/components/layout/Sidebar";
+import Header from "@/components/layout/Header";
+import BottomNav from "@/components/layout/BottomNav";
 
 export const metadata: Metadata = {
   title: "Dashboard Koperasi Sukamaju",
@@ -13,8 +16,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-[#0b0f19] text-[#f8fafc]">
-        {children}
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+        <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" />
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet" />
+      </head>
+      <body className="min-h-full flex">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-h-screen relative">
+          <Header />
+          {children}
+          <BottomNav />
+        </div>
       </body>
     </html>
   );

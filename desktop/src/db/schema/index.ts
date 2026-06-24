@@ -5,3 +5,4 @@ export * from "./gamification";
 export * from "./achievements";
 export * from "./activities";
 export * from "./financials";
+export * from "./governance";

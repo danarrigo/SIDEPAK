@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from 'react-dom';
 import { useRouter } from "next/navigation";
 import { createTopUpInvoice, verifyInvoicePayment } from "@/actions/wallet";
 
@@ -80,20 +81,15 @@ export default function TopUpModal({ memberId }: TopUpModalProps) {
     }
   };
 
-  return (
-    <>
-      <button
-        onClick={handleOpen}
-        className="w-full py-3 px-4 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-on-primary text-sm font-extrabold uppercase tracking-widest rounded-2xl transition-all shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(var(--primary-rgb),0.3)] hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2"
-      >
-        <span className="material-symbols-outlined">add_circle</span>
-        Top Up Saldo
-      </button>
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-md"></div>
-          <div className="w-full max-w-md max-h-[85vh] overflow-y-auto scrollbar-hide bg-surface-container-high/90 backdrop-blur-xl rounded-[2rem] border border-white/10 shadow-2xl relative transform transition-all animate-scale-up">
+  const modalContent = isOpen && (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-md"></div>
+      <div className="w-full max-w-md max-h-[85vh] overflow-y-auto scrollbar-hide bg-surface-container-high/90 backdrop-blur-xl rounded-[2rem] border border-white/10 shadow-2xl relative transform transition-all animate-scale-up">
             
             {/* Decorative background gradients */}
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -244,7 +240,22 @@ export default function TopUpModal({ memberId }: TopUpModalProps) {
             </div>
           </div>
         </div>
-      )}
+      </div>
+  );
+
+  return (
+    <>
+      <button
+        onClick={handleOpen}
+        className="w-full py-3 px-4 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-on-primary text-sm font-extrabold uppercase tracking-widest rounded-2xl transition-all shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(var(--primary-rgb),0.3)] hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 relative z-10"
+      >
+        <span className="material-symbols-outlined">add_circle</span>
+        Top Up Saldo
+      </button>
+
+      {mounted && isOpen && typeof document !== 'undefined'
+        ? createPortal(modalContent, document.body)
+        : null}
     </>
   );
 }

@@ -92,7 +92,6 @@ class KoperasiProvider extends ChangeNotifier {
 
   Map<String, String> _headers({bool isJson = false}) {
     final h = <String, String>{
-      'x-vercel-protection-bypass': 'x7R9wK2mP5qN4vB8zY1tC6sX3dL0fG9j',
       if (token != null) 'Authorization': 'Bearer $token',
     };
     if (isJson) {

@@ -40,16 +40,29 @@ export async function signup(prevState: unknown, formData: FormData) {
     koperasi: (formData.get("koperasi") as string)?.trim() ?? "",
   };
 
-  // Validate that the cooperative exists and belongs to the given desa/kelurahan
-  const [coop] = await db.select().from(cooperatives).where(
+  // Check if the cooperative exists for the given desa/kelurahan
+  let [coop] = await db.select().from(cooperatives).where(
     and(
       ilike(cooperatives.name, data.koperasi),
       ilike(cooperatives.desa, data.desa)
     )
   );
 
+  // If it doesn't exist, create it automatically
   if (!coop) {
-    return { error: "Koperasi tidak ditemukan di Desa/Kelurahan tersebut." };
+    try {
+      const [newCoop] = await db.insert(cooperatives).values({
+        name: data.koperasi,
+        provinsi: data.provinsi,
+        kabupaten: data.kabupaten,
+        kecamatan: data.kecamatan,
+        desa: data.desa,
+      }).returning();
+      coop = newCoop;
+    } catch (dbError) {
+      console.error("Error creating cooperative:", dbError);
+      return { error: "Gagal membuat koperasi baru." };
+    }
   }
 
   const { data: authData, error: authError } = await supabase.auth.signUp({

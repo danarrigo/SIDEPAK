@@ -240,7 +240,6 @@ export default function TopUpModal({ memberId }: TopUpModalProps) {
             </div>
           </div>
         </div>
-      </div>
   );
 
   return (

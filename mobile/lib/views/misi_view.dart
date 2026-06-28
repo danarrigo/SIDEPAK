@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/koperasi_provider.dart';
 import '../models/shop_item.dart';
+import '../models/mission.dart';
 
 class MisiView extends StatelessWidget {
   const MisiView({super.key});
@@ -9,18 +10,7 @@ class MisiView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<KoperasiProvider>();
-    final double progress = (provider.points / 1500).clamp(0.0, 1.0);
-
-    void showSnackBar(String message) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message, style: const TextStyle(fontWeight: FontWeight.bold)),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
+    final double progress = (provider.points / provider.nextLevelPoints).clamp(0.0, 1.0);
 
     return SingleChildScrollView(
       child: Column(
@@ -37,7 +27,7 @@ class MisiView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      decoration: BoxDecoration(color: const Color(0xFFFCD34D), borderRadius: BorderRadius.circular(20)),
+                      decoration: const BoxDecoration(color: Color(0xFFFCD34D), borderRadius: BorderRadius.all(Radius.circular(20))),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       margin: const EdgeInsets.only(bottom: 12),
                       child: Text(
@@ -46,7 +36,7 @@ class MisiView extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${provider.points} / 1.500 poin menuju Platinum',
+                      '${provider.points} / ${provider.nextLevelPoints} poin menuju ${provider.nextRankName}',
                       style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
                     ),
                     const SizedBox(height: 6),
@@ -173,15 +163,20 @@ class MisiView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.72,
-                  children: provider.shopItems.map((item) => _buildShopItemCard(context, item)).toList(),
-                ),
+                provider.shopItems.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Text('Belum ada item di toko.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 12)),
+                      )
+                    : GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.72,
+                        children: provider.shopItems.map((item) => _buildShopItemCard(context, item)).toList(),
+                      ),
                 const SizedBox(height: 20),
               ],
             ),
@@ -194,18 +189,6 @@ class MisiView extends StatelessWidget {
   Widget _buildMissionSectionCard(BuildContext context, String title, bool isDaily) {
     final provider = context.read<KoperasiProvider>();
     final list = provider.missions.where((m) => m.isDaily == isDaily).toList();
-    final pointsAvailable = isDaily ? 100 : 380;
-
-    void showSnackBar(String message) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message, style: const TextStyle(fontWeight: FontWeight.bold)),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
 
     return Card(
       color: Colors.white,
@@ -216,56 +199,24 @@ class MisiView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF334155))),
-                Text('+ $pointsAvailable Poin Tersedia', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFFACC15)))
-              ],
-            ),
+            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF334155))),
             const SizedBox(height: 16),
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: list.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final m = list[index];
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () => provider.toggleMission(m.id, showSnackBar),
-                          child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: m.completed ? const Color(0xFF84CC16) : Colors.transparent,
-                              border: Border.all(color: m.completed ? const Color(0xFF84CC16) : const Color(0xFFCBD5E1), width: 2),
-                            ),
-                            child: m.completed ? const Icon(Icons.check, color: Colors.white, size: 14) : null,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          m.title,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: m.completed ? Colors.grey : const Color(0xFF475569),
-                            decoration: m.completed ? TextDecoration.lineThrough : null,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Text('+ ${m.points}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFFACC15)))
-                  ],
-                );
-              },
-            )
+            if (list.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Text('Belum ada misi tersedia.', style: TextStyle(color: Colors.grey, fontSize: 12)),
+              )
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: list.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final m = list[index];
+                  return _MissionRow(mission: m);
+                },
+              )
           ],
         ),
       ),
@@ -319,7 +270,10 @@ class MisiView extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             GestureDetector(
-              onTap: () => provider.buyShopItem(item, showSnackBar),
+              onTap: () async {
+                final msg = await provider.buyShopItem(item);
+                showSnackBar(msg);
+              },
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
@@ -328,15 +282,85 @@ class MisiView extends StatelessWidget {
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 alignment: Alignment.center,
-                child: Text(
-                  item.ownedCount > 0 ? 'Beli (Miliki: ${item.ownedCount}x)' : 'Beli',
-                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                child: const Text(
+                  'Beli',
+                  style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _MissionRow extends StatelessWidget {
+  final Mission mission;
+  const _MissionRow({required this.mission});
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.read<KoperasiProvider>();
+
+    void showSnackBar(String message) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message, style: const TextStyle(fontWeight: FontWeight.bold)),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                mission.title,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: mission.isCompleted ? Colors.grey : const Color(0xFF475569),
+                  decoration: mission.isCompleted ? TextDecoration.lineThrough : null,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Progres: ${mission.progress} / ${mission.targetCount}',
+                style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        if (mission.isCompleted)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(20)),
+            child: const Text('SELESAI', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+          )
+        else if (mission.isClaimable)
+          GestureDetector(
+            onTap: () async {
+              final msg = await provider.claimMission(mission.id, mission.points);
+              showSnackBar(msg);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(color: const Color(0xFFFACC15), borderRadius: BorderRadius.circular(20)),
+              child: const Text('KLAIM', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+            ),
+          )
+        else
+          Text('+${mission.points} XP', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFFACC15))),
+      ],
     );
   }
 }

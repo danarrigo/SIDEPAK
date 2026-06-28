@@ -2,6 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/koperasi_provider.dart';
 
+const _rankColors = <String, List<Color>>{
+  'Perunggu': [Color(0xFFB45309), Color(0xFF78350F)],
+  'Perak': [Color(0xFF94A3B8), Color(0xFF475569)],
+  'Emas': [Color(0xFFFBBF24), Color(0xFFB45309)],
+  'Platinum': [Color(0xFF22D3EE), Color(0xFF2563EB)],
+  'Legenda': [Color(0xFFA855F7), Color(0xFFC026D3)],
+};
+
+const _rankIcons = <String, IconData>{
+  'Perunggu': Icons.eco,
+  'Perak': Icons.military_tech,
+  'Emas': Icons.workspace_premium,
+  'Platinum': Icons.diamond,
+  'Legenda': Icons.grade,
+};
+
 class ProfileView extends StatelessWidget {
   final VoidCallback onLogout;
 
@@ -10,83 +26,99 @@ class ProfileView extends StatelessWidget {
     required this.onLogout,
   });
 
+  String fmtMoney(int v) =>
+      'Rp ${v.toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}';
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<KoperasiProvider>();
+    final initials = provider.fullName != null && provider.fullName!.isNotEmpty
+        ? provider.fullName!.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join('').toUpperCase()
+        : 'AG';
+    final rankGradient = _rankColors[provider.rankName] ?? _rankColors['Perunggu']!;
+    final rankIcon = _rankIcons[provider.rankName] ?? Icons.eco;
+    final int totalSimpananDisplay = provider.totalSimpanan > 0
+        ? provider.totalSimpanan
+        : provider.simpananPokok + provider.simpananWajib + provider.simpananSukarela;
+    final estimasiSHU = totalSimpananDisplay > 0 ? (totalSimpananDisplay * 0.12).floor() : 0;
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Rank gradient digital member card
           Container(
-            color: const Color(0xFF0F172A),
-            padding: const EdgeInsets.only(top: 60, left: 24, right: 24, bottom: 24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: rankGradient,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            padding: const EdgeInsets.only(top: 60, left: 24, right: 24, bottom: 32),
             child: Column(
               children: [
-                Stack(
-                  alignment: Alignment.center,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 106,
-                      height: 106,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(colors: [Color(0xFFF59E0B), Color(0xFFFCD34D)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                        boxShadow: [BoxShadow(color: const Color(0xFFF59E0B).withOpacity(0.5), blurRadius: 20, spreadRadius: 2)],
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          provider.fullName ?? 'Anggota',
+                          style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.3),
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.white30),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(rankIcon, color: Colors.white, size: 14),
+                              const SizedBox(width: 4),
+                              Text('RANK ${provider.rankName.toUpperCase()}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'No. Anggota: KMP-DSKMJ-2026-${(provider.memberId ?? 1).toString().padLeft(4, '0')}',
+                          style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                        if (provider.email != null) ...[
+                          const SizedBox(height: 2),
+                          Text(provider.email!, style: const TextStyle(color: Colors.white70, fontSize: 10)),
+                        ],
+                      ],
                     ),
                     CircleAvatar(
-                      radius: 48,
-                      backgroundColor: const Color(0xFF0F172A),
+                      radius: 32,
+                      backgroundColor: Colors.white24,
                       child: CircleAvatar(
-                        radius: 44,
-                        backgroundColor: Colors.white70,
+                        radius: 28,
+                        backgroundColor: Colors.white,
                         child: Text(
-                          provider.fullName != null && provider.fullName!.isNotEmpty
-                              ? provider.fullName!.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join('').toUpperCase()
-                              : 'AG',
-                          style: const TextStyle(color: Color(0xFF0F172A), fontSize: 24, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(colors: [Color(0xFFF59E0B), Color(0xFFB45309)]),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.white, width: 1.5),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.workspace_premium, color: Colors.white, size: 14),
-                            const SizedBox(width: 4),
-                            Text('RANK ${provider.rankName.toUpperCase()}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                          ],
+                          initials,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text(provider.fullName ?? 'Anggota', style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
-                const SizedBox(height: 4),
-                Text('Anggota ${provider.rankName} Koperasi', style: const TextStyle(color: Color(0xFFFCD34D), fontSize: 12, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 2),
-                Text('No. Anggota: KMP-DSKMJ-2026-${(provider.memberId ?? 1).toString().padLeft(4, '0')}', style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
-                if (provider.email != null) ...[
-                  const SizedBox(height: 2),
-                  Text(provider.email!, style: const TextStyle(color: Colors.grey, fontSize: 10)),
-                ],
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _buildTopBadge(Icons.local_fire_department, '${provider.streak} Hari Streak', Colors.white, Colors.white12, iconColor: Colors.orange),
                     const SizedBox(width: 8),
-                    _buildTopBadge(Icons.calendar_month, 'Aktif 2026', Colors.white, Colors.white12),
+                    _buildTopBadge(Icons.workspace_premium, '${provider.xp} XP', Colors.white, Colors.white12, iconColor: Colors.amberAccent),
                   ],
                 )
               ],
@@ -97,30 +129,7 @@ class ProfileView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Card(
-                  color: const Color(0xFF111827),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(
-                      children: [
-                        Container(color: Colors.white, padding: const EdgeInsets.all(6), child: const Icon(Icons.qr_code, color: Colors.black, size: 52)),
-                        const SizedBox(width: 16),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('QR Kartu Keanggotaan', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
-                              SizedBox(height: 4),
-                              Text('Untuk transaksi, presensi RAT, dan verifikasi identitas', style: TextStyle(color: Colors.grey, fontSize: 9.5))
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
+                // Ranking row (mobile-only, but uses DB-backed rankName/level)
                 const Text('Ranking', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
                 const SizedBox(height: 8),
                 Card(
@@ -141,9 +150,9 @@ class ProfileView extends StatelessWidget {
                               _buildRankDivider(),
                               _buildRankItem(Icons.workspace_premium, 'Emas', const Color(0xFFF59E0B), provider.rankName == 'Emas'),
                               _buildRankDivider(),
-                              _buildRankItem(Icons.diamond, 'Platinum', Colors.lightBlue, provider.rankName == 'Platinum', opacity: provider.level >= 10 ? 1.0 : 0.5),
+                              _buildRankItem(Icons.diamond, 'Platinum', Colors.lightBlue, provider.rankName == 'Platinum', opacity: provider.level >= 30 ? 1.0 : 0.5),
                               _buildRankDivider(),
-                              _buildRankItem(Icons.grade, 'Legenda', Colors.redAccent, provider.rankName == 'Legenda', opacity: provider.level >= 15 ? 1.0 : 0.5),
+                              _buildRankItem(Icons.grade, 'Legenda', Colors.redAccent, provider.rankName == 'Legenda', opacity: provider.level >= 40 ? 1.0 : 0.5),
                             ],
                           ),
                         ),
@@ -160,29 +169,8 @@ class ProfileView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text('Penghargaan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 120,
-                  child: provider.earnedBadges.isEmpty
-                      ? const Center(
-                          child: Text('Belum ada penghargaan', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                        )
-                      : ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: provider.earnedBadges.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 12),
-                          itemBuilder: (context, i) {
-                            final badge = provider.earnedBadges[i];
-                            return _buildAchievementIcon(
-                              badge['name'] ?? 'Badge',
-                              badge['description'] ?? '',
-                              Icons.emoji_events,
-                            );
-                          },
-                        ),
-                ),
-                const SizedBox(height: 24),
+
+                // Dampak Personal (DB-backed)
                 const Text('Dampak Personal', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
                 const SizedBox(height: 8),
                 GridView.count(
@@ -193,15 +181,114 @@ class ProfileView extends StatelessWidget {
                   mainAxisSpacing: 12,
                   childAspectRatio: 1.6,
                   children: [
-                    _buildImpactCard('Total Simpanan', 'Rp ${((provider.simpananPokok + provider.simpananWajib + provider.simpananSukarela) / 1000000).toStringAsFixed(1)}Jt'),
-                    _buildImpactCard('Misi Diselesaikan', '${provider.missions.where((m) => m.completed).length}'),
+                    _buildImpactCard('Total Simpanan', 'Rp ${(totalSimpananDisplay / 1000000).toStringAsFixed(1)}Jt'),
+                    _buildImpactCard('Misi Diselesaikan', '${provider.missions.where((m) => m.isCompleted).length}'),
                     _buildImpactCard('Level Kamu', 'Level ${provider.level}'),
                     _buildImpactCard('Tingkat Kemenangan', '${provider.userWinRate}%'),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-                // Mutasi & Ledger Keuangan
+                // Estimasi SHU (DB-backed)
+                Card(
+                  color: Colors.white,
+                  surfaceTintColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  elevation: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Estimasi SHU', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
+                            SizedBox(height: 4),
+                            Text('Tahun Buku 2024', style: TextStyle(fontSize: 9, color: Colors.grey)),
+                          ],
+                        ),
+                        Text(
+                          fmtMoney(estimasiSHU),
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Riwayat Aktivitas Poin (DB-backed via dashboard.transactions)
+                const Text('Riwayat Aktivitas Poin', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
+                const SizedBox(height: 8),
+                Card(
+                  color: Colors.white,
+                  surfaceTintColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  elevation: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: provider.pointTransactions.isEmpty
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: Text('Belum ada aktivitas poin tercatat.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          )
+                        : ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: provider.pointTransactions.length,
+                            separatorBuilder: (_, __) => const Divider(color: Color(0xFFF1F5F9), height: 8),
+                            itemBuilder: (context, i) {
+                              final t = provider.pointTransactions[i];
+                              final int amount = (t['amount'] as num?)?.toInt() ?? 0;
+                              final bool isPositive = amount >= 0;
+                              final String source = t['source']?.toString() ?? '';
+                              final String description = t['description']?.toString() ?? source;
+                              final String date = t['createdAt'] != null
+                                  ? t['createdAt'].toString().split('T')[0]
+                                  : '';
+                              return Row(
+                                children: [
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: isPositive ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      isPositive ? Icons.arrow_upward : Icons.arrow_downward,
+                                      color: isPositive ? const Color(0xFF16A34A) : const Color(0xFFEF4444),
+                                      size: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(description, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                                        Text('$source • $date', style: const TextStyle(fontSize: 9, color: Colors.grey)),
+                                      ],
+                                    ),
+                                  ),
+                                  Text(
+                                    '${isPositive ? '+' : ''}$amount XP',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: isPositive ? const Color(0xFF16A34A) : const Color(0xFFEF4444),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Mutasi & Ledger Keuangan (savings + loans, DB-backed)
                 const Text('Mutasi & Ledger Keuangan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
                 const SizedBox(height: 8),
                 Card(
@@ -225,7 +312,7 @@ class ProfileView extends StatelessWidget {
                             const SizedBox(height: 8),
                             ...provider.listSavings.map((s) {
                               final bool isDeposit = s['type'] == 'deposit';
-                              final int amount = s['amount'] ?? 0;
+                              final int amount = (s['amount'] as num?)?.toInt() ?? 0;
                               final String desc = s['description'] ?? 'Transaksi Simpanan';
                               return Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 6),
@@ -245,7 +332,7 @@ class ProfileView extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      '${isDeposit ? "+" : "-"} Rp ${amount.toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}',
+                                      '${isDeposit ? "+" : "-"} ${fmtMoney(amount)}',
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
@@ -264,7 +351,7 @@ class ProfileView extends StatelessWidget {
                             const Text('Status Pinjaman', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
                             const SizedBox(height: 8),
                             ...provider.listLoans.map((l) {
-                              final int amount = l['amount'] ?? 0;
+                              final int amount = (l['amount'] as num?)?.toInt() ?? 0;
                               final String status = l['status'] ?? 'pending';
                               final Color statusColor = status == 'approved'
                                   ? const Color(0xFF3B82F6)
@@ -279,7 +366,7 @@ class ProfileView extends StatelessWidget {
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text('Pinjaman Dana', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                                        const Text('Pinjaman Dana', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
                                         const SizedBox(height: 4),
                                         Container(
                                           decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
@@ -289,7 +376,7 @@ class ProfileView extends StatelessWidget {
                                       ],
                                     ),
                                     Text(
-                                      'Rp ${amount.toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}',
+                                      fmtMoney(amount),
                                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
                                     ),
                                   ],
@@ -302,7 +389,116 @@ class ProfileView extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
+
+                // Inventory (DB-backed via member_items)
+                const Text('Inventori', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
+                const SizedBox(height: 8),
+                Card(
+                  color: Colors.white,
+                  surfaceTintColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  elevation: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: provider.inventory.isEmpty
+                        ? const Column(
+                            children: [
+                              Icon(Icons.inventory_2_outlined, color: Colors.grey, size: 36),
+                              SizedBox(height: 8),
+                              Text('Inventori kosong.', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                              SizedBox(height: 4),
+                              Text('Beli item di Toko Misi!', style: TextStyle(color: Color(0xFFF59E0B), fontSize: 10, fontWeight: FontWeight.bold)),
+                            ],
+                          )
+                        : ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: provider.inventory.length,
+                            separatorBuilder: (_, __) => const Divider(color: Color(0xFFF1F5F9), height: 8),
+                            itemBuilder: (context, i) {
+                              final inv = provider.inventory[i];
+                              final item = inv.item;
+                              void showSnackBar(String message) {
+                                ScaffoldMessenger.of(context).clearSnackBars();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(message, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                    behavior: SnackBarBehavior.floating,
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                              return Row(
+                                children: [
+                                  Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: item.iconColor.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(item.icon, color: item.iconColor, size: 18),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(item.title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                                        Text('Tersedia: ${inv.quantity}', style: const TextStyle(fontSize: 9, color: Colors.grey)),
+                                      ],
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      if (item.id == 0) return;
+                                      final msg = await provider.useInventoryItem(item.id);
+                                      showSnackBar(msg);
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFFACC15),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Text('PAKAI', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Achievements (DB-backed via member_badges)
+                const Text('Penghargaan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 120,
+                  child: provider.earnedBadges.isEmpty
+                      ? const Center(
+                          child: Text('Belum ada penghargaan', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                        )
+                      : ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: provider.earnedBadges.length,
+                          separatorBuilder: (_, __) => const SizedBox(width: 12),
+                          itemBuilder: (context, i) {
+                            final badge = provider.earnedBadges[i];
+                            return _buildAchievementIcon(
+                              badge['name'] ?? 'Badge',
+                              badge['description'] ?? '',
+                              Icons.emoji_events,
+                            );
+                          },
+                        ),
+                ),
                 const SizedBox(height: 20),
+
+                // Pengaturan
                 const Text('Pengaturan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
                 const SizedBox(height: 8),
                 Card(
@@ -310,13 +506,11 @@ class ProfileView extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   child: Column(
                     children: [
-                      _buildSettingsTile('Edit Profil'),
-                      const Divider(color: Colors.white10, height: 1),
-                      _buildSettingsTile('Ganti PIN'),
+                      _buildSettingsTile('Keamanan & Password'),
                       const Divider(color: Colors.white10, height: 1),
                       _buildSettingsTile('Notifikasi'),
                       const Divider(color: Colors.white10, height: 1),
-                      _buildSettingsTile('Bahasa'),
+                      _buildSettingsTile('Metode Pembayaran'),
                       const Divider(color: Colors.white10, height: 1),
                       _buildSettingsTile('Pusat Bantuan'),
                     ],
@@ -335,7 +529,7 @@ class ProfileView extends StatelessWidget {
                 const SizedBox(height: 20),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

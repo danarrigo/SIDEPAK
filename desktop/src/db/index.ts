@@ -8,7 +8,7 @@ const globalForDb = globalThis as unknown as {
 
 const pool = globalForDb.conn ?? new Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 10,
+  max: 1, // Keep at 1 for serverless Next.js environments
 });
 
 if (process.env.NODE_ENV !== "production") globalForDb.conn = pool;

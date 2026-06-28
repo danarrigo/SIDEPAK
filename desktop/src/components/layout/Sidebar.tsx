@@ -3,18 +3,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { getCurrentMember } from "@/actions/members";
-
 export default function Sidebar() {
   const pathname = usePathname();
-  const [member, setMember] = useState<any>(null);
-
-  useEffect(() => {
-    getCurrentMember().then((res) => {
-      if (res) setMember(res);
-    });
-  }, []);
 
   const navLinks = [
     { href: "/", icon: "home", label: "Beranda" },

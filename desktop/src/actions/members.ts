@@ -16,8 +16,9 @@ export async function getMemberData(memberId: number) {
 }
 
 import { createClient } from "@/utils/supabase/server";
+import { cache } from "react";
 
-export async function getCurrentMember() {
+export const getCurrentMember = cache(async () => {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -42,7 +43,7 @@ export async function getCurrentMember() {
     console.error("GetCurrentMember Error:", error);
     return null;
   }
-}
+});
 export async function getActiveMembers(cooperativeId: number) {
   try {
     return await db.select().from(members).where(

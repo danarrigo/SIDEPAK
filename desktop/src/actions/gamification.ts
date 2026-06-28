@@ -6,8 +6,9 @@ import { battles } from "@/db/schema/activities";
 import { members } from "@/db/schema/members";
 import { cooperatives } from "@/db/schema/cooperatives";
 import { or, eq, and, desc, sql } from "drizzle-orm";
+import { cache } from "react";
 
-export async function getMemberProgress(memberId: number) {
+export const getMemberProgress = cache(async (memberId: number) => {
   try {
     const [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
     return progress;
@@ -15,7 +16,7 @@ export async function getMemberProgress(memberId: number) {
     console.error("Member Progress Error:", error);
     return null;
   }
-}
+});
 
 export async function getStoreItems() {
   try {

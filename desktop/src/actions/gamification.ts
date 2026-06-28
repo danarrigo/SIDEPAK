@@ -108,9 +108,54 @@ export async function getLeaderboard(cooperativeId: number) {
       .orderBy(desc(memberProgress.xp))
       .limit(10);
       
-    return topMembers;
+      return topMembers;
   } catch (error) {
     console.error("Leaderboard Error:", error);
+    return [];
+  }
+}
+
+export async function getLeaderboardProvincial(provinsi: string) {
+  try {
+    const topMembers = await db
+      .select({
+        id: members.id,
+        namaLengkap: members.namaLengkap,
+        level: memberProgress.level,
+        xp: memberProgress.xp,
+        pointsBalance: memberProgress.pointsBalance,
+      })
+      .from(members)
+      .innerJoin(memberProgress, eq(members.id, memberProgress.memberId))
+      .where(eq(members.provinsi, provinsi))
+      .orderBy(desc(memberProgress.xp))
+      .limit(10);
+      
+    return topMembers;
+  } catch (error) {
+    console.error("Leaderboard Provincial Error:", error);
+    return [];
+  }
+}
+
+export async function getLeaderboardNational() {
+  try {
+    const topMembers = await db
+      .select({
+        id: members.id,
+        namaLengkap: members.namaLengkap,
+        level: memberProgress.level,
+        xp: memberProgress.xp,
+        pointsBalance: memberProgress.pointsBalance,
+      })
+      .from(members)
+      .innerJoin(memberProgress, eq(members.id, memberProgress.memberId))
+      .orderBy(desc(memberProgress.xp))
+      .limit(10);
+      
+    return topMembers;
+  } catch (error) {
+    console.error("Leaderboard National Error:", error);
     return [];
   }
 }

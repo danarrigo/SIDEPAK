@@ -1,6 +1,8 @@
 import { getFinancialsData } from "@/actions/financials";
 import { getCurrentMember } from "@/actions/members";
 import { redirect } from "next/navigation";
+import { getWinRate } from "@/actions/gamification";
+import { logout } from "@/actions/auth";
 
 export default async function Page() {
   const currentMember = await getCurrentMember();
@@ -8,7 +10,9 @@ export default async function Page() {
 
   const { savings, loans, dues, totalSavings } = await getFinancialsData(currentMember.id);
   const totalTransaksi = savings.length + loans.length + dues.length;
-  const estimasiSHU = Math.floor(totalSavings * 0.12);
+  const estimasiSHU = totalSavings > 0 ? Math.floor(totalSavings * 0.12) : 0;
+  
+  const { winRate, totalBattles } = await getWinRate(currentMember.id);
 
   return (
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">
@@ -38,26 +42,19 @@ export default async function Page() {
 <span className="material-symbols-outlined" style={{ fontVariationSettings: "\'FILL\' 1" }}>savings</span>
 </div>
 <p className="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">Estimasi SHU</p>
-<h4 className="font-headline-lg text-headline-lg text-on-surface">Rp {(estimasiSHU || 4200000).toLocaleString('id-ID')}</h4>
+<h4 className="font-headline-lg text-headline-lg text-on-surface">Rp {estimasiSHU.toLocaleString('id-ID')}</h4>
 <p className="font-body-md text-body-md text-tertiary mt-2">Tahun Buku 2024</p>
 </div>
 
-<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all">
-<div className="w-12 h-12 bg-secondary-container rounded-2xl flex items-center justify-center mb-4 text-secondary">
-<span className="material-symbols-outlined">storefront</span>
-</div>
-<p className="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">UMKM Didukung</p>
-<h4 className="font-headline-lg text-headline-lg text-on-surface">14 Unit</h4>
-<p className="font-body-md text-body-md text-secondary mt-2">Wilayah Desa Sukajaya</p>
-</div>
+
 
 <div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all">
 <div className="w-12 h-12 bg-error-container rounded-2xl flex items-center justify-center mb-4 text-error">
 <span className="material-symbols-outlined">rocket_launch</span>
 </div>
 <p className="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">Win Rate</p>
-<h4 className="font-headline-lg text-headline-lg text-on-surface">78.5%</h4>
-<p className="font-body-md text-body-md text-error mt-2">Dari 200+ Kompetisi</p>
+<h4 className="font-headline-lg text-headline-lg text-on-surface">{winRate.toFixed(1)}%</h4>
+<p className="font-body-md text-body-md text-error mt-2">Dari {totalBattles} Kompetisi</p>
 </div>
 </div>
 </section>
@@ -119,10 +116,12 @@ export default async function Page() {
 </div>
 
 <div className="mt-8">
-<button className="flex items-center gap-3 px-6 py-4 rounded-2xl border border-error/30 text-error hover:bg-error/5 transition-colors w-full md:w-auto">
+<form action={logout}>
+<button type="submit" className="flex items-center gap-3 px-6 py-4 rounded-2xl border border-error/30 text-error hover:bg-error/5 transition-colors w-full md:w-auto">
 <span className="material-symbols-outlined">logout</span>
 <span className="font-body-lg text-body-lg font-bold">Keluar dari Aplikasi</span>
 </button>
+</form>
 </div>
 </div>
 </div>

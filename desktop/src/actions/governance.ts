@@ -2,7 +2,8 @@
 import { db } from "@/db";
 import { proposals } from "@/db/schema/governance";
 import { members } from "@/db/schema/members";
-import { eq, count } from "drizzle-orm";
+import { eq, count, sum } from "drizzle-orm";
+import { savings, loans } from "@/db/schema/financials";
 
 export async function getGovernanceData() {
   try {
@@ -11,14 +12,16 @@ export async function getGovernanceData() {
     const totalMembersRes = await db.select({ value: count() }).from(members);
     const totalMembers = totalMembersRes[0].value;
 
-    return { activeProposals, totalMembers };
+    const totalSavingsRes = await db.select({ value: sum(savings.amount) }).from(savings);
+    const totalAsetDesa = Number(totalSavingsRes[0].value || 0);
+
+    return { activeProposals, totalMembers, totalAsetDesa };
   } catch (error) {
     console.error("Governance DB Error:", error);
-    return { activeProposals: [], totalMembers: 0 };
+    return { activeProposals: [], totalMembers: 0, totalAsetDesa: 0 };
   }
 }
 
-import { savings, loans } from "@/db/schema/financials";
 
 export async function getKoperasiStats() {
   try {

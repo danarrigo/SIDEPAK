@@ -62,7 +62,7 @@ export async function getInAppItems() {
   }
 }
 
-export async function getMarketplaceItems() {
+export async function getMarketplaceItems(cooperativeId?: number) {
   try {
     const mkItems = await db.select().from(marketplaceItems).orderBy(desc(marketplaceItems.createdAt));
     
@@ -71,6 +71,10 @@ export async function getMarketplaceItems() {
       const [seller] = await db.select().from(members).where(eq(members.id, item.sellerId));
       return { ...item, seller };
     }));
+    
+    if (cooperativeId) {
+      return itemsWithSellers.filter(item => item.seller && item.seller.cooperativeId === cooperativeId);
+    }
     
     return itemsWithSellers;
   } catch (error) {

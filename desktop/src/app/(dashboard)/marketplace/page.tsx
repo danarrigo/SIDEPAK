@@ -12,7 +12,7 @@ export default async function MarketplacePage() {
 
   const progress = await getMemberProgress(currentMember.id);
   const inAppItems = await getInAppItems();
-  const physicalItems = await getMarketplaceItems();
+  const physicalItems = await getMarketplaceItems(currentMember.cooperativeId as number);
 
   return (
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">

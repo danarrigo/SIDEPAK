@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { db } from "@/db";
 import { users, members, cooperatives, memberProgress } from "@/db/schema";
-import { and, ilike } from "drizzle-orm";
+import { and, ilike, eq } from "drizzle-orm";
 
 export async function login(prevState: unknown, formData: FormData) {
   const supabase = await createClient();
@@ -65,6 +65,12 @@ export async function signup(prevState: unknown, formData: FormData) {
     }
   }
 
+  // Pre-check if NIK is already registered to avoid orphaned Supabase accounts
+  const existingMember = await db.select().from(members).where(eq(members.nik, data.nik));
+  if (existingMember.length > 0) {
+    return { error: "NIK sudah terdaftar di sistem. Silakan gunakan NIK lain atau login." };
+  }
+
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: data.email,
     password: data.password,
@@ -102,7 +108,9 @@ export async function signup(prevState: unknown, formData: FormData) {
       });
     } catch (dbError) {
       console.error("Error inserting user/member into database:", dbError);
-      return { error: "Failed to create user profile in database." };
+      // Fallback: If SQL insert fails for any unexpected reason, sign out to prevent a phantom session
+      await supabase.auth.signOut();
+      return { error: "Gagal membuat profil pengguna. Silakan coba lagi." };
     }
   }
 

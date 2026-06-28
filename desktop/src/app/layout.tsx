@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Koperasi Digital",
+  title: "SIDEPAK",
   description: "Platform digital untuk pengelolaan koperasi desa",
 };
 

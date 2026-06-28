@@ -18,7 +18,7 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-[#0B1120] border-r border-white/5 shadow-2xl z-50">
       <div className="p-6">
-        <h1 className="font-headline-lg text-headline-lg text-tertiary tracking-tighter drop-shadow-[0_0_12px_rgba(250,204,21,0.4)]">Koperasi<br/>Digital</h1>
+        <h1 className="font-headline-lg text-headline-lg text-tertiary tracking-tighter drop-shadow-[0_0_12px_rgba(250,204,21,0.4)]">SIDEPAK</h1>
       </div>
       <nav className="flex-1 px-4 space-y-2 mt-4">
       {navLinks.map((link) => {

@@ -48,7 +48,7 @@ export default async function DesktopDashboard() {
   const joinedEventIds = participations?.map(p => p.event.id) || [];
   
   const points = dbData?.progress?.pointsBalance || 0;
-  const streak = dbData?.progress?.currentStreak || 0;
+  const streak = Math.max(1, dbData?.progress?.currentStreak ?? 1);
   const level = dbData?.progress?.level || 1;
   const memberName = currentMember?.namaLengkap ? currentMember.namaLengkap.split(' ')[0] : "Anggota";
 

@@ -40,9 +40,9 @@ class MisiView extends StatelessWidget {
                       decoration: BoxDecoration(color: const Color(0xFFFCD34D), borderRadius: BorderRadius.circular(20)),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       margin: const EdgeInsets.only(bottom: 12),
-                      child: const Text(
-                        'Rank: Emas',
-                        style: TextStyle(color: Color(0xFF78350F), fontSize: 12, fontWeight: FontWeight.bold),
+                      child: Text(
+                        'Rank: ${provider.rankName}',
+                        style: const TextStyle(color: Color(0xFF78350F), fontSize: 12, fontWeight: FontWeight.bold),
                       ),
                     ),
                     Text(
@@ -114,10 +114,12 @@ class MisiView extends StatelessWidget {
                           const SizedBox(height: 16),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: provider.streakDays.entries.map((entry) {
+                            children: provider.weeklyStreakDays.entries.map((entry) {
                               final day = entry.key;
                               final done = entry.value;
-                              final bool isToday = day == 'Kam';
+                              final dayLabels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+                              final todayLabel = dayLabels[(DateTime.now().weekday - 1) % 7];
+                              final bool isToday = day == todayLabel;
 
                               return Column(
                                 children: [

@@ -192,9 +192,9 @@ class HomeView extends StatelessWidget {
                                 Container(
                                   decoration: BoxDecoration(color: const Color(0xFFFCD34D), borderRadius: BorderRadius.circular(20)),
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                  child: const Text(
-                                    'Emas',
-                                    style: TextStyle(color: Color(0xFF854D0E), fontSize: 10, fontWeight: FontWeight.bold),
+                                  child: Text(
+                                    provider.rankName,
+                                    style: const TextStyle(color: Color(0xFF854D0E), fontSize: 10, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ],
@@ -222,9 +222,9 @@ class HomeView extends StatelessWidget {
                                         ),
                                       ],
                                     ),
-                                    const Text(
-                                      'Anggota Emas',
-                                      style: TextStyle(color: Color(0xFF854D0E), fontSize: 10, fontWeight: FontWeight.w800),
+                                    Text(
+                                      'Anggota ${provider.rankName}',
+                                      style: const TextStyle(color: Color(0xFF854D0E), fontSize: 10, fontWeight: FontWeight.w800),
                                     ),
                                   ],
                                 ),

@@ -1,6 +1,7 @@
 "use server";
 import { db } from "@/db";
 import { items } from "@/db/schema/gamification";
+import { memberBadges, badges } from "@/db/schema/achievements";
 import { battles } from "@/db/schema/activities";
 import { or, eq, and } from "drizzle-orm";
 
@@ -35,5 +36,24 @@ export async function getWinRate(memberId: number) {
   } catch (error) {
     console.error("Win Rate Error:", error);
     return { winRate: 0, totalBattles: 0 };
+  }
+}
+
+export async function getMemberBadges(memberId: number) {
+  try {
+    const earned = await db
+      .select({
+        id: badges.id,
+        name: badges.name,
+        description: badges.description,
+        earnedAt: memberBadges.earnedAt,
+      })
+      .from(memberBadges)
+      .innerJoin(badges, eq(memberBadges.badgeId, badges.id))
+      .where(eq(memberBadges.memberId, memberId));
+    return earned;
+  } catch (error) {
+    console.error("Member Badges Error:", error);
+    return [];
   }
 }

@@ -58,12 +58,12 @@ class ProfileView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.white, width: 1.5),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.workspace_premium, color: Colors.white, size: 14),
-                            SizedBox(width: 4),
-                            Text('RANK EMAS', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                            const Icon(Icons.workspace_premium, color: Colors.white, size: 14),
+                            const SizedBox(width: 4),
+                            Text('RANK ${provider.rankName.toUpperCase()}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -73,7 +73,7 @@ class ProfileView extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(provider.fullName ?? 'Anggota', style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
                 const SizedBox(height: 4),
-                const Text('Anggota Premium Koperasi', style: TextStyle(color: Color(0xFFFCD34D), fontSize: 12, fontWeight: FontWeight.bold)),
+                Text('Anggota ${provider.rankName} Koperasi', style: const TextStyle(color: Color(0xFFFCD34D), fontSize: 12, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 2),
                 Text('No. Anggota: KMP-DSKMJ-2026-${(provider.memberId ?? 1).toString().padLeft(4, '0')}', style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
                 if (provider.email != null) ...[
@@ -135,15 +135,15 @@ class ProfileView extends StatelessWidget {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              _buildRankItem(Icons.eco, 'Perunggu', Colors.greenAccent, false),
+                              _buildRankItem(Icons.eco, 'Perunggu', Colors.greenAccent, provider.rankName == 'Perunggu'),
                               _buildRankDivider(),
-                              _buildRankItem(Icons.military_tech, 'Perak', Colors.amberAccent, false),
+                              _buildRankItem(Icons.military_tech, 'Perak', Colors.amberAccent, provider.rankName == 'Perak'),
                               _buildRankDivider(),
-                              _buildRankItem(Icons.workspace_premium, 'Emas', const Color(0xFFF59E0B), true),
+                              _buildRankItem(Icons.workspace_premium, 'Emas', const Color(0xFFF59E0B), provider.rankName == 'Emas'),
                               _buildRankDivider(),
-                              _buildRankItem(Icons.diamond, 'Platinum', Colors.lightBlue, false, opacity: 0.5),
+                              _buildRankItem(Icons.diamond, 'Platinum', Colors.lightBlue, provider.rankName == 'Platinum', opacity: provider.level >= 10 ? 1.0 : 0.5),
                               _buildRankDivider(),
-                              _buildRankItem(Icons.grade, 'Legenda', Colors.redAccent, false, opacity: 0.5),
+                              _buildRankItem(Icons.grade, 'Legenda', Colors.redAccent, provider.rankName == 'Legenda', opacity: provider.level >= 15 ? 1.0 : 0.5),
                             ],
                           ),
                         ),
@@ -164,16 +164,23 @@ class ProfileView extends StatelessWidget {
                 const SizedBox(height: 8),
                 SizedBox(
                   height: 120,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      _buildAchievementIcon('Investor Desa', 'Tabung Rp 5Jt', Icons.savings),
-                      const SizedBox(width: 12),
-                      _buildAchievementIcon('Loyal Streak', '30 Hari Beruntun', Icons.local_fire_department, opacity: 0.8),
-                      const SizedBox(width: 12),
-                      _buildAchievementIcon('UMKM Hero', '100 Produk Terjual', Icons.storefront, opacity: 0.8),
-                    ],
-                  ),
+                  child: provider.earnedBadges.isEmpty
+                      ? const Center(
+                          child: Text('Belum ada penghargaan', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                        )
+                      : ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: provider.earnedBadges.length,
+                          separatorBuilder: (_, __) => const SizedBox(width: 12),
+                          itemBuilder: (context, i) {
+                            final badge = provider.earnedBadges[i];
+                            return _buildAchievementIcon(
+                              badge['name'] ?? 'Badge',
+                              badge['description'] ?? '',
+                              Icons.emoji_events,
+                            );
+                          },
+                        ),
                 ),
                 const SizedBox(height: 24),
                 const Text('Dampak Personal', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
@@ -186,10 +193,10 @@ class ProfileView extends StatelessWidget {
                   mainAxisSpacing: 12,
                   childAspectRatio: 1.6,
                   children: [
-                    _buildImpactCard('Total Transaksi', '247'),
-                    _buildImpactCard('Estimasi SHU', 'Rp 320rb'),
-                    _buildImpactCard('UMKM Didukung', '18'),
-                    _buildImpactCard('Tingkat Kemenangan', '73 %'),
+                    _buildImpactCard('Total Simpanan', 'Rp ${((provider.simpananPokok + provider.simpananWajib + provider.simpananSukarela) / 1000000).toStringAsFixed(1)}Jt'),
+                    _buildImpactCard('Misi Diselesaikan', '${provider.missions.where((m) => m.completed).length}'),
+                    _buildImpactCard('Level Kamu', 'Level ${provider.level}'),
+                    _buildImpactCard('Tingkat Kemenangan', '${provider.userWinRate}%'),
                   ],
                 ),
                 const SizedBox(height: 20),

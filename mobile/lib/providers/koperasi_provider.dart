@@ -19,6 +19,8 @@ class KoperasiProvider extends ChangeNotifier {
   int points = 0;
   int streak = 0;
   int userWinRate = 50;
+  int level = 1;
+  String rankName = 'Perunggu';
   String? voteSelection;
   bool isLoading = true;
 
@@ -40,15 +42,13 @@ class KoperasiProvider extends ChangeNotifier {
   // Governance
   List<dynamic> activeProposals = [];
 
-  // Streak days
-  final Map<String, bool> streakDays = {
-    'Sen': true,
-    'Sel': true,
-    'Rab': true,
-    'Kam': true, // Today (Active/Fire)
-    'Jum': false,
-    'Sab': false,
-    'Min': false,
+  // Badges
+  List<dynamic> earnedBadges = [];
+
+  // Weekly streak (computed dynamically)
+  Map<String, bool> weeklyStreakDays = {
+    'Sen': false, 'Sel': false, 'Rab': false, 'Kam': false,
+    'Jum': false, 'Sab': false, 'Min': false,
   };
 
   // Missions
@@ -258,6 +258,29 @@ class KoperasiProvider extends ChangeNotifier {
           if (progress != null) {
             points = progress['pointsBalance'] ?? points;
             streak = progress['currentStreak'] ?? streak;
+            level = progress['level'] ?? level;
+            rankName = _rankFromLevel(level);
+
+            // Compute weekly streak days from lastActivityDate + currentStreak
+            final lastActivityStr = progress['lastActivityDate'];
+            if (lastActivityStr != null) {
+              try {
+                final lastActivity = DateTime.parse(lastActivityStr);
+                final today = DateTime.now();
+                final dayLabels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+                final newStreak = <String, bool>{};
+                for (final key in dayLabels) { newStreak[key] = false; }
+                // Fill backward from lastActivity for streak days
+                final streakCount = streak.clamp(0, 7);
+                for (int i = 0; i < streakCount; i++) {
+                  final day = lastActivity.subtract(Duration(days: i));
+                  // weekday: 1=Mon..7=Sun
+                  final idx = day.weekday - 1; // 0-indexed
+                  newStreak[dayLabels[idx]] = true;
+                }
+                weeklyStreakDays = newStreak;
+              } catch (_) {}
+            }
           }
 
           final financials = data['financials'];
@@ -298,13 +321,12 @@ class KoperasiProvider extends ChangeNotifier {
               activeBattle = arena['activeBattles'][0];
               activeBattleEndDate = activeBattle?['endDate']?.toString().split('T')[0];
               // Compute win rate from scores
-              final myScore = activeBattle?['challengerId'] == memberId
-                  ? activeBattle?['challengerPoints'] ?? 0
-                  : activeBattle?['opponentPoints'] ?? 0;
-              final opScore = activeBattle?['challengerId'] == memberId
-                  ? activeBattle?['opponentPoints'] ?? 0
-                  : activeBattle?['challengerPoints'] ?? 0;
-              final totalScore = (myScore as int) + (opScore as int);
+              final challengerId = activeBattle?['challengerId'];
+              final challengerPts = (activeBattle?['challengerPoints'] ?? 0) as int;
+              final opponentPts = (activeBattle?['opponentPoints'] ?? 0) as int;
+              final myScore = challengerId == memberId ? challengerPts : opponentPts;
+              final opScore = challengerId == memberId ? opponentPts : challengerPts;
+              final totalScore = myScore + opScore;
               userWinRate = totalScore > 0 ? ((myScore / totalScore) * 100).round() : 50;
             }
             final past = arena['pastBattles'];
@@ -326,6 +348,16 @@ class KoperasiProvider extends ChangeNotifier {
           if (governance != null) {
             activeProposals = governance['activeProposals'] ?? [];
           }
+
+          final badgesList = data['badges'];
+          if (badgesList != null && badgesList is List) {
+            earnedBadges = badgesList;
+          }
+
+          final winRateData = data['winRate'];
+          if (winRateData != null) {
+            userWinRate = (winRateData['winRate'] as num?)?.round() ?? userWinRate;
+          }
         }
       }
     } catch (e) {
@@ -334,6 +366,14 @@ class KoperasiProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  String _rankFromLevel(int lvl) {
+    if (lvl >= 15) return 'Legenda';
+    if (lvl >= 10) return 'Platinum';
+    if (lvl >= 6) return 'Emas';
+    if (lvl >= 3) return 'Perak';
+    return 'Perunggu';
   }
 
   Future<void> toggleMission(String id, Function(String) showSnackBar) async {

@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { matchmakeWeeklyBattle } from '@/actions/arena';
 
 export default function AutoMatchmake({ memberId }: { memberId: number }) {
   const router = useRouter();
   const attempted = useRef(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (attempted.current) return;
@@ -15,11 +16,15 @@ export default function AutoMatchmake({ memberId }: { memberId: number }) {
     const matchmake = async () => {
       try {
         const res = await matchmakeWeeklyBattle(memberId);
-        if (mounted && res.success) {
-          router.refresh();
+        if (mounted) {
+          if (res.success) {
+            router.refresh();
+          } else {
+            setErrorMsg(res.error || "Gagal mencari lawan.");
+          }
         }
       } catch (err) {
-        console.error("Automatchmake error", err);
+        if (mounted) setErrorMsg("Terjadi kesalahan sistem saat mencari lawan.");
       }
     };
     
@@ -27,6 +32,15 @@ export default function AutoMatchmake({ memberId }: { memberId: number }) {
     
     return () => { mounted = false; };
   }, [memberId, router]);
+
+  if (errorMsg) {
+    return (
+      <div className="mt-4 text-center p-3 bg-surface-container rounded-xl border border-outline-variant/30 max-w-xs mx-auto">
+        <span className="material-symbols-outlined text-tertiary mb-1">group_off</span>
+        <p className="text-sm text-on-surface-variant font-medium">{errorMsg}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-4 text-center">

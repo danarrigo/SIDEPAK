@@ -132,6 +132,37 @@ export default async function Page() {
           </div>
         </section>
 
+        <section className="mb-16 relative z-10 animate-slide-up delay-[175ms]">
+          <div className="flex justify-between items-end mb-6">
+            <div>
+              <h3 className="font-headline-md text-headline-md text-on-surface">Cara Mendapatkan Poin</h3>
+              <p className="font-body-md text-body-md text-on-surface-variant">Tingkatkan skor Anda dengan melakukan aktivitas berikut.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { title: "Menabung", desc: "Memasukkan duit untuk penabungan", icon: "savings" },
+              { title: "Beli Barang", desc: "Beli barang dr duit", icon: "shopping_cart" },
+              { title: "Ikut Acara", desc: "Ngikut acara2", icon: "event" },
+              { title: "Jual Barang", desc: "Naro barang", icon: "storefront" },
+              { title: "Selesaikan Quest", desc: "Dari quest", icon: "task_alt" },
+              { title: "Konsistensi", desc: "Dari streak", icon: "local_fire_department" },
+              { title: "Pinjaman", desc: "Meminjam duit", icon: "account_balance" },
+              { title: "Menang", desc: "Menang battles", icon: "emoji_events" },
+            ].map((item, i) => (
+              <div key={i} className="glass-card p-6 rounded-xl flex items-start gap-4 hover:bg-surface-container-high/50 transition-colors">
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined">{item.icon}</span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-on-surface mb-1">{item.title}</h4>
+                  <p className="text-sm text-on-surface-variant capitalize-first">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="relative z-10 animate-slide-up delay-200">
           <div className="flex justify-between items-end mb-6">
             <div>

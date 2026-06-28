@@ -102,6 +102,9 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
   int simpananPokok = 750000;
   int simpananWajib = 750000;
   int simpananSukarela = 7254000;
+  List<dynamic> listSavings = [];
+  List<dynamic> listLoans = [];
+  Map<String, dynamic>? activeBattle;
 
   // Koperasi Stats
   int kopTransaksi = 37;
@@ -194,7 +197,12 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
 
   Future<void> fetchData() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:3000/api/mobile-sync'));
+      String apiHost = 'localhost:3000';
+      // Dynamically resolve host when running in a web browser
+      if (Uri.base.host.isNotEmpty) {
+        apiHost = '${Uri.base.host}:3000';
+      }
+      final response = await http.get(Uri.parse('http://$apiHost/api/mobile-sync'));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if (jsonResponse['success']) {
@@ -213,6 +221,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
             simpananPokok = dues.where((d) => d['type'] == 'initial').fold<int>(0, (s, i) => s + (i['amount'] as int));
             simpananWajib = dues.where((d) => d['type'] == 'monthly').fold<int>(0, (s, i) => s + (i['amount'] as int));
             simpananSukarela = savings.fold<int>(0, (s, i) => s + (i['type'] == 'deposit' ? (i['amount'] as int) : -(i['amount'] as int)));
+            listSavings = savings;
+            listLoans = financials['loans'] ?? [];
           }
 
           final quests = data['quests'];
@@ -234,6 +244,11 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
             kopAnggotaBaru = kopStats['anggotaBaru'] ?? kopAnggotaBaru;
             kopOmzet = kopStats['omzetHarian'] ?? kopOmzet;
             kopUmkm = kopStats['umkmAktif'] ?? kopUmkm;
+          }
+
+          final arena = data['arena'];
+          if (arena != null && arena['activeBattles'] != null && (arena['activeBattles'] as List).isNotEmpty) {
+            activeBattle = arena['activeBattles'][0];
           }
 
           setState(() { isLoading = false; });
@@ -354,6 +369,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           historyList: historyList,
           shopItems: shopItems,
           onUseItem: useItemInBattle,
+          activeBattle: activeBattle,
         );
       case 3:
         return KoperasiView(
@@ -371,6 +387,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           onLogout: () {
             _showSnackBar('Keluar dari sesi...');
           },
+          listSavings: listSavings,
+          listLoans: listLoans,
         );
       default:
         return const SizedBox.shrink();
@@ -933,10 +951,10 @@ class HomeView extends StatelessWidget {
                               mainAxisSpacing: 12,
                               childAspectRatio: 1.5,
                               children: [
-                                _buildCoopStat(Icons.swap_horiz, '\$kopTransaksi', 'Transaksi'),
-                                _buildCoopStat(Icons.attach_money, 'Rp \$kopOmzet Jt', 'Omzet Harian'),
-                                _buildCoopStat(Icons.groups, '\$kopAnggotaBaru', 'Anggota Baru'),
-                                _buildCoopStat(Icons.storefront, '\$kopUmkm', 'UMKM Aktif'),
+                                _buildCoopStat(Icons.swap_horiz, '$kopTransaksi', 'Transaksi'),
+                                _buildCoopStat(Icons.attach_money, 'Rp $kopOmzet Jt', 'Omzet Harian'),
+                                _buildCoopStat(Icons.groups, '$kopAnggotaBaru', 'Anggota Baru'),
+                                _buildCoopStat(Icons.storefront, '$kopUmkm', 'UMKM Aktif'),
                               ],
                             ),
                           ],
@@ -1418,6 +1436,7 @@ class BattleView extends StatelessWidget {
   final List<HistoryItem> historyList;
   final List<ShopItem> shopItems;
   final Function(ShopItem) onUseItem;
+  final Map<String, dynamic>? activeBattle;
 
   const BattleView({
     super.key,
@@ -1425,6 +1444,7 @@ class BattleView extends StatelessWidget {
     required this.historyList,
     required this.shopItems,
     required this.onUseItem,
+    required this.activeBattle,
   });
 
   void _showUseItemSheet(BuildContext context) {
@@ -1487,6 +1507,9 @@ class BattleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final int p1 = activeBattle != null ? (activeBattle!['challengerPoints'] ?? 8200) : 8200;
+    final int p2 = activeBattle != null ? (activeBattle!['opponentPoints'] ?? 7500) : 7500;
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1541,9 +1564,9 @@ class BattleView extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildPlayerCol('AS', 'Agung (Kamu)', '1240 Poin', Colors.grey),
+                            _buildPlayerCol('AS', 'Agung (Kamu)', '$p1 Poin', Colors.grey),
                             const Text('VS', style: TextStyle(color: Colors.white38, fontSize: 20, fontStyle: FontStyle.italic, fontWeight: FontWeight.w900)),
-                            _buildPlayerCol('BW', 'Budi', '980 Poin', Colors.grey),
+                            _buildPlayerCol('BW', 'Budi', '$p2 Poin', Colors.grey),
                           ],
                         ),
                         const SizedBox(height: 20),
@@ -2167,11 +2190,15 @@ class KoperasiView extends StatelessWidget {
 class ProfileView extends StatelessWidget {
   final int streak;
   final VoidCallback onLogout;
+  final List<dynamic> listSavings;
+  final List<dynamic> listLoans;
 
   const ProfileView({
     super.key,
     required this.streak,
     required this.onLogout,
+    required this.listSavings,
+    required this.listLoans,
   });
 
   @override
@@ -2389,6 +2416,125 @@ class ProfileView extends StatelessWidget {
                     _buildImpactCard('UMKM Didukung', '18'),
                     _buildImpactCard('Tingkat Kemenangan', '73 %'),
                   ],
+                ),
+                const SizedBox(height: 20),
+
+                // Mutasi & Ledger Keuangan
+                const Text('Mutasi & Ledger Keuangan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
+                const SizedBox(height: 8),
+                Card(
+                  color: Colors.white,
+                  surfaceTintColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  elevation: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (listSavings.isEmpty && listLoans.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: Text(
+                              'Belum ada transaksi tercatat.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.grey, fontSize: 12),
+                            ),
+                          )
+                        else ...[
+                          if (listSavings.isNotEmpty) ...[
+                            const Text(
+                              'Simpanan & Penarikan',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+                            ),
+                            const SizedBox(height: 8),
+                            ...listSavings.map((s) {
+                              final bool isDeposit = s['type'] == 'deposit';
+                              final int amount = s['amount'] ?? 0;
+                              final String desc = s['description'] ?? 'Transaksi Simpanan';
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(desc, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                                          Text(
+                                            s['transactionDate'] != null ? s['transactionDate'].toString().split('T')[0] : '',
+                                            style: const TextStyle(fontSize: 9, color: Colors.grey),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(
+                                      '${isDeposit ? "+" : "-"} Rp ${amount.toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDeposit ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                            const SizedBox(height: 12),
+                          ],
+                          if (listLoans.isNotEmpty) ...[
+                            const Divider(height: 1),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Status Pinjaman',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+                            ),
+                            const SizedBox(height: 8),
+                            ...listLoans.map((l) {
+                              final int amount = l['amount'] ?? 0;
+                              final String status = l['status'] ?? 'pending';
+                              final Color statusColor = status == 'approved'
+                                  ? const Color(0xFF3B82F6)
+                                  : status == 'paid'
+                                      ? const Color(0xFF16A34A)
+                                      : const Color(0xFFF59E0B);
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Pinjaman Dana', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                                        const SizedBox(height: 4),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: statusColor.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          child: Text(
+                                            status.toUpperCase(),
+                                            style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: statusColor),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      'Rp ${amount.toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}',
+                                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                          ],
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
 

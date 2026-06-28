@@ -121,7 +121,17 @@ export default async function DesktopDashboard() {
             <div className="absolute inset-0 bg-gradient-to-br from-tertiary/5 to-transparent pointer-events-none"></div>
             <div className="flex justify-between items-center mb-4 relative z-10">
               <h3 className="text-xs uppercase font-extrabold tracking-widest text-tertiary">SALDO POIN</h3>
-              <span className="bg-tertiary/10 text-tertiary text-[10px] font-extrabold px-3 py-1 rounded-full border border-tertiary/20">{rankName}</span>
+              <div className="relative group cursor-pointer">
+                <span className="bg-tertiary/10 text-tertiary text-[10px] font-extrabold px-3 py-1 rounded-full border border-tertiary/20">{rankName}</span>
+                <div className="absolute right-0 top-full mt-2 w-48 p-3 bg-surface-container-highest border border-outline-variant/30 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-left">
+                  <p className="text-xs font-bold mb-1 text-on-surface">Benefit {rankName}:</p>
+                  <ul className="text-[10px] space-y-1 text-on-surface-variant list-disc pl-3">
+                    <li>Bunga pinjaman khusus</li>
+                    <li>Prioritas layanan</li>
+                    <li>Cashback belanja {level >= 30 ? '15%' : level >= 20 ? '10%' : level >= 10 ? '5%' : '0%'}</li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center gap-4 my-2 relative z-10">

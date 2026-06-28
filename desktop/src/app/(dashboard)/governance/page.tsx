@@ -151,6 +151,23 @@ export default async function Page() {
               </div>
             </div>
           </div>
+          
+          <div className="glass-card p-6 rounded-xl flex flex-col justify-between border border-transparent">
+            <div className="flex justify-between items-start mb-4">
+              <span className="material-symbols-outlined text-secondary bg-secondary/10 p-2 rounded-lg" style={{ fontVariationSettings: "'FILL' 1" }}>
+                health_and_safety
+              </span>
+              <span className="font-label-caps text-[10px] text-secondary font-bold">100%</span>
+            </div>
+            <div>
+              <div className="font-headline-md text-headline-md text-secondary">
+                Sangat Sehat
+              </div>
+              <div className="font-label-caps text-[10px] tracking-widest text-on-surface-variant uppercase mt-1">
+                Kesehatan Koperasi
+              </div>
+            </div>
+          </div>
         </div>
 
         <section className="glass-card rounded-xl p-6">

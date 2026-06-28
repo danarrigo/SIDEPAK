@@ -158,13 +158,22 @@ export default async function Page() {
                 else if (isPast) textClass = `${r.color} font-bold`;
                 
                 return (
-                  <div key={r.name} className={`flex flex-col items-center gap-3 relative z-10 transition-all duration-500 ${isFuture ? 'opacity-40 grayscale' : ''} ${isActive ? '-mt-4' : ''}`}>
+                  <div key={r.name} className={`group flex flex-col items-center gap-3 relative z-10 transition-all duration-500 cursor-pointer ${isFuture ? 'opacity-40 grayscale' : ''} ${isActive ? '-mt-4' : ''}`}>
                     <div className={`rounded-full flex items-center justify-center border-2 transition-all duration-500 ${containerClass}`}>
                       <span className={`material-symbols-outlined transition-all duration-500 ${isActive || isPast ? r.color : ''} ${isActive ? 'text-4xl' : ''}`} style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
                         {r.icon}
                       </span>
                     </div>
                     <span className={`font-label-caps text-[10px] tracking-widest ${textClass}`}>{r.name}</span>
+                    
+                    <div className="absolute top-full mt-2 w-48 p-3 bg-surface-container-highest border border-outline-variant/30 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 left-1/2 -translate-x-1/2 text-left">
+                      <p className="text-xs font-bold mb-1 text-on-surface">Benefit {r.name}:</p>
+                      <ul className="text-[10px] space-y-1 text-on-surface-variant list-disc pl-3">
+                        <li>Bunga pinjaman -{idx}%</li>
+                        <li>Prioritas layanan {r.name}</li>
+                        <li>Cashback belanja {idx * 5}%</li>
+                      </ul>
+                    </div>
                   </div>
                 )
               })}

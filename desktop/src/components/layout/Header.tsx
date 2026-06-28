@@ -1,6 +1,8 @@
 import { getCurrentMember } from "@/actions/members";
 import { getMemberProgress } from "@/actions/gamification";
 
+import NotificationBell from "./NotificationBell";
+
 export default async function Header() {
   const member = await getCurrentMember();
   let progress = null;
@@ -31,10 +33,7 @@ export default async function Header() {
 <span className="font-points-display text-points-display text-on-surface">{streak} 🔥 Hari Beruntun</span>
 </div>
 <div className="flex items-center gap-3">
-<div className="relative">
-<span className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">notifications</span>
-<span className="absolute top-0 right-0 w-2 h-2 bg-tertiary rounded-full border border-surface"></span>
-</div>
+        <NotificationBell />
 <div className="w-[1px] h-6 bg-outline-variant/30 mx-2"></div>
 <div className="flex items-center gap-2">
 <span className="font-label-caps text-label-caps text-tertiary">{rank} • {xp.toLocaleString()} XP</span>

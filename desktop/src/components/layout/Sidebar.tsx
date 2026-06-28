@@ -46,20 +46,7 @@ export default function Sidebar() {
   );
 })}
 </nav>
-<div className="p-4 mt-auto">
-<div className="bg-surface-container-highest p-4 rounded-xl border border-outline-variant/10">
-<div className="flex items-center gap-3 mb-3">
-<div className="w-10 h-10 rounded-full overflow-hidden bg-primary-container">
-<img className="w-full h-full object-cover" data-alt="A professional high-resolution headshot of a smiling community member, styled with warm studio lighting and a clean dark corporate background to match the koperasi app aesthetic. The person looks friendly and trustworthy, reflecting the village cooperative's focus on social empowerment and financial growth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoG8RcWMNWQkxjfRNOgyHUQdZVpWhij5Eg3VIuOfOI7Be0akVwsrwDj0Ipzv40EsomW4UuifRfT4ICzann51nnr2IJ5JNfLRu_EIXe17UIJNjX1zMF5Akv3lKD5ki03zN4zSBiqx5TOYo9Wm3zvSd-4YYgxQMzAP0-r9Oyo6d5DO3niZC3PsJsTOpj4nSGL3v5nQWA6jPwNK5s2UGv6oOn7OcDWQIGf0e2CmwjM6waeBke7PsaKjwISOX1L_ExNH2LjnlK1s5ECFg"/>
-</div>
-<div>
-<p className="font-body-md text-body-md text-on-surface">{member ? member.namaLengkap : "Memuat..."}</p>
-<p className="text-[10px] uppercase tracking-widest text-tertiary font-bold">{member ? member.koperasi : "..."}</p>
-</div>
-</div>
-<Link href="/profile" className="w-full py-2 bg-primary-container text-primary rounded-lg font-label-caps text-[10px] hover:bg-primary hover:text-on-primary transition-all block text-center">PENGATURAN</Link>
-</div>
-</div>
+
 </aside>
   );
 }

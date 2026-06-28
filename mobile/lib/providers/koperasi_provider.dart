@@ -94,7 +94,7 @@ class KoperasiProvider extends ChangeNotifier {
   }
 
   String _apiUrl(String path) {
-    return 'http://localhost:3000$path';
+    return 'https://hackathon-kopdes.vercel.app$path';
   }
 
   Map<String, String> _headers({bool isJson = false}) {

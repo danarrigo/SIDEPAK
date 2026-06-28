@@ -86,8 +86,8 @@ class KoperasiProvider extends ChangeNotifier {
     loadSavedSession();
   }
 
-  String _apiBase() {
-    return 'https://hackathon-kopdes-ekgie9nai-darrigos-projects.vercel.app';
+  String _apiUrl(String path) {
+    return 'https://hackathon-kopdes-ekgie9nai-darrigos-projects.vercel.app$path?x-vercel-protection-bypass=x7R9wK2mP5qN4vB8zY1tC6sX3dL0fG9j';
   }
 
   Map<String, String> _headers({bool isJson = false}) {
@@ -125,7 +125,7 @@ class KoperasiProvider extends ChangeNotifier {
   Future<bool> login(String emailInput, String passwordInput) async {
     try {
       final response = await http.post(
-        Uri.parse('${_apiBase()}/api/auth/login'),
+        Uri.parse(_apiUrl('/api/auth/login')),
         headers: _headers(isJson: true),
         body: json.encode({'email': emailInput, 'password': passwordInput}),
       );
@@ -167,7 +167,7 @@ class KoperasiProvider extends ChangeNotifier {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('${_apiBase()}/api/auth/signup'),
+        Uri.parse(_apiUrl('/api/auth/signup')),
         headers: _headers(isJson: true),
         body: json.encode({
           'email': email,
@@ -213,7 +213,7 @@ class KoperasiProvider extends ChangeNotifier {
       notifyListeners();
 
       final response = await http.get(
-        Uri.parse('${_apiBase()}/api/mobile-sync'),
+        Uri.parse(_apiUrl('/api/mobile-sync')),
         headers: _headers(),
       );
       if (response.statusCode == 200) {
@@ -390,7 +390,7 @@ class KoperasiProvider extends ChangeNotifier {
   Future<String> claimMission(String id, int? questRewardPoints) async {
     try {
       final res = await http.post(
-        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
+        Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
           'action': 'toggle-quest',
@@ -417,7 +417,7 @@ class KoperasiProvider extends ChangeNotifier {
     }
     try {
       final res = await http.post(
-        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
+        Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
           'action': 'buy-item',
@@ -442,7 +442,7 @@ class KoperasiProvider extends ChangeNotifier {
   Future<String> useInventoryItem(int itemId, {int? targetMemberId}) async {
     try {
       final res = await http.post(
-        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
+        Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
           'action': 'use-item',
@@ -469,7 +469,7 @@ class KoperasiProvider extends ChangeNotifier {
     final proposalId = proposal?['id'] ?? 1;
     try {
       final res = await http.post(
-        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
+        Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
           'action': 'vote',
@@ -494,7 +494,7 @@ class KoperasiProvider extends ChangeNotifier {
   Future<String> submitProposal(String title, String description) async {
     try {
       final res = await http.post(
-        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
+        Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
           'action': 'submit-proposal',
@@ -518,7 +518,7 @@ class KoperasiProvider extends ChangeNotifier {
   Future<Map<String, dynamic>> createTopUp(int amount) async {
     try {
       final res = await http.post(
-        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
+        Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
           'action': 'create-topup',
@@ -544,7 +544,7 @@ class KoperasiProvider extends ChangeNotifier {
   Future<Map<String, dynamic>> verifyTopUp(String invoiceId) async {
     try {
       final res = await http.post(
-        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
+        Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
           'action': 'verify-topup',

@@ -8,7 +8,6 @@ import 'views/koperasi_view.dart';
 import 'views/profile_view.dart';
 import 'views/login_view.dart';
 import 'views/marketplace_view.dart';
-import 'views/events_view.dart';
 import 'views/widgets/prank_overlay.dart';
 
 void main() {
@@ -73,10 +72,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       case 3:
         return const MarketplaceView();
       case 4:
-        return const EventsView();
-      case 5:
         return const KoperasiView();
-      case 6:
+      case 5:
         return ProfileView(
           onLogout: () {
             Provider.of<KoperasiProvider>(context, listen: false).logout();
@@ -120,9 +117,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
               _buildNavItem(1, Icons.assignment_rounded, 'Misi'),
               _buildNavItem(2, Icons.bolt_rounded, 'Arena'),
               _buildNavItem(3, Icons.storefront_rounded, 'Pasar'),
-              _buildNavItem(4, Icons.event_rounded, 'Event'),
-              _buildNavItem(5, Icons.account_balance_rounded, 'Koperasi'),
-              _buildNavItem(6, Icons.person_rounded, 'Profil'),
+              _buildNavItem(4, Icons.account_balance_rounded, 'Koperasi'),
+              _buildNavItem(5, Icons.person_rounded, 'Profil'),
             ],
           ),
         ),

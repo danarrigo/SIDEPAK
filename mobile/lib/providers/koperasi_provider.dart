@@ -577,7 +577,22 @@ class KoperasiProvider extends ChangeNotifier {
       final lastActivity = DateTime.parse(lastActivityStr);
       final dayLabels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
       final newStreak = <String, bool>{for (final k in dayLabels) k: false};
-      final streakCount = streak.clamp(0, 7);
+      final today = DateTime.now();
+      final isSameDay = (DateTime a, DateTime b) =>
+          a.year == b.year && a.month == b.month && a.day == b.day;
+
+      // Edge case: user has just logged in today but the server hasn't yet
+      // bumped currentStreak from 0 -> 1 (the streak is updated lazily on the
+      // first quest completion / event join of the day, not on login itself).
+      // Treat lastActivity == today as "active today" and surface a streak
+      // of at least 1 so the UI reflects reality.
+      int effectiveStreak = streak;
+      if (streak == 0 && isSameDay(lastActivity, today)) {
+        effectiveStreak = 1;
+        streak = 1;
+      }
+
+      final streakCount = effectiveStreak.clamp(0, 7);
       for (int i = 0; i < streakCount; i++) {
         final day = lastActivity.subtract(Duration(days: i));
         final idx = day.weekday - 1;

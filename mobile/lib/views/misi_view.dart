@@ -193,13 +193,25 @@ class MisiView extends StatelessWidget {
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF334155))),
-                      _buildResetCountdown(),
+                      _buildResetCountdown(isDaily: true),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  _buildMissionSectionCard(context, 'Misi Harian', true),
+                  _buildMissionSectionCard(context, true),
                   const SizedBox(height: 16),
-                  _buildMissionSectionCard(context, 'Misi Mingguan', false),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Misi Mingguan',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF334155))),
+                      _buildResetCountdown(isDaily: false),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  _buildMissionSectionCard(context, false),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -246,8 +258,7 @@ class MisiView extends StatelessWidget {
     );
   }
 
-  Widget _buildMissionSectionCard(
-      BuildContext context, String title, bool isDaily) {
+  Widget _buildMissionSectionCard(BuildContext context, bool isDaily) {
     final provider = context.read<KoperasiProvider>();
     final list = provider.missions.where((m) => m.isDaily == isDaily).toList();
 
@@ -260,12 +271,6 @@ class MisiView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(title,
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF334155))),
-            const SizedBox(height: 16),
             if (list.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
@@ -291,7 +296,8 @@ class MisiView extends StatelessWidget {
   }
 
   Widget _buildShopItemCard(BuildContext context, ShopItem item) {
-    final provider = context.read<KoperasiProvider>();
+    final provider = context.watch<KoperasiProvider>();
+    final canAfford = provider.points >= item.cost;
 
     void showSnackBar(String message) {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -303,6 +309,39 @@ class MisiView extends StatelessWidget {
           duration: const Duration(seconds: 2),
         ),
       );
+    }
+
+    Future<void> handleBuy() async {
+      if (!canAfford) {
+        showSnackBar(
+            'Poin tidak mencukupi. Butuh ${item.cost} poin untuk ${item.title}.');
+        return;
+      }
+      // Confirmation dialog before purchase
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text('Beli ${item.title}?'),
+          content: Text(
+              'Harga: ${item.cost} poin.\nSaldo Anda: ${provider.points} poin.\n\nSaldo setelah pembelian: ${provider.points - item.cost} poin.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Beli',
+                  style: TextStyle(
+                      color: Color(0xFFFACC15),
+                      fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      final msg = await provider.buyShopItem(item);
+      if (context.mounted) showSnackBar(msg);
     }
 
     return Card(
@@ -334,43 +373,54 @@ class MisiView extends StatelessWidget {
                     fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
             Expanded(
-                child: Text(item.description,
-                    textAlign: TextAlign.center,
-                    maxLines: 3,
-                    style:
-                        const TextStyle(color: Colors.white70, fontSize: 8.5))),
+              child: Text(item.description,
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  style:
+                      const TextStyle(color: Colors.white70, fontSize: 8.5))),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text('⭐', style: TextStyle(fontSize: 10)),
                 const SizedBox(width: 2),
                 Text('${item.cost} poin',
-                    style: const TextStyle(
-                        color: Color(0xFFFCD34D),
+                    style: TextStyle(
+                        color: canAfford
+                            ? const Color(0xFFFCD34D)
+                            : Colors.white38,
                         fontSize: 11,
                         fontWeight: FontWeight.bold)),
               ],
             ),
             const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () async {
-                final msg = await provider.buyShopItem(item);
-                showSnackBar(msg);
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  border: Border.all(color: Colors.white38),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                alignment: Alignment.center,
-                child: const Text(
-                  'Beli',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold),
+            // Issue 4: proper InkWell with ripple, disabled when can't afford
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: canAfford ? handleBuy : null,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: canAfford
+                        ? Colors.white.withOpacity(0.2)
+                        : Colors.black.withOpacity(0.25),
+                    border: Border.all(
+                        color: canAfford
+                            ? Colors.white38
+                            : Colors.white12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  alignment: Alignment.center,
+                  child: Text(
+                    canAfford ? 'Beli' : 'Poin Kurang',
+                    style: TextStyle(
+                        color: canAfford
+                            ? Colors.white
+                            : Colors.white38,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ),
@@ -380,13 +430,27 @@ class MisiView extends StatelessWidget {
     );
   }
 
-  Widget _buildResetCountdown() {
+  Widget _buildResetCountdown({required bool isDaily}) {
     final now = DateTime.now();
-    final midnight =
-        DateTime(now.year, now.month, now.day).add(const Duration(days: 1));
-    final diff = midnight.difference(now);
-    final hours = diff.inHours;
-    final minutes = diff.inMinutes % 60;
+    String label;
+    if (isDaily) {
+      final midnight = DateTime(now.year, now.month, now.day)
+          .add(const Duration(days: 1));
+      final diff = midnight.difference(now);
+      final hours = diff.inHours;
+      final minutes = diff.inMinutes % 60;
+      label = 'Reset ${hours}j ${minutes}m';
+    } else {
+      // Weekly reset: count down to next Monday 00:00
+      final daysUntilMonday = (8 - now.weekday) % 7;
+      final nextMonday = DateTime(now.year, now.month, now.day)
+          .add(Duration(days: daysUntilMonday == 0 ? 7 : daysUntilMonday));
+      final diff = nextMonday.difference(now);
+      final days = diff.inDays;
+      final hours = diff.inHours % 24;
+      final minutes = diff.inMinutes % 60;
+      label = 'Reset ${days}h ${hours}j ${minutes}m';
+    }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
@@ -399,7 +463,7 @@ class MisiView extends StatelessWidget {
           const Icon(Icons.refresh, size: 10, color: Color(0xFFB45309)),
           const SizedBox(width: 4),
           Text(
-            'Reset ${hours}j ${minutes}m',
+            label,
             style: const TextStyle(
                 fontSize: 9,
                 fontWeight: FontWeight.bold,

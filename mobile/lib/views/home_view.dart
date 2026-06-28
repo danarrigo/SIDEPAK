@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import '../providers/koperasi_provider.dart';
 import '../models/mission.dart';
 import 'simpanan_view.dart';
+import 'events_view.dart';
 import 'widgets/leaderboard_section.dart';
+import 'widgets/weekly_event_calendar.dart';
 
 class HomeView extends StatelessWidget {
   final Function(int) onNavigate;
@@ -33,6 +35,86 @@ class HomeView extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold)),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+
+    void openNotifications() {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        builder: (sheetContext) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Notifikasi',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0F172A)),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(sheetContext),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                if (missions.where((m) => !m.isCompleted).isEmpty &&
+                    provider.events.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    child: Column(
+                      children: [
+                        Icon(Icons.notifications_off,
+                            size: 48, color: Colors.grey.shade400),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Tidak ada notifikasi baru.',
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  )
+                else ...[
+                  if (missions.where((m) => !m.isCompleted).isNotEmpty)
+                    _buildNotifTile(
+                      icon: Icons.assignment,
+                      iconColor: const Color(0xFFFBBF24),
+                      title: 'Misi menunggu',
+                      subtitle:
+                          '${missions.where((m) => !m.isCompleted).length} misi harian belum selesai',
+                    ),
+                  if (provider.activeProposals.isNotEmpty)
+                    _buildNotifTile(
+                      icon: Icons.how_to_vote,
+                      iconColor: const Color(0xFF22C55E),
+                      title: 'Voting terbuka',
+                      subtitle:
+                          '${provider.activeProposals.length} proposal menunggu suara Anda',
+                    ),
+                  if (provider.activeBattle != null)
+                    _buildNotifTile(
+                      icon: Icons.sports_kabaddi,
+                      iconColor: const Color(0xFFEF4444),
+                      title: 'Pertandingan aktif',
+                      subtitle:
+                          'Selesaikan sebelum ${provider.activeBattleEndDate ?? 'minggu ini'}',
+                    ),
+                ],
+              ],
+            ),
+          ),
         ),
       );
     }
@@ -89,21 +171,31 @@ class HomeView extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Container(
-                        decoration: const BoxDecoration(
-                            color: Color(0x1AFFFFFF), shape: BoxShape.circle),
-                        padding: const EdgeInsets.all(12),
-                        child: const Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Icon(Icons.notifications,
-                                color: Colors.white, size: 24),
-                            Positioned(
-                                top: 0,
-                                right: 0,
-                                child: CircleAvatar(
-                                    radius: 4, backgroundColor: Colors.red))
-                          ],
+                      // Notification icon — tappable (Issue 1)
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: openNotifications,
+                          borderRadius: BorderRadius.circular(24),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                                color: Color(0x1AFFFFFF),
+                                shape: BoxShape.circle),
+                            padding: const EdgeInsets.all(12),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: const [
+                                Icon(Icons.notifications,
+                                    color: Colors.white, size: 24),
+                                Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: CircleAvatar(
+                                        radius: 4,
+                                        backgroundColor: Colors.red)),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -420,6 +512,17 @@ class HomeView extends StatelessWidget {
                             ],
                           ),
                         ),
+                        // Weekly Event Calendar — moved from dedicated Event tab (Issue 2)
+                        WeeklyEventCalendar(
+                          onSeeAll: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const EventsView()),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
                         Card(
                           color: Colors.white,
                           surfaceTintColor: Colors.white,
@@ -431,11 +534,11 @@ class HomeView extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                const Row(
+                                Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
+                                    const Text(
                                       'Misi Hari Ini',
                                       style: TextStyle(
                                           fontSize: 18,
@@ -443,8 +546,10 @@ class HomeView extends StatelessWidget {
                                           color: Color(0xFF64748B)),
                                     ),
                                     Text(
-                                      'Klaim hadiah',
-                                      style: TextStyle(
+                                      missions.isEmpty
+                                          ? 'Klaim hadiah'
+                                          : '${missions.where((m) => !m.isCompleted).length} tersisa',
+                                      style: const TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.bold,
                                           color: Color(0xFFFBBF24)),
@@ -452,61 +557,75 @@ class HomeView extends StatelessWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 16),
-                                ListView.separated(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount:
-                                      missions.length > 4 ? 4 : missions.length,
-                                  separatorBuilder: (context, index) =>
-                                      const SizedBox(height: 12),
-                                  itemBuilder: (context, index) {
-                                    final m = missions[index];
-                                    return Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                m.title,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: m.isCompleted
-                                                      ? Colors.grey
-                                                      : const Color(0xFF64748B),
-                                                  decoration: m.isCompleted
-                                                      ? TextDecoration
-                                                          .lineThrough
-                                                      : null,
+                                if (missions.isEmpty)
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 8),
+                                    child: Text(
+                                      'Belum ada misi harian tersedia.',
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 12),
+                                    ),
+                                  )
+                                else
+                                  ListView.separated(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: missions.length > 4
+                                        ? 4
+                                        : missions.length,
+                                    separatorBuilder: (context, index) =>
+                                        const SizedBox(height: 12),
+                                    itemBuilder: (context, index) {
+                                      final m = missions[index];
+                                      return Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  m.title,
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: m.isCompleted
+                                                        ? Colors.grey
+                                                        : const Color(
+                                                            0xFF64748B),
+                                                    decoration:
+                                                        m.isCompleted
+                                                            ? TextDecoration
+                                                                .lineThrough
+                                                            : null,
+                                                  ),
                                                 ),
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                'Progres: ${m.progress} / ${m.targetCount}  •  +${m.points} XP',
-                                                style: const TextStyle(
-                                                    fontSize: 10,
-                                                    color: Colors.grey,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ],
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  'Progres: ${m.progress} / ${m.targetCount}  •  +${m.points} XP',
+                                                  style: const TextStyle(
+                                                      fontSize: 10,
+                                                      color: Colors.grey,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        _buildMissionAction(
-                                          context,
-                                          provider,
-                                          m,
-                                          showSnackBar,
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
+                                          const SizedBox(width: 8),
+                                          _buildMissionAction(
+                                            context,
+                                            provider,
+                                            m,
+                                            showSnackBar,
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
                                 const SizedBox(height: 12),
                                 GestureDetector(
                                   onTap: () => onNavigate(1),
@@ -585,6 +704,47 @@ class HomeView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildNotifTile({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: iconColor.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0F172A))),
+                const SizedBox(height: 2),
+                Text(subtitle,
+                    style: const TextStyle(
+                        fontSize: 11, color: Colors.grey)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

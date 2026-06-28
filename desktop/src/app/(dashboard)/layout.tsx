@@ -6,6 +6,8 @@ import PrankEffect from "@/components/PrankEffect";
 import { getCurrentMember } from "@/actions/members";
 import { getMemberProgress } from "@/actions/gamification";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({
   children,
 }: {

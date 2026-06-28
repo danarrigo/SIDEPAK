@@ -87,7 +87,18 @@ class KoperasiProvider extends ChangeNotifier {
   }
 
   String _apiBase() {
-    return 'https://hackathon-kopdes.vercel.app';
+    return 'https://hackathon-kopdes-ekgie9nai-darrigos-projects.vercel.app';
+  }
+
+  Map<String, String> _headers({bool isJson = false}) {
+    final h = <String, String>{
+      'x-vercel-protection-bypass': 'x7R9wK2mP5qN4vB8zY1tC6sX3dL0fG9j',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+    if (isJson) {
+      h['Content-Type'] = 'application/json';
+    }
+    return h;
   }
 
   Future<void> loadSavedSession() async {
@@ -115,7 +126,7 @@ class KoperasiProvider extends ChangeNotifier {
     try {
       final response = await http.post(
         Uri.parse('${_apiBase()}/api/auth/login'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers(isJson: true),
         body: json.encode({'email': emailInput, 'password': passwordInput}),
       );
       if (response.statusCode == 200) {
@@ -157,7 +168,7 @@ class KoperasiProvider extends ChangeNotifier {
     try {
       final response = await http.post(
         Uri.parse('${_apiBase()}/api/auth/signup'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers(isJson: true),
         body: json.encode({
           'email': email,
           'password': password,
@@ -203,7 +214,7 @@ class KoperasiProvider extends ChangeNotifier {
 
       final response = await http.get(
         Uri.parse('${_apiBase()}/api/mobile-sync'),
-        headers: {if (token != null) 'Authorization': 'Bearer $token'},
+        headers: _headers(),
       );
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -380,10 +391,7 @@ class KoperasiProvider extends ChangeNotifier {
     try {
       final res = await http.post(
         Uri.parse('${_apiBase()}/api/mobile-sync/action'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token'
-        },
+        headers: _headers(isJson: true),
         body: json.encode({
           'action': 'toggle-quest',
           'memberId': memberId,
@@ -410,10 +418,7 @@ class KoperasiProvider extends ChangeNotifier {
     try {
       final res = await http.post(
         Uri.parse('${_apiBase()}/api/mobile-sync/action'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token'
-        },
+        headers: _headers(isJson: true),
         body: json.encode({
           'action': 'buy-item',
           'memberId': memberId,
@@ -438,10 +443,7 @@ class KoperasiProvider extends ChangeNotifier {
     try {
       final res = await http.post(
         Uri.parse('${_apiBase()}/api/mobile-sync/action'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token'
-        },
+        headers: _headers(isJson: true),
         body: json.encode({
           'action': 'use-item',
           'memberId': memberId,
@@ -468,10 +470,7 @@ class KoperasiProvider extends ChangeNotifier {
     try {
       final res = await http.post(
         Uri.parse('${_apiBase()}/api/mobile-sync/action'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token'
-        },
+        headers: _headers(isJson: true),
         body: json.encode({
           'action': 'vote',
           'memberId': memberId,
@@ -496,10 +495,7 @@ class KoperasiProvider extends ChangeNotifier {
     try {
       final res = await http.post(
         Uri.parse('${_apiBase()}/api/mobile-sync/action'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token'
-        },
+        headers: _headers(isJson: true),
         body: json.encode({
           'action': 'submit-proposal',
           'memberId': memberId,
@@ -523,10 +519,7 @@ class KoperasiProvider extends ChangeNotifier {
     try {
       final res = await http.post(
         Uri.parse('${_apiBase()}/api/mobile-sync/action'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token'
-        },
+        headers: _headers(isJson: true),
         body: json.encode({
           'action': 'create-topup',
           'memberId': memberId,
@@ -552,10 +545,7 @@ class KoperasiProvider extends ChangeNotifier {
     try {
       final res = await http.post(
         Uri.parse('${_apiBase()}/api/mobile-sync/action'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token'
-        },
+        headers: _headers(isJson: true),
         body: json.encode({
           'action': 'verify-topup',
           'memberId': memberId,

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Dashboard Koperasi Sukamaju",
-  description: "Portal Anggota & Transparansi Tata Kelola Koperasi Merah Putih Desa Sukamaju",
+  title: "Koperasi Digital",
+  description: "Platform digital untuk pengelolaan koperasi desa",
 };
 
 export default function RootLayout({

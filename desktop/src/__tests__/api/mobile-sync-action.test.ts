@@ -256,6 +256,45 @@ describe('POST /api/mobile-sync/action', () => {
     expect(json.success).toBe(false);
   });
 
+  // ============ Auth & security regression tests ============
+
+  it('returns 401 when Authorization header is missing', async () => {
+    ((globalThis as any).__mockHeadersGet as jest.Mock).mockReturnValue(null);
+    const res = await POST(makeRequest({ action: 'join-event', memberId: 1, eventId: 1 }));
+    expect(res.status).toBe(401);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.error).toMatch(/missing/i);
+  });
+
+  it('returns 401 when token is rejected by Supabase', async () => {
+    ((globalThis as any).__mockHeadersGet as jest.Mock).mockReturnValue('Bearer invalid');
+    ((globalThis as any).__mockGetUser as jest.Mock).mockResolvedValue({
+      data: { user: null },
+      error: { message: 'Invalid token', name: 'AuthError', status: 401 },
+    });
+    const res = await POST(makeRequest({ action: 'join-event', memberId: 1, eventId: 1 }));
+    expect(res.status).toBe(401);
+  });
+
+  it('ignores body.memberId — server uses only token-derived memberId', async () => {
+    // Attacker sends a forged memberId in body (claims to be member 99)
+    // but their token only resolves to member 1.
+    setupAuth();
+    const res = await POST(
+      makeRequest({ action: 'join-event', memberId: 99, eventId: 1 })
+    );
+    // The joinEvent action should be called with memberId=1 (from token),
+    // NOT memberId=99 (from body).
+    expect((globalThis as any).joinEvent).toHaveBeenCalledWith(1, 1);
+  });
+
+  it('returns 401 for action POST when auth header is malformed', async () => {
+    ((globalThis as any).__mockHeadersGet as jest.Mock).mockReturnValue('Token abc');
+    const res = await POST(makeRequest({ action: 'join-event', memberId: 1, eventId: 1 }));
+    expect(res.status).toBe(401);
+  });
+
   it('returns success payload on a valid request', async () => {
     setupAuth();
     const res = await POST(makeRequest({ action: 'join-event', memberId: 1, eventId: 1 }));

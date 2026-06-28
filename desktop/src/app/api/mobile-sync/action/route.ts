@@ -18,21 +18,33 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { action } = body;
-    let memberId = body.memberId || 1;
 
     const headerList = await headers();
     const authHeader = headerList.get('authorization');
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      const supabase = createSupabaseClient();
-      const { data: { user } } = await supabase.auth.getUser(token);
-      if (user) {
-        const [member] = await db.select().from(members).where(eq(members.userId, user.id));
-        if (member) {
-          memberId = member.id;
-        }
-      }
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required: missing Bearer token' },
+        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
     }
+    const token = authHeader.substring(7);
+    const supabase = createSupabaseClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or expired session token' },
+        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
+    }
+    const [member] = await db.select().from(members).where(eq(members.userId, user.id));
+    if (!member) {
+      return NextResponse.json(
+        { success: false, error: 'No member profile linked to this account' },
+        { status: 403, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
+    }
+    // SECURITY: never trust body.memberId — always use token-derived memberId
+    const memberId = member.id;
 
     let result: { success: boolean; error?: string; updatedPoints?: number } & Record<string, unknown> = { success: false, error: "Invalid action" };
 

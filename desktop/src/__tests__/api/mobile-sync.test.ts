@@ -179,6 +179,55 @@ describe('GET /api/mobile-sync', () => {
     expect(json.success).toBe(false);
   });
 
+  // ============ Auth & security regression tests ============
+
+  it('returns 401 when Authorization header is missing', async () => {
+    mockHeadersGet.mockReturnValue(null);
+    const response = await GET();
+    expect(response.status).toBe(401);
+    const json = await response.json();
+    expect(json.success).toBe(false);
+    expect(json.error).toMatch(/missing/i);
+  });
+
+  it('returns 401 when Authorization header is not Bearer scheme', async () => {
+    mockHeadersGet.mockReturnValue('Basic dXNlcjpwYXNz');
+    const response = await GET();
+    expect(response.status).toBe(401);
+  });
+
+  it('returns 401 when Supabase rejects the token', async () => {
+    mockHeadersGet.mockReturnValue('Bearer invalid-token-123');
+    mockGetUser.mockResolvedValue({
+      data: { user: null },
+      error: { message: 'Invalid token', name: 'AuthError', status: 401 },
+    });
+    const response = await GET();
+    expect(response.status).toBe(401);
+    const json = await response.json();
+    expect(json.success).toBe(false);
+    expect(json.error).toMatch(/invalid|expired/i);
+  });
+
+  it('returns 401 when Supabase returns null user (silent failure)', async () => {
+    mockHeadersGet.mockReturnValue('Bearer stale-token-456');
+    mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+    const response = await GET();
+    expect(response.status).toBe(401);
+  });
+
+  it('returns 403 when token is valid but no member profile exists', async () => {
+    mockHeadersGet.mockReturnValue('Bearer valid-but-orphan-token');
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'orphan-uuid' } }, error: null });
+    // No need to mock .where — but to be safe, return empty array
+    ((globalThis as any).__mockDbChain as any).where.mockResolvedValueOnce([]);
+    const response = await GET();
+    expect(response.status).toBe(403);
+    const json = await response.json();
+    expect(json.success).toBe(false);
+    expect(json.error).toMatch(/profile|anggota/i);
+  });
+
   it('OPTIONS returns 204 with CORS headers', async () => {
     const { OPTIONS } = await import('@/app/api/mobile-sync/route');
     const response = await OPTIONS();

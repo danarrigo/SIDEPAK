@@ -17,25 +17,37 @@ import { headers } from 'next/headers';
 
 export async function GET() {
   try {
-    let memberId = 1; // Fallback default
-    let cooperativeId = 1; // Fallback default
+    let memberId = -1;
+    let cooperativeId = -1;
     let currentProvinsi: string | null = null;
 
     const headerList = await headers();
     const authHeader = headerList.get('authorization');
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      const supabase = createSupabaseClient();
-      const { data: { user } } = await supabase.auth.getUser(token);
-      if (user) {
-        const [member] = await db.select().from(members).where(eq(members.userId, user.id));
-        if (member) {
-          memberId = member.id;
-          if (member.cooperativeId) cooperativeId = member.cooperativeId;
-          currentProvinsi = member.provinsi || null;
-        }
-      }
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required: missing Bearer token' },
+        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
     }
+    const token = authHeader.substring(7);
+    const supabase = createSupabaseClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or expired session token' },
+        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
+    }
+    const [member] = await db.select().from(members).where(eq(members.userId, user.id));
+    if (!member) {
+      return NextResponse.json(
+        { success: false, error: 'No member profile linked to this account' },
+        { status: 403, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
+    }
+    memberId = member.id;
+    if (member.cooperativeId) cooperativeId = member.cooperativeId;
+    currentProvinsi = member.provinsi || null;
     
     // Fetch all data concurrently
     const [dashboardData, financialsData, questsData, governanceData, arenaData, koperasiStats, battleHistoryData, badgesData, winRateData, storeItemsData, leaderboardData, inventoryData, marketplaceData, eventsData, eventParticipationsData, leaderboardByProvinsi, leaderboardByNasional, activeMembersData, activeLoanData] = await Promise.all([

@@ -200,6 +200,16 @@ export default async function DesktopDashboard() {
                   <p className="text-xl font-black text-on-surface mt-1">{koperasiStats.anggotaBaru}</p>
                   <p className="text-[9px] font-bold text-on-surface-variant">Anggota Baru</p>
                 </div>
+                <div className="bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/30">
+                  <span className="material-symbols-outlined text-primary text-base">payments</span>
+                  <p className="text-xl font-black text-on-surface mt-1">{(koperasiStats.omzetHarian / 1000000).toFixed(1)}Jt</p>
+                  <p className="text-[9px] font-bold text-on-surface-variant">Omzet Harian</p>
+                </div>
+                <div className="bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/30">
+                  <span className="material-symbols-outlined text-primary text-base">storefront</span>
+                  <p className="text-xl font-black text-on-surface mt-1">{koperasiStats.umkmAktif}</p>
+                  <p className="text-[9px] font-bold text-on-surface-variant">UMKM Aktif</p>
+                </div>
               </div>
             </div>
             <div className="pt-4 border-t border-outline-variant/30 mt-6">

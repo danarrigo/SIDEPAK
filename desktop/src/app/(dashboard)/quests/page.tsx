@@ -14,20 +14,32 @@ export default async function Page() {
   const dbData = await getDashboardData(currentMember.id);
   const activeQuests = await getActiveQuests(currentMember.id);
   
-  // Seed initial items and quests if empty (check via DB)
-  const existingQuests = await db.select().from(quests).limit(1);
-  if (existingQuests.length === 0) {
+  const allQuests = await db.select().from(quests);
+  if (allQuests.length < 8) {
     try {
-      await db.insert(items).values([
-        { name: "Sakit Jantung", description: "Beri efek jantungan (jumpscare) pada teman koperasimu!", priceInPoints: 50, effectType: "prank", effectValue: "sakit_jantung" },
-        { name: "Freeze Streak", description: "Pertahankan streakmu meskipun kamu lupa login sehari.", priceInPoints: 100, effectType: "freeze_streak", effectValue: "1" },
-        { name: "Poin Bomb", description: "Raih 2x XP dari semua aktivitas besok.", priceInPoints: 300, effectType: "point_bomb", effectValue: "2x" }
-      ]);
-      await db.insert(quests).values([
+      if (allQuests.length === 0) {
+        await db.insert(items).values([
+          { name: "Sakit Jantung", description: "Beri efek jantungan (jumpscare) pada teman koperasimu!", priceInPoints: 50, effectType: "prank", effectValue: "sakit_jantung" },
+          { name: "Freeze Streak", description: "Pertahankan streakmu meskipun kamu lupa login sehari.", priceInPoints: 100, effectType: "freeze_streak", effectValue: "1" },
+          { name: "Poin Bomb", description: "Raih 2x XP dari semua aktivitas besok.", priceInPoints: 300, effectType: "point_bomb", effectValue: "2x" }
+        ]);
+      }
+      
+      const existingTitles = allQuests.map(q => q.title);
+      const newQuests = [
         { title: "Nabung Yuk!", description: "Lakukan 1x transaksi menabung hari ini.", rewardPoints: 200, frequency: "daily", targetCount: 1 },
+        { title: "Login Berturut", description: "Login 3 hari berturut-turut.", rewardPoints: 300, frequency: "weekly", targetCount: 3 },
+        { title: "Voting Pintar", description: "Berikan 1 suara pada proposal yang sedang berjalan.", rewardPoints: 150, frequency: "daily", targetCount: 1 },
+        { title: "Pejuang Acara", description: "Hadir di 1 event koperasi bulan ini.", rewardPoints: 800, frequency: "monthly", targetCount: 1 },
         { title: "Bayar Iuran", description: "Selesaikan iuran wajib bulan ini.", rewardPoints: 500, frequency: "monthly", targetCount: 1 },
-        { title: "Duel Master", description: "Menangkan 3 battle di Arena Koperasi.", rewardPoints: 1000, frequency: "weekly", targetCount: 3 }
-      ]);
+        { title: "Duel Master", description: "Menangkan 3 battle di Arena Koperasi.", rewardPoints: 1000, frequency: "weekly", targetCount: 3 },
+        { title: "Membantu Sesama", description: "Gunakan item prank ke 1 teman.", rewardPoints: 100, frequency: "daily", targetCount: 1 },
+        { title: "Bintang Desa", description: "Capai top 3 di Peringkat Mingguan.", rewardPoints: 2000, frequency: "weekly", targetCount: 1 }
+      ].filter(q => !existingTitles.includes(q.title));
+
+      if (newQuests.length > 0) {
+        await db.insert(quests).values(newQuests);
+      }
     } catch(e) {
       console.log(e);
     }

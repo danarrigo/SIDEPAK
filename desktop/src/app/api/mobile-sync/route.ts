@@ -16,6 +16,8 @@ import { members } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     let memberId = -1;

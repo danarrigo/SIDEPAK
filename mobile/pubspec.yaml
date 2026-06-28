@@ -36,7 +36,10 @@ dependencies:
   cupertino_icons: ^1.0.8
   http: ^1.6.0
   provider: ^6.1.5+1
-  shared_preferences: ^2.5.5
+  # Pinned to ^2.5.3 because ^2.5.5 requires Dart SDK >=3.9.0 (CI uses 3.6.0
+  # via Flutter 3.27.x). Bump back to ^2.5.5 once the CI Flutter version is
+  # upgraded to 3.34+ / Dart 3.9+.
+  shared_preferences: ^2.5.3
   url_launcher: ^6.3.1
 
 dev_dependencies:

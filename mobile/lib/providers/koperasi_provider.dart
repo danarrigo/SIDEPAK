@@ -9,6 +9,12 @@ import '../models/marketplace_item.dart';
 import '../models/event_model.dart';
 
 class KoperasiProvider extends ChangeNotifier {
+  // Test hook: allow tests to inject a custom http.Client.
+  // ignore: unused_field
+  static http.Client? apiClientOverride;
+
+  http.Client get _client => apiClientOverride ?? http.Client();
+
   // Auth State
   String? token;
   int? memberId;
@@ -151,7 +157,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<bool> login(String emailInput, String passwordInput) async {
     try {
-      final response = await http.post(
+      final response = await _client.post(
         Uri.parse(_apiUrl('/api/auth/login')),
         headers: _headers(isJson: true),
         body: json.encode({'email': emailInput, 'password': passwordInput}),
@@ -193,7 +199,7 @@ class KoperasiProvider extends ChangeNotifier {
     required String koperasi,
   }) async {
     try {
-      final response = await http.post(
+      final response = await _client.post(
         Uri.parse(_apiUrl('/api/auth/signup')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -239,7 +245,7 @@ class KoperasiProvider extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      final response = await http.get(
+      final response = await _client.get(
         Uri.parse(_apiUrl('/api/mobile-sync')),
         headers: _headers(),
       );
@@ -467,7 +473,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<String> claimMission(String id, int? questRewardPoints) async {
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -494,7 +500,7 @@ class KoperasiProvider extends ChangeNotifier {
       return 'Poin tidak mencukupi untuk membeli ${item.title}';
     }
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -519,7 +525,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<String> useInventoryItem(int itemId, {int? targetMemberId}) async {
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -546,7 +552,7 @@ class KoperasiProvider extends ChangeNotifier {
         activeProposals.isNotEmpty ? activeProposals[0] : null;
     final proposalId = proposal?['id'] ?? 1;
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -571,7 +577,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<String> submitProposal(String title, String description) async {
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -595,7 +601,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<Map<String, dynamic>> createTopUp(int amount) async {
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -621,7 +627,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<Map<String, dynamic>> verifyTopUp(String invoiceId) async {
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -647,7 +653,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<String> payDuesFromWallet(String type) async {
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -670,7 +676,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<String> depositSavingsFromWallet(int amount, String description) async {
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -705,7 +711,7 @@ class KoperasiProvider extends ChangeNotifier {
       if (points < 0) {
         return 'Poin tidak valid.';
       }
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -732,7 +738,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<String> buyMarketplaceItem(int itemId) async {
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -759,7 +765,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<String> joinEvent(int eventId) async {
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -789,7 +795,7 @@ class KoperasiProvider extends ChangeNotifier {
     required DateTime endDate,
   }) async {
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -817,7 +823,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<String> matchmakeBattle() async {
     try {
-      final res = await http.post(
+      final res = await _client.post(
         Uri.parse(_apiUrl('/api/mobile-sync/action')),
         headers: _headers(isJson: true),
         body: json.encode({
@@ -841,7 +847,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<String?> checkActiveEffect() async {
     try {
-      final response = await http.get(
+      final response = await _client.get(
         Uri.parse(_apiUrl('/api/mobile-sync')),
         headers: _headers(),
       );

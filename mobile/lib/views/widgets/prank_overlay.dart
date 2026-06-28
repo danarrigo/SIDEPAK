@@ -14,6 +14,7 @@ class _PrankOverlayState extends State<PrankOverlay> {
   bool _visible = false;
   String? _lastShown;
   Timer? _pollTimer;
+  Timer? _hideTimer;
 
   @override
   void initState() {
@@ -26,6 +27,7 @@ class _PrankOverlayState extends State<PrankOverlay> {
   @override
   void dispose() {
     _pollTimer?.cancel();
+    _hideTimer?.cancel();
     super.dispose();
   }
 
@@ -44,7 +46,8 @@ class _PrankOverlayState extends State<PrankOverlay> {
       _visible = true;
       _lastShown = effect;
     });
-    Timer(const Duration(seconds: 4), () async {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 4), () async {
       if (!mounted) return;
       setState(() {
         _visible = false;

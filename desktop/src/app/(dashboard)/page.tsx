@@ -19,11 +19,19 @@ export default async function DesktopDashboard() {
   
   const points = dbData?.progress?.pointsBalance || 0;
   const streak = dbData?.progress?.currentStreak || 0;
+  const level = dbData?.progress?.level || 1;
   const memberName = currentMember?.namaLengkap ? currentMember.namaLengkap.split(' ')[0] : "Anggota";
 
-
-
-  return (
+  const nextLevelPoints = level * 1000;
+  let rankName = "Bronze";
+  if (level >= 10 && level < 20) rankName = "Silver";
+  else if (level >= 20 && level < 30) rankName = "Gold";
+  else if (level >= 30) rankName = "Platinum";
+  
+  let nextRankName = "Silver";
+  if (level >= 10 && level < 20) nextRankName = "Gold";
+  else if (level >= 20 && level < 30) nextRankName = "Platinum";
+  else if (level >= 30) nextRankName = "Legend";  return (
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">
       <div className="flex-1 overflow-y-auto px-6 py-10 space-y-8 pb-32 w-full">
         
@@ -31,7 +39,7 @@ export default async function DesktopDashboard() {
         <div className="glass-card border border-outline-variant rounded-2xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h2 className="text-2xl font-black text-on-surface">Selamat Datang kembali, {memberName}!</h2>
-            <p className="text-on-surface-variant text-sm mt-1">Status Keanggotaan Anda sangat baik. Mari capai Platinum bulan ini!</p>
+            <p className="text-on-surface-variant text-sm mt-1">Status Keanggotaan Anda sangat baik. Mari capai {nextRankName} bulan ini!</p>
           </div>
           <div className="flex items-center gap-3 bg-tertiary/10 px-4 py-2 border border-tertiary/20 rounded-xl text-tertiary">
             <span className="text-xl">🔥</span>
@@ -83,7 +91,7 @@ export default async function DesktopDashboard() {
             <div className="absolute inset-0 bg-gradient-to-br from-tertiary/5 to-transparent pointer-events-none"></div>
             <div className="flex justify-between items-center mb-4 relative z-10">
               <h3 className="text-xs uppercase font-extrabold tracking-widest text-tertiary">SALDO POIN</h3>
-              <span className="bg-tertiary/10 text-tertiary text-[10px] font-extrabold px-3 py-1 rounded-full border border-tertiary/20">Emas</span>
+              <span className="bg-tertiary/10 text-tertiary text-[10px] font-extrabold px-3 py-1 rounded-full border border-tertiary/20">{rankName}</span>
             </div>
 
             <div className="flex items-center gap-4 my-2 relative z-10">
@@ -95,17 +103,17 @@ export default async function DesktopDashboard() {
                   <span className="text-4xl font-black text-tertiary">{points.toLocaleString()}</span>
                   <span className="text-sm font-bold text-tertiary">Poin</span>
                 </div>
-                <p className="text-[10px] font-bold text-on-surface-variant">Tingkat Anggota Emas</p>
+                <p className="text-[10px] font-bold text-on-surface-variant">Tingkat Anggota {rankName}</p>
               </div>
             </div>
 
             <div className="space-y-2 border-t border-outline-variant/30 pt-6 relative z-10">
               <div className="flex justify-between text-[10px] font-bold text-on-surface-variant">
-                <span>{1500 - points > 0 ? `${1500 - points} Poin lagi ke Platinum` : "Platinum Tercapai!"}</span>
-                <span>{points} / 1.500</span>
+                <span>{nextLevelPoints - points > 0 ? `${nextLevelPoints - points} Poin lagi ke ${nextRankName}` : `${nextRankName} Tercapai!`}</span>
+                <span>{points} / {nextLevelPoints.toLocaleString()}</span>
               </div>
               <div className="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden flex">
-                <div className="h-full bg-tertiary" style={{ width: `${Math.min(100, (points / 1500) * 100)}%` }}></div>
+                <div className="h-full bg-tertiary" style={{ width: `${Math.min(100, (points / nextLevelPoints) * 100)}%` }}></div>
               </div>
             </div>
           </div>

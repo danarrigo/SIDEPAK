@@ -1,6 +1,7 @@
 import { getDashboardData } from "@/actions/dashboard";
 import { getActiveQuests } from "@/actions/quests";
 import { getCurrentMember } from "@/actions/members";
+import { getStoreItems } from "@/actions/gamification";
 import { redirect } from "next/navigation";
 
 export default async function Page() {
@@ -9,11 +10,21 @@ export default async function Page() {
 
   const dbData = await getDashboardData(currentMember.id);
   const activeQuests = await getActiveQuests(currentMember.id);
+  const storeItems = await getStoreItems();
 
   const xp = dbData?.progress?.xp || 0;
+  const points = dbData?.progress?.pointsBalance || 0;
   const level = dbData?.progress?.level || 1;
   const nextLevelXp = level * 1000;
   const xpPercent = Math.min(100, (xp / nextLevelXp) * 100);
+
+  const now = new Date();
+  const midnight = new Date();
+  midnight.setHours(24, 0, 0, 0);
+  const diffMs = midnight.getTime() - now.getTime();
+  const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  const resetTimeStr = `Reset dalam ${diffHrs}j ${diffMins}m`;
 
   return (
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">
@@ -62,7 +73,7 @@ export default async function Page() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-headline-md text-headline-md">Misi Harian</h3>
             <span className="font-label-caps text-label-caps text-primary">
-              Reset dalam 4j 12m
+              {resetTimeStr}
             </span>
           </div>
           <div className="space-y-4">
@@ -191,100 +202,34 @@ export default async function Page() {
                 monetization_on
               </span>
               <span className="font-points-display text-lg text-tertiary">
-                12,850 Poin
+                {points.toLocaleString()} Poin
               </span>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-            <div className="glass-card rounded-xl p-5 group hover:-translate-y-1 transition-transform duration-300 flex flex-col">
-              <div className="w-full aspect-square rounded-lg bg-surface-container-highest flex items-center justify-center mb-4 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
-                <span className="material-symbols-outlined text-5xl text-primary group-hover:scale-110 transition-transform">
-                  ac_unit
-                </span>
+            {storeItems.map(item => (
+              <div key={item.id} className="glass-card rounded-xl p-5 group hover:-translate-y-1 transition-transform duration-300 flex flex-col">
+                <div className="w-full aspect-square rounded-lg bg-surface-container-highest flex items-center justify-center mb-4 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
+                  <span className="material-symbols-outlined text-5xl text-primary group-hover:scale-110 transition-transform">
+                    {item.effectType === 'freeze_streak' ? 'ac_unit' : item.effectType === 'point_bomb' ? 'bomb' : 'stars'}
+                  </span>
+                </div>
+                <h4 className="font-body-lg text-body-lg mb-1">{item.name}</h4>
+                <p className="font-body-md text-body-md text-on-surface-variant flex-grow mb-4 line-clamp-2">
+                  {item.description}
+                </p>
+                <button className="w-full py-2.5 bg-surface-container-high hover:bg-primary hover:text-on-primary transition-colors rounded-lg flex items-center justify-center gap-2">
+                  <span className="font-points-display">{item.priceInPoints.toLocaleString()}</span>
+                  <span
+                    className="material-symbols-outlined text-sm"
+                    style={{ fontVariationSettings: "\'FILL\' 1" }}
+                  >
+                    monetization_on
+                  </span>
+                </button>
               </div>
-              <h4 className="font-body-lg text-body-lg mb-1">Freeze Streak</h4>
-              <p className="font-body-md text-body-md text-on-surface-variant flex-grow mb-4 line-clamp-2">
-                Jaga streak Anda tetap aktif meskipun tidak masuk selama 24 jam.
-              </p>
-              <button className="w-full py-2.5 bg-surface-container-high hover:bg-primary hover:text-on-primary transition-colors rounded-lg flex items-center justify-center gap-2">
-                <span className="font-points-display">500</span>
-                <span
-                  className="material-symbols-outlined text-sm"
-                  style={{ fontVariationSettings: "\'FILL\' 1" }}
-                >
-                  monetization_on
-                </span>
-              </button>
-            </div>
-
-            <div className="glass-card rounded-xl p-5 group hover:-translate-y-1 transition-transform duration-300 flex flex-col">
-              <div className="w-full aspect-square rounded-lg bg-surface-container-highest flex items-center justify-center mb-4 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-tertiary/10 to-transparent"></div>
-                <span className="material-symbols-outlined text-5xl text-tertiary group-hover:scale-110 transition-transform">
-                  bomb
-                </span>
-              </div>
-              <h4 className="font-body-lg text-body-lg mb-1">Point Bomb</h4>
-              <h4 className="font-body-lg text-body-lg mb-1">Point Bomb</h4>
-              <p className="font-body-md text-body-md text-on-surface-variant flex-grow mb-4 line-clamp-2">
-                Gandakan perolehan poin dari semua misi selama 1 jam kedepan.
-              </p>
-              <button className="w-full py-2.5 bg-surface-container-high hover:bg-primary hover:text-on-primary transition-colors rounded-lg flex items-center justify-center gap-2">
-                <span className="font-points-display">1,200</span>
-                <span
-                  className="material-symbols-outlined text-sm"
-                  style={{ fontVariationSettings: "\'FILL\' 1" }}
-                >
-                  monetization_on
-                </span>
-              </button>
-            </div>
-
-            <div className="glass-card rounded-xl p-5 group hover:-translate-y-1 transition-transform duration-300 flex flex-col">
-              <div className="w-full aspect-square rounded-lg bg-surface-container-highest flex items-center justify-center mb-4 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent"></div>
-                <span className="material-symbols-outlined text-5xl text-secondary group-hover:scale-110 transition-transform">
-                  shield
-                </span>
-              </div>
-              <h4 className="font-body-lg text-body-lg mb-1">Loan Shield</h4>
-              <p className="font-body-md text-body-md text-on-surface-variant flex-grow mb-4 line-clamp-2">
-                Perlindungan denda keterlambatan untuk pinjaman aktif selama 3
-                hari.
-              </p>
-              <button className="w-full py-2.5 bg-surface-container-high hover:bg-primary hover:text-on-primary transition-colors rounded-lg flex items-center justify-center gap-2">
-                <span className="font-points-display">2,500</span>
-                <span
-                  className="material-symbols-outlined text-sm"
-                  style={{ fontVariationSettings: "\'FILL\' 1" }}
-                >
-                  monetization_on
-                </span>
-              </button>
-            </div>
-
-            <div className="glass-card rounded-xl p-5 group hover:-translate-y-1 transition-transform duration-300 flex flex-col">
-              <div className="w-full aspect-square rounded-lg bg-surface-container-highest flex items-center justify-center mb-4 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-error/10 to-transparent"></div>
-                <span className="material-symbols-outlined text-5xl text-error group-hover:scale-110 transition-transform">
-                  mystery
-                </span>
-              </div>
-              <h4 className="font-body-lg text-body-lg mb-1">Mystery Box</h4>
-              <p className="font-body-md text-body-md text-on-surface-variant flex-grow mb-4 line-clamp-2">
-                Kesempatan mendapatkan kupon belanja hingga Rp 100.000!
-              </p>
-              <button className="w-full py-2.5 bg-surface-container-high hover:bg-primary hover:text-on-primary transition-colors rounded-lg flex items-center justify-center gap-2">
-                <span className="font-points-display">800</span>
-                <span
-                  className="material-symbols-outlined text-sm"
-                  style={{ fontVariationSettings: "\'FILL\' 1" }}
-                >
-                  monetization_on
-                </span>
-              </button>
-            </div>
+            ))}
           </div>
         </section>
       </div>

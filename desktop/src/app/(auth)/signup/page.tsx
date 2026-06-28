@@ -2,20 +2,115 @@
 
 import Link from "next/link";
 import { signup } from "@/actions/auth";
-import { useActionState, useEffect, useState } from "react";
-import { getAllCooperatives } from "@/actions/cooperatives";
+import { useActionState, useEffect, useState, useRef } from "react";
 
 const initialState = {
   error: "",
 };
 
+// API Types (ibnux/data-indonesia)
+interface LocationType { id: string; nama: string; }
+
 export default function SignupPage() {
   const [state, formAction, pending] = useActionState(signup, initialState);
-  const [cooperatives, setCooperatives] = useState<{ id: number; name: string; desa: string | null }[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateInput = (target: HTMLInputElement | HTMLSelectElement) => {
+    const { name, validity } = target;
+    if (!name) return;
+    let errorMessage = "";
+    if (!validity.valid) {
+      if (validity.valueMissing) {
+        errorMessage = "Bagian ini harus diisi.";
+      } else if (name === "nik" && (validity.patternMismatch || validity.tooShort || validity.tooLong)) {
+        errorMessage = "NIK harus tepat 16 digit angka.";
+      } else if (name === "password" && validity.tooShort) {
+        errorMessage = "Kata sandi minimal 6 karakter.";
+      } else if (name === "email" && validity.typeMismatch) {
+        errorMessage = "Email tidak valid.";
+      } else {
+        errorMessage = "Format tidak valid.";
+      }
+    }
+    setErrors(prev => ({ ...prev, [name]: errorMessage }));
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLFormElement>) => {
+    const target = e.target as unknown as HTMLInputElement | HTMLSelectElement;
+    validateInput(target);
+    checkFormValidity();
+  };
+
+  const handleInput = (e: React.FormEvent<HTMLFormElement>) => {
+    const target = e.target as unknown as HTMLInputElement | HTMLSelectElement;
+    if (errors[target.name]) {
+      validateInput(target);
+    }
+    checkFormValidity();
+  };
+
+  const checkFormValidity = () => {
+    if (formRef.current) {
+      setIsFormValid(formRef.current.checkValidity());
+    }
+  };
+
+  // Location Data States
+  const [provinces, setProvinces] = useState<LocationType[]>([]);
+  const [regencies, setRegencies] = useState<LocationType[]>([]);
+  const [districts, setDistricts] = useState<LocationType[]>([]);
+  const [villages, setVillages] = useState<LocationType[]>([]);
+
+  // Selected ID States (for fetching)
+  const [selectedProvId, setSelectedProvId] = useState("");
+  const [selectedRegId, setSelectedRegId] = useState("");
+  const [selectedDistId, setSelectedDistId] = useState("");
+  const [selectedDesaName, setSelectedDesaName] = useState("");
 
   useEffect(() => {
-    getAllCooperatives().then(setCooperatives);
+    // Fetch Provinces on mount
+    fetch("https://ibnux.github.io/data-indonesia/provinsi.json")
+      .then(res => res.json())
+      .then(setProvinces)
+      .catch(console.error);
   }, []);
+
+  useEffect(() => {
+    if (!selectedProvId) {
+      setRegencies([]);
+      setSelectedRegId("");
+      return;
+    }
+    fetch(`https://ibnux.github.io/data-indonesia/kabupaten/${selectedProvId}.json`)
+      .then(res => res.json())
+      .then(setRegencies)
+      .catch(console.error);
+  }, [selectedProvId]);
+
+  useEffect(() => {
+    if (!selectedRegId) {
+      setDistricts([]);
+      setSelectedDistId("");
+      return;
+    }
+    fetch(`https://ibnux.github.io/data-indonesia/kecamatan/${selectedRegId}.json`)
+      .then(res => res.json())
+      .then(setDistricts)
+      .catch(console.error);
+  }, [selectedRegId]);
+
+  useEffect(() => {
+    if (!selectedDistId) {
+      setVillages([]);
+      return;
+    }
+    fetch(`https://ibnux.github.io/data-indonesia/kelurahan/${selectedDistId}.json`)
+      .then(res => res.json())
+      .then(setVillages)
+      .catch(console.error);
+  }, [selectedDistId]);
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-background p-6">
@@ -25,7 +120,15 @@ export default function SignupPage() {
           <p className="text-sm text-on-surface-variant mt-2">Bergabung dengan KopDes hari ini</p>
         </div>
 
-        <form action={formAction} className="space-y-6">
+        <form 
+          ref={formRef}
+          action={formAction} 
+          className="space-y-6"
+          onChange={checkFormValidity}
+          onKeyUp={checkFormValidity}
+          onBlur={handleBlur}
+          onInput={handleInput}
+        >
           {state?.error && (
             <div className="bg-error-container text-error p-3 rounded-xl text-sm font-bold">
               {state.error}
@@ -43,6 +146,7 @@ export default function SignupPage() {
                 className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface"
                 placeholder="John Doe"
               />
+              {errors.namaLengkap && <p className="text-error text-xs font-semibold mt-1.5 ml-1">{errors.namaLengkap}</p>}
             </div>
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2" htmlFor="nik">NIK</label>
@@ -51,9 +155,14 @@ export default function SignupPage() {
                 name="nik"
                 type="text"
                 required
+                pattern="\d{16}"
+                minLength={16}
+                maxLength={16}
+                title="NIK harus 16 digit angka"
                 className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface"
                 placeholder="16 Digit NIK"
               />
+              {errors.nik && <p className="text-error text-xs font-semibold mt-1.5 ml-1">{errors.nik}</p>}
             </div>
           </div>
 
@@ -68,6 +177,7 @@ export default function SignupPage() {
                 className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface"
                 placeholder="nama@email.com"
               />
+              {errors.email && <p className="text-error text-xs font-semibold mt-1.5 ml-1">{errors.email}</p>}
             </div>
 
             <div>
@@ -77,9 +187,11 @@ export default function SignupPage() {
                 name="password"
                 type="password"
                 required
+                minLength={6}
                 className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface"
                 placeholder="Min. 6 karakter"
               />
+              {errors.password && <p className="text-error text-xs font-semibold mt-1.5 ml-1">{errors.password}</p>}
             </div>
           </div>
 
@@ -88,63 +200,109 @@ export default function SignupPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold text-on-surface mb-2" htmlFor="provinsi">Provinsi</label>
-                <input
+                <select
                   id="provinsi"
                   name="provinsi"
-                  type="text"
                   required
-                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface"
-                  placeholder="Contoh: Jawa Barat"
-                />
+                  defaultValue=""
+                  onChange={(e) => {
+                    const option = e.target.selectedOptions[0];
+                    setSelectedProvId(option.dataset.id || "");
+                    // Reset child selects
+                    setSelectedRegId("");
+                    setSelectedDistId("");
+                    setSelectedDesaName("");
+                  }}
+                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface appearance-none"
+                >
+                  <option value="" disabled>Pilih Provinsi</option>
+                  {provinces.map((p) => (
+                    <option key={p.id} value={p.nama} data-id={p.id}>{p.nama}</option>
+                  ))}
+                </select>
               </div>
+              
               <div>
                 <label className="block text-sm font-bold text-on-surface mb-2" htmlFor="kabupaten">Kabupaten/Kota</label>
-                <input
+                <select
                   id="kabupaten"
                   name="kabupaten"
-                  type="text"
                   required
-                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface"
-                  placeholder="Contoh: Bandung"
-                />
+                  disabled={!selectedProvId || regencies.length === 0}
+                  value={selectedRegId ? regencies.find(r => r.id === selectedRegId)?.nama : ""}
+                  onChange={(e) => {
+                    const option = e.target.selectedOptions[0];
+                    setSelectedRegId(option.dataset.id || "");
+                    // Reset child selects
+                    setSelectedDistId("");
+                    setSelectedDesaName("");
+                  }}
+                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface appearance-none disabled:opacity-50"
+                >
+                  <option value="" disabled>Pilih Kabupaten/Kota</option>
+                  {regencies.map((r) => (
+                    <option key={r.id} value={r.nama} data-id={r.id}>{r.nama}</option>
+                  ))}
+                </select>
               </div>
+              
               <div>
                 <label className="block text-sm font-bold text-on-surface mb-2" htmlFor="kecamatan">Kecamatan</label>
-                <input
+                <select
                   id="kecamatan"
                   name="kecamatan"
-                  type="text"
                   required
-                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface"
-                  placeholder="Contoh: Lembang"
-                />
+                  disabled={!selectedRegId || districts.length === 0}
+                  value={selectedDistId ? districts.find(d => d.id === selectedDistId)?.nama : ""}
+                  onChange={(e) => {
+                    const option = e.target.selectedOptions[0];
+                    setSelectedDistId(option.dataset.id || "");
+                    setSelectedDesaName("");
+                  }}
+                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface appearance-none disabled:opacity-50"
+                >
+                  <option value="" disabled>Pilih Kecamatan</option>
+                  {districts.map((d) => (
+                    <option key={d.id} value={d.nama} data-id={d.id}>{d.nama}</option>
+                  ))}
+                </select>
               </div>
+              
               <div>
                 <label className="block text-sm font-bold text-on-surface mb-2" htmlFor="desa">Desa/Kelurahan</label>
-                <input
+                <select
                   id="desa"
                   name="desa"
-                  type="text"
                   required
-                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface"
-                  placeholder="Contoh: Sukamaju"
-                />
+                  disabled={!selectedDistId || villages.length === 0}
+                  value={selectedDesaName}
+                  onChange={(e) => setSelectedDesaName(e.target.value)}
+                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface appearance-none disabled:opacity-50"
+                >
+                  <option value="" disabled>Pilih Desa</option>
+                  {villages.map((v) => (
+                    <option key={v.id} value={v.nama}>{v.nama}</option>
+                  ))}
+                </select>
               </div>
+              
               <div className="md:col-span-2">
                 <label className="block text-sm font-bold text-on-surface mb-2" htmlFor="koperasi">Nama Koperasi</label>
                 <select
                   id="koperasi"
                   name="koperasi"
                   required
-                  defaultValue=""
-                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface appearance-none"
+                  value={selectedDesaName ? `Koperasi ${selectedDesaName}` : ""}
+                  onChange={() => {}}
+                  disabled={!selectedDesaName}
+                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface appearance-none disabled:opacity-50"
                 >
                   <option value="" disabled>Pilih Koperasi yang tersedia di Desa Anda</option>
-                  {cooperatives.map((c) => (
-                    <option key={c.id} value={c.name}>
-                      {c.name} (Desa {c.desa})
+                  {selectedDesaName && (
+                    <option value={`Koperasi ${selectedDesaName}`}>
+                      Koperasi {selectedDesaName}
                     </option>
-                  ))}
+                  )}
                 </select>
                 <p className="text-[10px] text-on-surface-variant mt-1 ml-1">Koperasi yang dipilih harus berada di desa yang sama dengan domisili Anda.</p>
               </div>
@@ -153,7 +311,7 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={pending}
+            disabled={pending || !isFormValid}
             className="w-full bg-primary hover:bg-primary/90 text-on-primary font-bold py-3 rounded-xl transition-colors mt-4 disabled:opacity-50"
           >
             {pending ? "Memproses..." : "Buat Akun"}

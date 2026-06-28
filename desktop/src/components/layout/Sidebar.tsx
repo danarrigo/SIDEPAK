@@ -47,7 +47,7 @@ export default function Sidebar() {
 <p className="text-[10px] uppercase tracking-widest text-tertiary font-bold">Anggota Emas</p>
 </div>
 </div>
-<button className="w-full py-2 bg-primary-container text-primary rounded-lg font-label-caps text-[10px] hover:bg-primary hover:text-on-primary transition-all">PENGATURAN</button>
+<Link href="/profile" className="w-full py-2 bg-primary-container text-primary rounded-lg font-label-caps text-[10px] hover:bg-primary hover:text-on-primary transition-all block text-center">PENGATURAN</Link>
 </div>
 </div>
 </aside>

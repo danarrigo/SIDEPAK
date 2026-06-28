@@ -1,0 +1,16 @@
+{
+  "name": "hackathon-kopdes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gamified cooperative (Koperasi) management platform — Next.js desktop + Flutter mobile",
+  "scripts": {
+    "test:desktop": "cd desktop && npm test",
+    "test:mobile": "cd mobile && flutter test",
+    "lint:desktop": "cd desktop && npm run lint",
+    "analyze:mobile": "cd mobile && flutter analyze",
+    "test": "echo \"Run npm run test:desktop or npm run test:mobile\" && exit 0"
+  },
+  "workspaces": [
+    "desktop"
+  ]
+}

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getGovernanceData, submitProposal, castVote } from "@/actions/governance";
 import { getCurrentMember } from "@/actions/members";
-import { getLeaderboard, getMemberProgress } from "@/actions/gamification";
+import { getLeaderboard, getMemberProgress, getCooperativeLeaderboard } from "@/actions/gamification";
 import { getEventsByCooperative, getMemberEventParticipations } from "@/actions/events";
 import EventCard from "@/components/EventCard";
 import { redirect } from "next/navigation";
@@ -31,9 +31,7 @@ export default async function Page() {
   const userLevel = progress?.level || 1;
   const canSubmit = userLevel >= 20;
 
-  const topContributors = await getLeaderboard(
-    currentMember.cooperativeId as number,
-  );
+  const topContributors = await getCooperativeLeaderboard();
 
   const { events: coopEvents } = await getEventsByCooperative(currentMember.cooperativeId as number);
   const { participations } = await getMemberEventParticipations(currentMember.id);
@@ -325,10 +323,10 @@ export default async function Page() {
             </div>
           </section>
 
-          {/* Top Contributors */}
+          {/* Top Cooperatives */}
           <section className="glass-card rounded-xl p-6">
             <h3 className="font-headline-md text-headline-md mb-6">
-              Top Kontributor (Leaderboard)
+              Leaderboard Koperasi (Nasional)
             </h3>
             <div className="space-y-4">
               {topContributors.slice(0, 3).map((member, idx) => (
@@ -345,7 +343,7 @@ export default async function Page() {
                         {member.namaLengkap}
                       </p>
                       <p className="font-label-caps text-label-caps text-tertiary">
-                        Level {member.level}
+                        Rata-Rata Level {member.level}
                       </p>
                     </div>
                   </div>

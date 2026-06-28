@@ -254,3 +254,27 @@ export async function getMemberBadges(memberId: number) {
     return [];
   }
 }
+
+export async function getCooperativeLeaderboard() {
+  try {
+    const topCooperatives = await db
+      .select({
+        id: cooperatives.id,
+        namaLengkap: cooperatives.name,
+        level: sql<number>`cast(avg(${memberProgress.level}) as integer)`,
+        xp: sql<number>`cast(sum(${memberProgress.xp}) as integer)`,
+        pointsBalance: sql<number>`cast(sum(${memberProgress.pointsBalance}) as integer)`,
+      })
+      .from(cooperatives)
+      .innerJoin(members, eq(cooperatives.id, members.cooperativeId))
+      .innerJoin(memberProgress, eq(members.id, memberProgress.memberId))
+      .groupBy(cooperatives.id, cooperatives.name)
+      .orderBy(desc(sql`sum(${memberProgress.xp})`))
+      .limit(10);
+      
+    return topCooperatives;
+  } catch (error) {
+    console.error("Cooperative Leaderboard Error:", error);
+    return [];
+  }
+}

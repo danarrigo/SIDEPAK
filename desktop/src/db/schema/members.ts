@@ -7,7 +7,7 @@ export const members = pgTable("members", {
   id: serial("id").primaryKey(),
   userId: uuid("user_id").notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
   nomorAnggota: varchar("nomor_anggota", { length: 50 }).unique(),
-  statusAnggota: varchar("status_anggota", { length: 20 }).default('pending').notNull(),
+  statusAnggota: varchar("status_anggota", { length: 20 }).default('active').notNull(),
   nik: varchar("nik", { length: 20 }).notNull().unique(),
   namaLengkap: varchar("nama_lengkap", { length: 255 }).notNull(),
   jenisKelamin: varchar("jenis_kelamin", { length: 20 }),

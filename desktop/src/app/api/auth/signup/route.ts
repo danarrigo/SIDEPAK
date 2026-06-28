@@ -54,6 +54,7 @@ export async function POST(request: Request) {
       const [member] = await db.insert(members).values({
         userId: authData.user.id,
         nik,
+        statusAnggota: 'active',
         namaLengkap,
         provinsi,
         kabupaten,

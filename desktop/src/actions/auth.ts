@@ -84,10 +84,10 @@ export async function signup(prevState: unknown, formData: FormData) {
         isActive: true,
       });
 
-      // Insert into members table
       await db.insert(members).values({
         userId: authData.user.id,
         nik: data.nik,
+        statusAnggota: 'active',
         namaLengkap: data.namaLengkap,
         provinsi: data.provinsi,
         kabupaten: data.kabupaten,

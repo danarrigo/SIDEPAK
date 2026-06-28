@@ -16,7 +16,7 @@ export default async function DesktopDashboard() {
   const dbData = await getDashboardData(currentMember.id);
   const financials = await getFinancialsData(currentMember.id);
   const activeQuests = await getActiveQuests(currentMember.id);
-  const koperasiStats = await getKoperasiStats();
+  const koperasiStats = await getKoperasiStats(currentMember.cooperativeId as number);
   
   const points = dbData?.progress?.pointsBalance || 0;
   const streak = dbData?.progress?.currentStreak || 0;

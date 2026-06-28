@@ -4,6 +4,8 @@ import { getInAppItems, getMarketplaceItems } from "@/actions/shop";
 import MarketplaceClient from "./MarketplaceClient";
 import { getMemberProgress } from "@/actions/gamification";
 
+export const dynamic = "force-dynamic";
+
 export default async function MarketplacePage() {
   const currentMember = await getCurrentMember();
   if (!currentMember) return null;

@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { battles } from "@/db/schema/activities";
 import { members } from "@/db/schema/members";
 import { or, eq, and, not } from "drizzle-orm";
-import { memberProgress } from "@/db/schema/gamification";
+import { memberProgress, pointTransactions } from "@/db/schema/gamification";
 import { memberQuests } from "@/db/schema/achievements";
 
 export async function getArenaData(memberId: number = 1) {
@@ -117,14 +117,26 @@ export async function getMemberStats(memberId: number) {
   try {
     const [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
     const quests = await db.select().from(memberQuests).where(and(eq(memberQuests.memberId, memberId), eq(memberQuests.isCompleted, true)));
+    const pts = await db.select().from(pointTransactions).where(eq(pointTransactions.memberId, memberId));
     
+    const eventsCount = pts.filter(p => p.source === 'event').length;
+    const shopCount = pts.filter(p => p.source === 'shop').length;
+    const mkCount = pts.filter(p => p.source === 'marketplace').length;
+    const loanCount = pts.filter(p => p.source === 'loan').length;
+    const winCount = pts.filter(p => p.source === 'battle').length;
+
     return {
       missionsCompleted: quests.length,
       totalSavings: progress ? progress.walletBalance : 0,
       activeStreak: progress ? progress.currentStreak : 0,
+      eventsJoined: eventsCount,
+      shopPurchases: shopCount,
+      marketplaceActivity: mkCount,
+      loansCount: loanCount,
+      battlesWon: winCount,
     };
   } catch (error) {
     console.error("Stats DB Error:", error);
-    return { missionsCompleted: 0, totalSavings: 0, activeStreak: 0 };
+    return { missionsCompleted: 0, totalSavings: 0, activeStreak: 0, eventsJoined: 0, shopPurchases: 0, marketplaceActivity: 0, loansCount: 0, battlesWon: 0 };
   }
 }

@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { items, memberItems, memberProgress, marketplaceItems, marketplaceTransactions } from "@/db/schema/gamification";
 import { members } from "@/db/schema/members";
 import { eq, and, desc } from "drizzle-orm";
+import { awardPoints } from "@/actions/gamification";
 
 export async function buyShopItem(memberId: number, itemId: number) {
   try {
@@ -42,6 +43,8 @@ export async function buyShopItem(memberId: number, itemId: number) {
         quantity: 1
       });
     }
+
+    await awardPoints(memberId, 25, 'shop', 'Membeli barang di koperasi');
 
     return { success: true, updatedPoints: progress[0].pointsBalance - price };
   } catch (error) {
@@ -87,6 +90,8 @@ export async function listMarketplaceItem(data: { sellerId: number, name: string
       imageUrl: data.imageUrl || null
     }).returning();
     
+    await awardPoints(data.sellerId, 50, 'marketplace', 'Mendaftarkan barang jualan');
+
     return { success: true, item: newItem };
   } catch (error) {
     console.error("List Marketplace Item DB Error:", error);
@@ -137,6 +142,8 @@ export async function buyMarketplaceItem(buyerId: number, itemId: number) {
       quantity: 1,
       totalPrice: price
     });
+
+    await awardPoints(buyerId, 50, 'marketplace', 'Membeli barang dari member lain');
 
     return { success: true, updatedPoints: buyerProgress.pointsBalance - price };
   } catch (error) {

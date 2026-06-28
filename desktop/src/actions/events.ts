@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { events, eventParticipants } from "@/db/schema/activities";
 import { eq, and } from "drizzle-orm";
 import { memberProgress } from "@/db/schema/gamification";
+import { awardPoints } from "@/actions/gamification";
 
 export async function joinEvent(memberId: number, eventId: number) {
   try {
@@ -28,6 +29,8 @@ export async function joinEvent(memberId: number, eventId: number) {
       eventId,
       status: 'registered'
     });
+
+    await awardPoints(memberId, 150, 'event', 'Mengikuti event');
 
     return { success: true, message: "Berhasil mendaftar ke event!" };
   } catch (error) {

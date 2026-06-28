@@ -86,6 +86,26 @@ export async function awardPoints(memberId: number, amount: number, source: stri
       })
       .where(eq(memberProgress.memberId, memberId));
 
+    // Update active battle score
+    const activeBattles = await db.select().from(battles).where(
+      and(
+        or(
+          eq(battles.challengerId, memberId),
+          eq(battles.opponentId, memberId)
+        ),
+        eq(battles.status, 'ongoing')
+      )
+    );
+    
+    if (activeBattles.length > 0) {
+      const battle = activeBattles[0];
+      if (battle.challengerId === memberId) {
+        await db.update(battles).set({ challengerPoints: battle.challengerPoints + amount }).where(eq(battles.id, battle.id));
+      } else {
+        await db.update(battles).set({ opponentPoints: battle.opponentPoints + amount }).where(eq(battles.id, battle.id));
+      }
+    }
+
     return { success: true, levelUp: newLevel > progress.level, newLevel };
   } catch (error) {
     console.error("Award Points Error:", error);
@@ -279,3 +299,76 @@ export async function getCooperativeLeaderboard() {
     return [];
   }
 }
+
+export async function claimStreakReward(memberId: number) {
+  try {
+    let [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
+    if (!progress) {
+      const [newProgress] = await db.insert(memberProgress).values({ memberId }).returning();
+      progress = newProgress;
+    }
+    
+    // Check if already claimed today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const lastUpdate = progress.updatedAt ? new Date(progress.updatedAt) : new Date(0);
+    lastUpdate.setHours(0, 0, 0, 0);
+    
+    if (lastUpdate.getTime() === today.getTime() && progress.currentStreak > 0) {
+      return { success: false, error: "Streak hari ini sudah diklaim." };
+    }
+    
+    // Calculate new streak
+    const isConsecutive = (today.getTime() - lastUpdate.getTime()) === 86400000; // 1 day in ms
+    const newStreak = isConsecutive ? progress.currentStreak + 1 : 1;
+    
+    await db.update(memberProgress).set({
+      currentStreak: newStreak,
+      updatedAt: new Date()
+    }).where(eq(memberProgress.memberId, memberId));
+    
+    await awardPoints(memberId, 50, 'streak', `Reward streak harian (${newStreak} hari)`);
+    
+    return { success: true, streak: newStreak };
+  } catch (error) {
+    console.error("Streak Error:", error);
+    return { success: false, error: "Gagal klaim streak." };
+  }
+}
+
+export async function resolveWeeklyBattles() {
+  try {
+    const now = new Date();
+    
+    const expiredBattles = await db.select().from(battles).where(
+      and(
+        eq(battles.status, 'ongoing'),
+        sql`${battles.endDate} < ${now}`
+      )
+    );
+    
+    for (const battle of expiredBattles) {
+      let winnerId = null;
+      if (battle.challengerPoints > battle.opponentPoints) {
+        winnerId = battle.challengerId;
+      } else if (battle.opponentPoints > battle.challengerPoints) {
+        winnerId = battle.opponentId;
+      }
+      
+      await db.update(battles).set({
+        status: 'completed',
+        winnerId
+      }).where(eq(battles.id, battle.id));
+      
+      if (winnerId) {
+        await awardPoints(winnerId, 500, 'battle', 'Memenangkan pertandingan mingguan!');
+      }
+    }
+    
+    return { success: true, resolvedCount: expiredBattles.length };
+  } catch (error) {
+    console.error("Resolve Battles Error:", error);
+    return { success: false, error: "Gagal menyelesaikan battle mingguan." };
+  }
+}
+

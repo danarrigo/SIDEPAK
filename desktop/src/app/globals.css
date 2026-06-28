@@ -24,7 +24,7 @@
   --color-secondary-fixed-dim: #94a3b8;
   --color-on-primary-container: #0c4a6e;
   --color-error: #ef4444;
-  --color-tertiary: #f59e0b;
+  --color-tertiary: #facc15;
   --color-surface-container-low: #f8fafc;
   --color-inverse-on-surface: #f8fafc;
   --color-on-surface: #1e293b;
@@ -34,27 +34,27 @@
   --color-surface-dim: #f1f5f9;
   --color-on-primary: #ffffff;
   --color-on-tertiary-fixed: #451a03;
-  --color-primary: #0284c7;
+  --color-primary: #0f172a;
   --color-on-secondary-container: #334155;
-  --color-surface-tint: #0284c7;
+  --color-surface-tint: #0f172a;
   --color-surface-variant: #f1f5f9;
   --color-error-container: #fee2e2;
   --color-tertiary-fixed-dim: #fbbf24;
   --color-tertiary-fixed: #fde68a;
   --color-surface-container: #ffffff;
-  --color-background: #f8fafc;
+  --color-background: #f1f5f9;
   --color-on-tertiary: #ffffff;
   --color-on-secondary-fixed-variant: #334155;
   --color-surface-container-lowest: #ffffff;
   --color-primary-container: #e0f2fe;
   --color-outline: #cbd5e1;
 
-  --font-label-caps: "Plus Jakarta Sans", sans-serif;
-  --font-body-md: "Plus Jakarta Sans", sans-serif;
-  --font-points-display: "Plus Jakarta Sans", sans-serif;
-  --font-headline-md: "Plus Jakarta Sans", sans-serif;
-  --font-body-lg: "Plus Jakarta Sans", sans-serif;
-  --font-headline-lg: "Plus Jakarta Sans", sans-serif;
+  --font-label-caps: "Inter", sans-serif;
+  --font-body-md: "Inter", sans-serif;
+  --font-points-display: "Inter", sans-serif;
+  --font-headline-md: "Inter", sans-serif;
+  --font-body-lg: "Inter", sans-serif;
+  --font-headline-lg: "Inter", sans-serif;
 
   --text-label-caps: 12px;
   --text-label-caps--line-height: 16px;
@@ -86,7 +86,7 @@
 body {
   background-color: var(--color-background);
   color: var(--color-on-background);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   overflow-x: hidden;
 }
 

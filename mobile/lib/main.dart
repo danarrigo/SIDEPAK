@@ -6,6 +6,7 @@ import 'views/misi_view.dart';
 import 'views/battle_view.dart';
 import 'views/koperasi_view.dart';
 import 'views/profile_view.dart';
+import 'views/login_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,7 +33,9 @@ class MyApp extends StatelessWidget {
           fontFamily: 'Inter',
           useMaterial3: true,
         ),
-        home: const MainNavigationWrapper(),
+        home: Consumer<KoperasiProvider>(
+          builder: (context, provider, _) => provider.isLoggedIn ? const MainNavigationWrapper() : const LoginView(),
+        ),
       ),
     );
   }
@@ -78,7 +81,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       case 4:
         return ProfileView(
           onLogout: () {
-            _showSnackBar('Keluar dari sesi...');
+            Provider.of<KoperasiProvider>(context, listen: false).logout();
           },
         );
       default:

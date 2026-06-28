@@ -4,10 +4,29 @@ import { getFinancialsData } from "@/actions/financials";
 import { getActiveQuests } from "@/actions/quests";
 import { getGovernanceData, getKoperasiStats } from "@/actions/governance";
 import { getArenaData } from "@/actions/arena";
+import { createSupabaseClient } from '@/utils/supabase/client-api';
+import { db } from '@/db';
+import { members } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { headers } from 'next/headers';
 
 export async function GET() {
   try {
-    const memberId = 1; // Default to member 1 for local testing
+    let memberId = 1; // Fallback default
+
+    const headerList = await headers();
+    const authHeader = headerList.get('authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const supabase = createSupabaseClient();
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user) {
+        const [member] = await db.select().from(members).where(eq(members.userId, user.id));
+        if (member) {
+          memberId = member.id;
+        }
+      }
+    }
     
     // Fetch all data concurrently
     const [dashboardData, financialsData, questsData, governanceData, arenaData, koperasiStats] = await Promise.all([

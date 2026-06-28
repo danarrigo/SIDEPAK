@@ -2,11 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/mission.dart';
 import '../models/shop_item.dart';
 import '../models/history_item.dart';
 
 class KoperasiProvider extends ChangeNotifier {
+  // Auth State
+  String? token;
+  int? memberId;
+  String? email;
+  String? fullName;
+  bool isLoggedIn = false;
+
   // Global State
   int points = 1350;
   int streak = 14;
@@ -56,7 +64,121 @@ class KoperasiProvider extends ChangeNotifier {
   KoperasiProvider() {
     _initMissions();
     _initShopItems();
-    fetchData();
+    loadSavedSession();
+  }
+
+  Future<void> loadSavedSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      token = prefs.getString('auth_token');
+      memberId = prefs.getInt('member_id');
+      email = prefs.getString('email');
+      fullName = prefs.getString('full_name');
+      if (token != null) {
+        isLoggedIn = true;
+        fetchData();
+      } else {
+        isLoading = false;
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Load session error: $e');
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> login(String emailInput, String passwordInput) async {
+    try {
+      String apiHost = 'localhost:3000';
+      if (Uri.base.host.isNotEmpty) {
+        apiHost = '${Uri.base.host}:3000';
+      }
+      final response = await http.post(
+        Uri.parse('http://$apiHost/api/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': emailInput, 'password': passwordInput}),
+      );
+      if (response.statusCode == 200) {
+        final res = json.decode(response.body);
+        if (res['success']) {
+          token = res['token'];
+          memberId = res['memberId'];
+          email = res['email'];
+          fullName = res['fullName'];
+          isLoggedIn = true;
+
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('auth_token', token!);
+          await prefs.setInt('member_id', memberId!);
+          await prefs.setString('email', email!);
+          await prefs.setString('full_name', fullName!);
+
+          await fetchData();
+          return true;
+        }
+      }
+    } catch (e) {
+      print('Login error: $e');
+    }
+    return false;
+  }
+
+  Future<bool> signup({
+    required String email,
+    required String password,
+    required String nik,
+    required String fullName,
+    String provinsi = '',
+    String kabupaten = '',
+    String kecamatan = '',
+    String desa = '',
+    required String koperasi,
+  }) async {
+    try {
+      String apiHost = 'localhost:3000';
+      if (Uri.base.host.isNotEmpty) {
+        apiHost = '${Uri.base.host}:3000';
+      }
+      final response = await http.post(
+        Uri.parse('http://$apiHost/api/auth/signup'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'password': password,
+          'nik': nik,
+          'namaLengkap': fullName,
+          'provinsi': provinsi,
+          'kabupaten': kabupaten,
+          'kecamatan': kecamatan,
+          'desa': desa,
+          'koperasi': koperasi,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final res = json.decode(response.body);
+        return res['success'];
+      }
+    } catch (e) {
+      print('Signup error: $e');
+    }
+    return false;
+  }
+
+  Future<void> logout() async {
+    token = null;
+    memberId = null;
+    email = null;
+    fullName = null;
+    isLoggedIn = false;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+    await prefs.remove('member_id');
+    await prefs.remove('email');
+    await prefs.remove('full_name');
+
+    notifyListeners();
   }
 
   void _initMissions() {
@@ -124,7 +246,10 @@ class KoperasiProvider extends ChangeNotifier {
       if (Uri.base.host.isNotEmpty) {
         apiHost = '${Uri.base.host}:3000';
       }
-      final response = await http.get(Uri.parse('http://$apiHost/api/mobile-sync'));
+      final response = await http.get(
+        Uri.parse('http://$apiHost/api/mobile-sync'),
+        headers: {if (token != null) 'Authorization': 'Bearer $token'},
+      );
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if (jsonResponse['success']) {
@@ -204,7 +329,10 @@ class KoperasiProvider extends ChangeNotifier {
           }
           final res = await http.post(
             Uri.parse('http://$apiHost/api/mobile-sync/action'),
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+              'Content-Type': 'application/json',
+              if (token != null) 'Authorization': 'Bearer $token'
+            },
             body: json.encode({
               'action': 'toggle-quest',
               'memberId': 1,
@@ -247,7 +375,10 @@ class KoperasiProvider extends ChangeNotifier {
         }
         final res = await http.post(
           Uri.parse('http://$apiHost/api/mobile-sync/action'),
-          headers: {'Content-Type': 'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+            if (token != null) 'Authorization': 'Bearer $token'
+          },
           body: json.encode({
             'action': 'buy-item',
             'memberId': 1,
@@ -312,7 +443,10 @@ class KoperasiProvider extends ChangeNotifier {
       }
       final res = await http.post(
         Uri.parse('http://$apiHost/api/mobile-sync/action'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token'
+        },
         body: json.encode({
           'action': 'vote',
           'memberId': 1,

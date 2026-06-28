@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,10 +16,14 @@ class KoperasiProvider extends ChangeNotifier {
 
   // Global State
   int points = 0;
+  int xp = 0;
   int streak = 0;
-  int userWinRate = 50;
+  int userWinRate = 0;
+  int totalBattles = 0;
   int level = 1;
   String rankName = 'Perunggu';
+  String nextRankName = 'Perak';
+  int nextLevelPoints = 1000;
   String? voteSelection;
   bool isLoading = true;
 
@@ -28,8 +31,10 @@ class KoperasiProvider extends ChangeNotifier {
   int simpananPokok = 0;
   int simpananWajib = 0;
   int simpananSukarela = 0;
+  int totalSimpanan = 0;
   List<dynamic> listSavings = [];
   List<dynamic> listLoans = [];
+  List<dynamic> listDues = [];
   Map<String, dynamic>? activeBattle;
   String? activeBattleEndDate;
 
@@ -41,11 +46,18 @@ class KoperasiProvider extends ChangeNotifier {
 
   // Governance
   List<dynamic> activeProposals = [];
+  List<dynamic> pastProposals = [];
+  int totalMembers = 0;
+  int totalAsetDesa = 0;
+  int asetKas = 0;
+  int asetPinjaman = 0;
+  int asetInvestasi = 0;
+  bool canSubmitProposal = false;
 
   // Badges
   List<dynamic> earnedBadges = [];
 
-  // Weekly streak (computed dynamically)
+  // Weekly streak (computed dynamically from DB lastActivityDate)
   Map<String, bool> weeklyStreakDays = {
     'Sen': false, 'Sel': false, 'Rab': false, 'Kam': false,
     'Jum': false, 'Sab': false, 'Min': false,
@@ -54,16 +66,30 @@ class KoperasiProvider extends ChangeNotifier {
   // Missions
   List<Mission> missions = [];
 
-  // Shop Items
+  // Shop Items (DB-backed)
   List<ShopItem> shopItems = [];
+
+  // Inventory (DB-backed)
+  List<InventoryItem> inventory = [];
+
+  // Leaderboard (DB-backed)
+  List<dynamic> leaderboard = [];
+
+  // Point transactions (DB-backed)
+  List<dynamic> pointTransactions = [];
 
   // Match History
   List<HistoryItem> historyList = [];
 
   KoperasiProvider() {
-    _initMissions();
-    _initShopItems();
     loadSavedSession();
+  }
+
+  String _apiHost() {
+    if (Uri.base.host.isNotEmpty) {
+      return '${Uri.base.host}:3000';
+    }
+    return 'localhost:3000';
   }
 
   Future<void> loadSavedSession() async {
@@ -89,12 +115,8 @@ class KoperasiProvider extends ChangeNotifier {
 
   Future<bool> login(String emailInput, String passwordInput) async {
     try {
-      String apiHost = 'localhost:3000';
-      if (Uri.base.host.isNotEmpty) {
-        apiHost = '${Uri.base.host}:3000';
-      }
       final response = await http.post(
-        Uri.parse('http://$apiHost/api/auth/login'),
+        Uri.parse('http://${_apiHost()}/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': emailInput, 'password': passwordInput}),
       );
@@ -135,12 +157,8 @@ class KoperasiProvider extends ChangeNotifier {
     required String koperasi,
   }) async {
     try {
-      String apiHost = 'localhost:3000';
-      if (Uri.base.host.isNotEmpty) {
-        apiHost = '${Uri.base.host}:3000';
-      }
       final response = await http.post(
-        Uri.parse('http://$apiHost/api/auth/signup'),
+        Uri.parse('http://${_apiHost()}/api/auth/signup'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': email,
@@ -156,7 +174,7 @@ class KoperasiProvider extends ChangeNotifier {
       );
       if (response.statusCode == 200) {
         final res = json.decode(response.body);
-        return res['success'];
+        return res['success'] == true;
       }
     } catch (e) {
       print('Signup error: $e');
@@ -180,165 +198,90 @@ class KoperasiProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _initMissions() {
-    missions = [
-      Mission(id: 'd1', title: 'Belanja hari ini', points: 20, completed: true, isDaily: true),
-      Mission(id: 'd2', title: 'Hadir RAT', points: 50, completed: false, isDaily: true),
-      Mission(id: 'd3', title: 'Baca berita koperasi', points: 15, completed: false, isDaily: true),
-      Mission(id: 'd4', title: 'Isi Survey Anggota', points: 15, completed: false, isDaily: true),
-      Mission(id: 'w1', title: 'Hadiri rapat tahunan', points: 120, completed: false, isDaily: false),
-      Mission(id: 'w2', title: 'Ajak Anggota baru', points: 200, completed: false, isDaily: false),
-    ];
-  }
-
-  void _initShopItems() {
-    shopItems = [
-      ShopItem(
-        id: 's1',
-        title: 'Freeze Streak',
-        description: 'Bekukan streak lawan selama 1 ronde',
-        cost: 200,
-        ownedCount: 2,
-        icon: Icons.ac_unit,
-        iconColor: Colors.teal,
-        bgGlow: Colors.teal.withOpacity(0.1),
-      ),
-      ShopItem(
-        id: 's2',
-        title: 'Point Bomb',
-        description: 'Kurangi 50 poin lawan minggu ini',
-        cost: 350,
-        ownedCount: 0,
-        icon: Icons.dangerous,
-        iconColor: Colors.pink,
-        bgGlow: Colors.pink.withOpacity(0.1),
-      ),
-      ShopItem(
-        id: 's3',
-        title: 'Streak Shield',
-        description: 'Proteksi Streak dari Freeze Streak lawan',
-        cost: 150,
-        ownedCount: 0,
-        icon: Icons.shield,
-        iconColor: Colors.orange,
-        bgGlow: Colors.orange.withOpacity(0.1),
-      ),
-      ShopItem(
-        id: 's4',
-        title: 'Poin Booster',
-        description: '2x poin dari semua quest hari ini',
-        cost: 500,
-        ownedCount: 1,
-        icon: Icons.rocket_launch,
-        iconColor: Colors.purple,
-        bgGlow: Colors.amber.withOpacity(0.1),
-      ),
-    ];
-  }
-
   Future<void> fetchData() async {
     try {
       isLoading = true;
       notifyListeners();
 
-      String apiHost = 'localhost:3000';
-      if (Uri.base.host.isNotEmpty) {
-        apiHost = '${Uri.base.host}:3000';
-      }
       final response = await http.get(
-        Uri.parse('http://$apiHost/api/mobile-sync'),
+        Uri.parse('http://${_apiHost()}/api/mobile-sync'),
         headers: {if (token != null) 'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if (jsonResponse['success']) {
           final data = jsonResponse['data'];
-          
+
           final progress = data['dashboard']?['progress'];
           if (progress != null) {
-            points = progress['pointsBalance'] ?? points;
-            streak = progress['currentStreak'] ?? streak;
-            level = progress['level'] ?? level;
-            rankName = _rankFromLevel(level);
-
-            // Compute weekly streak days from lastActivityDate + currentStreak
-            final lastActivityStr = progress['lastActivityDate'];
-            if (lastActivityStr != null) {
-              try {
-                final lastActivity = DateTime.parse(lastActivityStr);
-                final today = DateTime.now();
-                final dayLabels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-                final newStreak = <String, bool>{};
-                for (final key in dayLabels) { newStreak[key] = false; }
-                // Fill backward from lastActivity for streak days
-                final streakCount = streak.clamp(0, 7);
-                for (int i = 0; i < streakCount; i++) {
-                  final day = lastActivity.subtract(Duration(days: i));
-                  // weekday: 1=Mon..7=Sun
-                  final idx = day.weekday - 1; // 0-indexed
-                  newStreak[dayLabels[idx]] = true;
-                }
-                weeklyStreakDays = newStreak;
-              } catch (_) {}
-            }
+            points = (progress['pointsBalance'] as num?)?.toInt() ?? points;
+            xp = (progress['xp'] as num?)?.toInt() ?? xp;
+            streak = (progress['currentStreak'] as num?)?.toInt() ?? streak;
+            level = (progress['level'] as num?)?.toInt() ?? level;
+            _recomputeRank();
+            _computeWeeklyStreak(progress['lastActivityDate']);
           }
+
+          pointTransactions =
+              data['dashboard']?['transactions'] as List<dynamic>? ?? [];
 
           final financials = data['financials'];
           if (financials != null) {
-            List dues = financials['dues'] ?? [];
-            List savings = financials['savings'] ?? [];
-            simpananPokok = dues.where((d) => d['type'] == 'initial').fold<int>(0, (s, i) => s + (i['amount'] as int));
-            simpananWajib = dues.where((d) => d['type'] == 'monthly').fold<int>(0, (s, i) => s + (i['amount'] as int));
-            simpananSukarela = savings.fold<int>(0, (s, i) => s + (i['type'] == 'deposit' ? (i['amount'] as int) : -(i['amount'] as int)));
-            listSavings = savings;
+            simpananPokok = (financials['simpananPokok'] as num?)?.toInt() ?? 0;
+            simpananWajib = (financials['simpananWajib'] as num?)?.toInt() ?? 0;
+            simpananSukarela = (financials['simpananSukarela'] as num?)?.toInt() ?? 0;
+            totalSimpanan = (financials['totalSavings'] as num?)?.toInt() ?? 0;
+            listSavings = financials['savings'] ?? [];
             listLoans = financials['loans'] ?? [];
+            listDues = financials['dues'] ?? [];
           }
 
           final quests = data['quests'];
           if (quests != null && quests is List) {
             missions = quests.map<Mission>((q) {
+              final p = q['progress'];
               return Mission(
                 id: q['id'].toString(),
                 title: q['title'] ?? '',
-                points: q['rewardPoints'] ?? 0,
-                completed: q['progress']?['isCompleted'] ?? false,
-                isDaily: q['category'] == 'daily',
+                description: q['description'] ?? '',
+                points: (q['rewardPoints'] as num?)?.toInt() ?? 0,
+                targetCount: (q['targetCount'] as num?)?.toInt() ?? 1,
+                progress: (p?['progress'] as num?)?.toInt() ?? 0,
+                isCompleted: p?['isCompleted'] ?? false,
+                isDaily: (q['frequency'] ?? q['category']) == 'daily',
               );
             }).toList();
           }
 
           final kopStats = data['koperasiStats'];
           if (kopStats != null) {
-            kopTransaksi = kopStats['transaksi'] ?? kopTransaksi;
-            kopAnggotaBaru = kopStats['anggotaBaru'] ?? kopAnggotaBaru;
-            kopOmzet = kopStats['omzetHarian'] ?? kopOmzet;
-            kopUmkm = kopStats['umkmAktif'] ?? kopUmkm;
+            kopTransaksi = (kopStats['transaksi'] as num?)?.toInt() ?? 0;
+            kopAnggotaBaru = (kopStats['anggotaBaru'] as num?)?.toInt() ?? 0;
+            kopOmzet = (kopStats['omzetHarian'] as num?)?.toInt() ?? 0;
+            kopUmkm = (kopStats['umkmAktif'] as num?)?.toInt() ?? 0;
           }
 
           final arena = data['arena'];
           if (arena != null) {
-            if (arena['activeBattles'] != null && (arena['activeBattles'] as List).isNotEmpty) {
+            if (arena['activeBattles'] != null &&
+                (arena['activeBattles'] as List).isNotEmpty) {
               activeBattle = arena['activeBattles'][0];
-              activeBattleEndDate = activeBattle?['endDate']?.toString().split('T')[0];
-              // Compute win rate from scores
-              final challengerId = activeBattle?['challengerId'];
-              final challengerPts = (activeBattle?['challengerPoints'] ?? 0) as int;
-              final opponentPts = (activeBattle?['opponentPoints'] ?? 0) as int;
-              final myScore = challengerId == memberId ? challengerPts : opponentPts;
-              final opScore = challengerId == memberId ? opponentPts : challengerPts;
-              final totalScore = myScore + opScore;
-              userWinRate = totalScore > 0 ? ((myScore / totalScore) * 100).round() : 50;
+              activeBattleEndDate =
+                  activeBattle?['endDate']?.toString().split('T')[0];
             }
             final past = arena['pastBattles'];
             if (past != null && past is List) {
               historyList = past.map<HistoryItem>((b) {
                 final isWinner = b['winnerId'] == memberId;
                 final opName = b['opponent']?['namaLengkap'] ?? 'Lawan';
-                final myScore = b['challengerId'] == memberId ? b['challengerPoints'] : b['opponentPoints'];
+                final myScore = b['challengerId'] == memberId
+                    ? b['challengerPoints']
+                    : b['opponentPoints'];
                 return HistoryItem(
                   opponent: opName,
                   result: isWinner ? 'Menang' : 'Kalah',
-                  points: myScore ?? 0,
+                  points: (myScore as num?)?.toInt() ?? 0,
+                  date: b['endDate']?.toString().split('T')[0],
                 );
               }).toList();
             }
@@ -347,6 +290,14 @@ class KoperasiProvider extends ChangeNotifier {
           final governance = data['governance'];
           if (governance != null) {
             activeProposals = governance['activeProposals'] ?? [];
+            pastProposals = governance['pastProposals'] ?? [];
+            totalMembers = (governance['totalMembers'] as num?)?.toInt() ?? 0;
+            totalAsetDesa =
+                (governance['totalAsetDesa'] as num?)?.toInt() ?? 0;
+            asetKas = (governance['asetKas'] as num?)?.toInt() ?? 0;
+            asetPinjaman = (governance['asetPinjaman'] as num?)?.toInt() ?? 0;
+            asetInvestasi = (governance['asetInvestasi'] as num?)?.toInt() ?? 0;
+            canSubmitProposal = level >= 20;
           }
 
           final badgesList = data['badges'];
@@ -354,9 +305,29 @@ class KoperasiProvider extends ChangeNotifier {
             earnedBadges = badgesList;
           }
 
-          final winRateData = data['winRate'];
-          if (winRateData != null) {
-            userWinRate = (winRateData['winRate'] as num?)?.round() ?? userWinRate;
+          final wr = data['winRate'];
+          if (wr != null) {
+            userWinRate = ((wr['winRate'] as num?)?.toDouble() ?? 0).round();
+            totalBattles = (wr['totalBattles'] as num?)?.toInt() ?? 0;
+          }
+
+          final storeItemsData = data['storeItems'];
+          if (storeItemsData != null && storeItemsData is List) {
+            shopItems = storeItemsData
+                .map<ShopItem>((s) => ShopItem.fromJson(s))
+                .toList();
+          }
+
+          final leaderboardData = data['leaderboard'];
+          if (leaderboardData != null && leaderboardData is List) {
+            leaderboard = leaderboardData;
+          }
+
+          final inventoryData = data['inventory'];
+          if (inventoryData != null && inventoryData is List) {
+            inventory = inventoryData
+                .map<InventoryItem>((i) => InventoryItem.fromJson(i))
+                .toList();
           }
         }
       }
@@ -368,170 +339,184 @@ class KoperasiProvider extends ChangeNotifier {
     }
   }
 
-  String _rankFromLevel(int lvl) {
-    if (lvl >= 15) return 'Legenda';
-    if (lvl >= 10) return 'Platinum';
-    if (lvl >= 6) return 'Emas';
-    if (lvl >= 3) return 'Perak';
-    return 'Perunggu';
-  }
-
-  Future<void> toggleMission(String id, Function(String) showSnackBar) async {
-    for (var m in missions) {
-      if (m.id == id) {
-        // Optimistic UI update
-        m.completed = !m.completed;
-        if (m.completed) {
-          points += m.points;
-          showSnackBar('Misi "${m.title}" selesai! +${m.points} Poin');
-        } else {
-          points -= m.points;
-          showSnackBar('Batal menyelesaikan "${m.title}". Poin -${m.points}');
-        }
-        notifyListeners();
-
-        // Server update
-        try {
-          String apiHost = 'localhost:3000';
-          if (Uri.base.host.isNotEmpty) {
-            apiHost = '${Uri.base.host}:3000';
-          }
-          final res = await http.post(
-            Uri.parse('http://$apiHost/api/mobile-sync/action'),
-            headers: {
-              'Content-Type': 'application/json',
-              if (token != null) 'Authorization': 'Bearer $token'
-            },
-            body: json.encode({
-              'action': 'toggle-quest',
-              'memberId': 1,
-              'questId': int.parse(id),
-            }),
-          );
-          if (res.statusCode != 200 || !json.decode(res.body)['success']) {
-            throw Exception('Server error');
-          }
-        } catch (e) {
-          print('Toggle quest sync error: $e');
-          // Rollback on failure
-          m.completed = !m.completed;
-          if (m.completed) {
-            points += m.points;
-          } else {
-            points -= m.points;
-          }
-          showSnackBar('Gagal menyimpan status misi ke server.');
-          notifyListeners();
-        }
-        break;
-      }
-    }
-  }
-
-  Future<void> buyShopItem(ShopItem item, Function(String) showSnackBar) async {
-    if (points >= item.cost) {
-      // Optimistic UI update
-      points -= item.cost;
-      item.ownedCount += 1;
-      showSnackBar('Berhasil membeli ${item.title}! -${item.cost} Poin');
-      notifyListeners();
-
-      // Server update
-      try {
-        String apiHost = 'localhost:3000';
-        if (Uri.base.host.isNotEmpty) {
-          apiHost = '${Uri.base.host}:3000';
-        }
-        final res = await http.post(
-          Uri.parse('http://$apiHost/api/mobile-sync/action'),
-          headers: {
-            'Content-Type': 'application/json',
-            if (token != null) 'Authorization': 'Bearer $token'
-          },
-          body: json.encode({
-            'action': 'buy-item',
-            'memberId': 1,
-            'itemId': item.id,
-            'cost': item.cost,
-          }),
-        );
-        if (res.statusCode != 200 || !json.decode(res.body)['success']) {
-          throw Exception('Server error');
-        }
-      } catch (e) {
-        print('Buy item sync error: $e');
-        // Rollback on failure
-        points += item.cost;
-        item.ownedCount -= 1;
-        showSnackBar('Gagal memproses pembelian di server.');
-        notifyListeners();
-      }
+  void _recomputeRank() {
+    nextLevelPoints = level * 1000;
+    if (level >= 40) {
+      rankName = 'Legenda';
+      nextRankName = 'Legenda';
+    } else if (level >= 30) {
+      rankName = 'Platinum';
+      nextRankName = 'Legenda';
+    } else if (level >= 20) {
+      rankName = 'Emas';
+      nextRankName = 'Platinum';
+    } else if (level >= 10) {
+      rankName = 'Perak';
+      nextRankName = 'Emas';
     } else {
-      showSnackBar('Poin tidak mencukupi untuk membeli ${item.title}');
+      rankName = 'Perunggu';
+      nextRankName = 'Perak';
     }
   }
 
-  void useItemInBattle(ShopItem item, Function(String) showSnackBar) {
-    if (item.ownedCount > 0) {
-      item.ownedCount -= 1;
-      int boost = 0;
-      String log = '';
-      if (item.id == 's1') {
-        boost = 8;
-        log = 'Menggunakan Freeze Streak! Win rate bertambah +8%';
-      } else if (item.id == 's2') {
-        boost = 12;
-        log = 'Meledakkan Point Bomb! Win rate bertambah +12%';
-      } else if (item.id == 's3') {
-        boost = 3;
-        log = 'Streak Shield diaktifkan! Win rate bertambah +3%';
-      } else if (item.id == 's4') {
-        boost = 15;
-        log = 'Poin Booster digunakan! Peluang menang naik +15%';
-      }
-      userWinRate = (userWinRate + boost).clamp(0, 100);
-      showSnackBar(log);
-      notifyListeners();
-    } else {
-      showSnackBar('Kamu tidak memiliki item ini. Beli di Toko Misi.');
-    }
-  }
-
-  Future<void> submitVote(String choice, Function(String) showSnackBar) async {
-    // Optimistic UI update
-    final oldSelection = voteSelection;
-    voteSelection = choice;
-    showSnackBar('Terima kasih! Pilihan Anda ($choice) disimpan.');
-    notifyListeners();
-
-    // Server update
+  void _computeWeeklyStreak(String? lastActivityStr) {
+    if (lastActivityStr == null) return;
     try {
-      String apiHost = 'localhost:3000';
-      if (Uri.base.host.isNotEmpty) {
-        apiHost = '${Uri.base.host}:3000';
+      final lastActivity = DateTime.parse(lastActivityStr);
+      final dayLabels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+      final newStreak = <String, bool>{
+        for (final k in dayLabels) k: false
+      };
+      final streakCount = streak.clamp(0, 7);
+      for (int i = 0; i < streakCount; i++) {
+        final day = lastActivity.subtract(Duration(days: i));
+        final idx = day.weekday - 1;
+        if (idx >= 0 && idx < 7) newStreak[dayLabels[idx]] = true;
       }
+      weeklyStreakDays = newStreak;
+    } catch (_) {}
+  }
+
+  Future<String> claimMission(String id, int? questRewardPoints) async {
+    try {
       final res = await http.post(
-        Uri.parse('http://$apiHost/api/mobile-sync/action'),
+        Uri.parse('http://${_apiHost()}/api/mobile-sync/action'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token'
+        },
+        body: json.encode({
+          'action': 'toggle-quest',
+          'memberId': memberId,
+          'questId': int.parse(id),
+        }),
+      );
+      final body = json.decode(res.body);
+      if (res.statusCode == 200 && body['success'] == true) {
+        await fetchData();
+        final reward = questRewardPoints ?? 0;
+        return 'Misi selesai! +$reward Poin';
+      }
+      return body['error'] ?? 'Gagal klaim misi (mungkin belum selesai).';
+    } catch (e) {
+      print('Claim mission error: $e');
+      return 'Gagal menyimpan ke server.';
+    }
+  }
+
+  Future<String> buyShopItem(ShopItem item) async {
+    if (points < item.cost) {
+      return 'Poin tidak mencukupi untuk membeli ${item.title}';
+    }
+    try {
+      final res = await http.post(
+        Uri.parse('http://${_apiHost()}/api/mobile-sync/action'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token'
+        },
+        body: json.encode({
+          'action': 'buy-item',
+          'memberId': memberId,
+          'itemId': item.id,
+          'cost': item.cost,
+        }),
+      );
+      final body = json.decode(res.body);
+      if (res.statusCode == 200 && body['success'] == true) {
+        points = (body['updatedPoints'] as num?)?.toInt() ?? points;
+        await fetchData();
+        return 'Berhasil membeli ${item.title}! -${item.cost} Poin';
+      }
+      return body['error'] ?? 'Gagal memproses pembelian.';
+    } catch (e) {
+      print('Buy item error: $e');
+      return 'Gagal memproses pembelian di server.';
+    }
+  }
+
+  Future<String> useInventoryItem(int itemId, {int? targetMemberId}) async {
+    try {
+      final res = await http.post(
+        Uri.parse('http://${_apiHost()}/api/mobile-sync/action'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token'
+        },
+        body: json.encode({
+          'action': 'use-item',
+          'memberId': memberId,
+          'itemId': itemId,
+          if (targetMemberId != null) 'targetMemberId': targetMemberId,
+        }),
+      );
+      final body = json.decode(res.body);
+      if (res.statusCode == 200 && body['success'] == true) {
+        await fetchData();
+        return 'Item digunakan!';
+      }
+      return body['error'] ?? 'Gagal menggunakan item.';
+    } catch (e) {
+      print('Use item error: $e');
+      return 'Gagal menghubungi server.';
+    }
+  }
+
+  Future<String> submitVote(String choice) async {
+    final proposal =
+        activeProposals.isNotEmpty ? activeProposals[0] : null;
+    final proposalId = proposal?['id'] ?? 1;
+    try {
+      final res = await http.post(
+        Uri.parse('http://${_apiHost()}/api/mobile-sync/action'),
         headers: {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token'
         },
         body: json.encode({
           'action': 'vote',
-          'memberId': 1,
-          'proposalId': 1,
+          'memberId': memberId,
+          'proposalId': proposalId,
           'voteType': choice,
         }),
       );
-      if (res.statusCode != 200 || !json.decode(res.body)['success']) {
-        throw Exception('Server error');
+      final body = json.decode(res.body);
+      if (res.statusCode == 200 && body['success'] == true) {
+        voteSelection = choice;
+        notifyListeners();
+        return 'Terima kasih! Pilihan Anda ($choice) disimpan.';
       }
+      return body['error'] ?? 'Gagal mengirim voting ke server.';
     } catch (e) {
-      print('Vote sync error: $e');
-      // Rollback on failure
-      voteSelection = oldSelection;
-      showSnackBar('Gagal mengirim voting ke server.');
-      notifyListeners();
+      print('Vote error: $e');
+      return 'Gagal mengirim voting ke server.';
+    }
+  }
+
+  Future<String> submitProposal(String title, String description) async {
+    try {
+      final res = await http.post(
+        Uri.parse('http://${_apiHost()}/api/mobile-sync/action'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token'
+        },
+        body: json.encode({
+          'action': 'submit-proposal',
+          'memberId': memberId,
+          'title': title,
+          'description': description,
+        }),
+      );
+      final body = json.decode(res.body);
+      if (res.statusCode == 200 && body['success'] == true) {
+        await fetchData();
+        return 'Proposal berhasil diajukan!';
+      }
+      return body['error'] ?? 'Gagal mengajukan proposal.';
+    } catch (e) {
+      print('Submit proposal error: $e');
+      return 'Gagal mengajukan proposal.';
     }
   }
 }

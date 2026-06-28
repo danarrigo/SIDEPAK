@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { castVote } from "@/actions/governance";
+import { castVote, submitProposal } from "@/actions/governance";
 import { claimQuestReward } from "@/actions/quests";
 import { buyShopItem } from "@/actions/shop";
+import { useItem as applyItem } from "@/actions/gamification";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
 import { members } from '@/db/schema';
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
       }
     }
 
-    let result: any = { success: false, error: "Invalid action" };
+    let result: { success: boolean; error?: string; updatedPoints?: number } & Record<string, unknown> = { success: false, error: "Invalid action" };
 
     if (action === 'vote') {
       const { proposalId, voteType } = body;
@@ -39,8 +40,14 @@ export async function POST(request: Request) {
       const { questId } = body;
       result = await claimQuestReward(memberId, questId);
     } else if (action === 'buy-item') {
-      const { itemId, cost } = body;
-      result = await buyShopItem(memberId, itemId, cost);
+      const { itemId } = body;
+      result = await buyShopItem(memberId, itemId);
+    } else if (action === 'use-item') {
+      const { itemId, targetMemberId } = body;
+      result = await applyItem(memberId, itemId, targetMemberId);
+    } else if (action === 'submit-proposal') {
+      const { title, description } = body;
+      result = await submitProposal(memberId, title, description);
     }
 
     return NextResponse.json(result, {

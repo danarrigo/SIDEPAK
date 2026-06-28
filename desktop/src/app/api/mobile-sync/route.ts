@@ -4,7 +4,7 @@ import { getFinancialsData } from "@/actions/financials";
 import { getActiveQuests } from "@/actions/quests";
 import { getGovernanceData, getKoperasiStats } from "@/actions/governance";
 import { getArenaData, getBattleHistory } from "@/actions/arena";
-import { getMemberBadges, getWinRate } from "@/actions/gamification";
+import { getMemberBadges, getWinRate, getStoreItems, getLeaderboard, getMemberInventory } from "@/actions/gamification";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
 import { members } from '@/db/schema';
@@ -32,7 +32,7 @@ export async function GET() {
     }
     
     // Fetch all data concurrently
-    const [dashboardData, financialsData, questsData, governanceData, arenaData, koperasiStats, battleHistoryData, badgesData, winRateData] = await Promise.all([
+    const [dashboardData, financialsData, questsData, governanceData, arenaData, koperasiStats, battleHistoryData, badgesData, winRateData, storeItemsData, leaderboardData, inventoryData] = await Promise.all([
       getDashboardData(memberId),
       getFinancialsData(memberId),
       getActiveQuests(memberId),
@@ -42,6 +42,9 @@ export async function GET() {
       getBattleHistory(memberId),
       getMemberBadges(memberId),
       getWinRate(memberId),
+      getStoreItems(),
+      getLeaderboard(cooperativeId),
+      getMemberInventory(memberId),
     ]);
 
     return NextResponse.json({
@@ -61,6 +64,9 @@ export async function GET() {
         koperasiStats: koperasiStats,
         badges: badgesData,
         winRate: winRateData,
+        storeItems: storeItemsData,
+        leaderboard: leaderboardData,
+        inventory: inventoryData,
       }
     }, {
       headers: {

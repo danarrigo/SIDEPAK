@@ -1,6 +1,6 @@
 "use server";
 import { db } from "@/db";
-import { proposals, votes } from "@/db/schema/governance";
+import { proposals } from "@/db/schema/governance";
 import { members } from "@/db/schema/members";
 import { eq, count } from "drizzle-orm";
 

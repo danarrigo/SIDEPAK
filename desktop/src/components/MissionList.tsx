@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 
-export default function MissionList({ initialQuests = [] }: { initialQuests?: any[] }) {
+export default function MissionList({ initialQuests = [] }: { initialQuests?: { id: string | number; title: string; rewardPoints?: number; progress?: { isCompleted?: boolean }; category?: string }[] }) {
   const [missions, setMissions] = useState(
     initialQuests.map((q) => ({
       id: q.id.toString(),

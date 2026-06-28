@@ -5,13 +5,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { db } from "@/db";
 import { users, members, cooperatives } from "@/db/schema";
-import { eq, and, ilike } from "drizzle-orm";
+import { and, ilike } from "drizzle-orm";
 
-export async function login(prevState: any, formData: FormData) {
+export async function login(prevState: unknown, formData: FormData) {
   const supabase = await createClient();
 
   const data = {
-    email: formData.get("email") as string,
+    email: (formData.get("email") as string)?.trim() ?? "",
     password: formData.get("password") as string,
   };
 
@@ -25,19 +25,19 @@ export async function login(prevState: any, formData: FormData) {
   redirect("/");
 }
 
-export async function signup(prevState: any, formData: FormData) {
+export async function signup(prevState: unknown, formData: FormData) {
   const supabase = await createClient();
 
   const data = {
-    email: formData.get("email") as string,
+    email: (formData.get("email") as string)?.trim() ?? "",
     password: formData.get("password") as string,
-    nik: formData.get("nik") as string,
-    namaLengkap: formData.get("namaLengkap") as string,
-    provinsi: formData.get("provinsi") as string,
-    kabupaten: formData.get("kabupaten") as string,
-    kecamatan: formData.get("kecamatan") as string,
-    desa: formData.get("desa") as string,
-    koperasi: formData.get("koperasi") as string,
+    nik: (formData.get("nik") as string)?.trim() ?? "",
+    namaLengkap: (formData.get("namaLengkap") as string)?.trim() ?? "",
+    provinsi: (formData.get("provinsi") as string)?.trim() ?? "",
+    kabupaten: (formData.get("kabupaten") as string)?.trim() ?? "",
+    kecamatan: (formData.get("kecamatan") as string)?.trim() ?? "",
+    desa: (formData.get("desa") as string)?.trim() ?? "",
+    koperasi: (formData.get("koperasi") as string)?.trim() ?? "",
   };
 
   // Validate that the cooperative exists and belongs to the given desa/kelurahan

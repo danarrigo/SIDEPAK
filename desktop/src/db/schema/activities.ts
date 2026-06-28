@@ -25,3 +25,12 @@ export const battles = pgTable("battles", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const eventParticipants = pgTable("event_participants", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: 'cascade' }),
+  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: 'cascade' }),
+  status: varchar("status", { length: 50 }).default('registered').notNull(), // 'registered', 'attended', 'cancelled'
+  joinedAt: timestamp("joined_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

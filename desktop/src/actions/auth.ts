@@ -15,10 +15,18 @@ export async function login(prevState: unknown, formData: FormData) {
     password: formData.get("password") as string,
   };
 
-  const { error } = await supabase.auth.signInWithPassword(data);
+  const { data: authData, error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
     return { error: error.message };
+  }
+
+  if (authData.user) {
+    const [member] = await db.select().from(members).where(eq(members.userId, authData.user.id));
+    if (!member) {
+      await supabase.auth.signOut();
+      return { error: "Akun Anda valid namun data profil (anggota) di database tidak ditemukan (biasanya karena reset database). Silakan daftar ulang dengan email baru atau hapus akun lama Anda." };
+    }
   }
 
   revalidatePath("/", "layout");

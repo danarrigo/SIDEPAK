@@ -4,6 +4,7 @@ import { claimQuestReward } from "@/actions/quests";
 import { buyShopItem } from "@/actions/shop";
 import { useItem as applyItem } from "@/actions/gamification";
 import { createTopUpInvoice, verifyInvoicePayment } from "@/actions/wallet";
+import { payDuesFromWallet, depositSavingsFromWallet } from "@/actions/financials";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
 import { members } from '@/db/schema';
@@ -56,6 +57,12 @@ export async function POST(request: Request) {
     } else if (action === 'verify-topup') {
       const { invoiceId } = body;
       result = await verifyInvoicePayment(memberId, invoiceId);
+    } else if (action === 'pay-dues-wallet') {
+      const { type } = body;
+      result = await payDuesFromWallet(memberId, type);
+    } else if (action === 'deposit-savings-wallet') {
+      const { amount, description } = body;
+      result = await depositSavingsFromWallet(memberId, amount, description);
     }
 
     return NextResponse.json(result, {

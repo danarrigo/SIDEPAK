@@ -40,6 +40,12 @@ class KoperasiProvider extends ChangeNotifier {
   Map<String, dynamic>? activeBattle;
   String? activeBattleEndDate;
 
+  // Membership status states
+  bool isMemberActive = true;
+  bool isPokokPaid = true;
+  bool isWajibPaidThisMonth = true;
+  int pendingWajibAmount = 0;
+
   // Koperasi Stats
   int kopTransaksi = 0;
   int kopAnggotaBaru = 0;
@@ -245,6 +251,11 @@ class KoperasiProvider extends ChangeNotifier {
             listLoans = financials['loans'] ?? [];
             listDues = financials['dues'] ?? [];
             listWalletTxs = financials['walletTransactions'] ?? [];
+
+            isMemberActive = financials['isMemberActive'] ?? true;
+            isPokokPaid = financials['isPokokPaid'] ?? true;
+            isWajibPaidThisMonth = financials['isWajibPaidThisMonth'] ?? true;
+            pendingWajibAmount = (financials['pendingWajibAmount'] as num?)?.toInt() ?? 0;
           }
 
           final quests = data['quests'];
@@ -565,6 +576,53 @@ class KoperasiProvider extends ChangeNotifier {
     } catch (e) {
       print('Verify topup error: $e');
       return {'success': false, 'error': 'Gagal menghubungi server.'};
+    }
+  }
+
+  Future<String> payDuesFromWallet(String type) async {
+    try {
+      final res = await http.post(
+        Uri.parse(_apiUrl('/api/mobile-sync/action')),
+        headers: _headers(isJson: true),
+        body: json.encode({
+          'action': 'pay-dues-wallet',
+          'memberId': memberId,
+          'type': type,
+        }),
+      );
+      final body = json.decode(res.body);
+      if (res.statusCode == 200 && body['success'] == true) {
+        await fetchData();
+        return 'success';
+      }
+      return body['error'] ?? 'Gagal membayar iuran.';
+    } catch (e) {
+      print('Pay dues wallet error: $e');
+      return 'Gagal menghubungi server.';
+    }
+  }
+
+  Future<String> depositSavingsFromWallet(int amount, String description) async {
+    try {
+      final res = await http.post(
+        Uri.parse(_apiUrl('/api/mobile-sync/action')),
+        headers: _headers(isJson: true),
+        body: json.encode({
+          'action': 'deposit-savings-wallet',
+          'memberId': memberId,
+          'amount': amount,
+          'description': description,
+        }),
+      );
+      final body = json.decode(res.body);
+      if (res.statusCode == 200 && body['success'] == true) {
+        await fetchData();
+        return 'success';
+      }
+      return body['error'] ?? 'Gagal menabung.';
+    } catch (e) {
+      print('Deposit savings wallet error: $e');
+      return 'Gagal menghubungi server.';
     }
   }
 }

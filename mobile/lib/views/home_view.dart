@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/koperasi_provider.dart';
 import '../models/mission.dart';
+import 'simpanan_view.dart';
 
 class HomeView extends StatelessWidget {
   final Function(int) onNavigate;
@@ -54,9 +55,14 @@ class HomeView extends StatelessWidget {
                           style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(height: 2),
-                        const Text(
-                          'Anggota Aktif',
-                          style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                        Text(
+                          provider.isMemberActive ? 'Anggota Aktif' : 'Anggota Nonaktif',
+                          style: TextStyle(
+                            color: provider.isMemberActive ? Colors.white : const Color(0xFFEF4444),
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         const Text(
@@ -107,6 +113,57 @@ class HomeView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Column(
               children: [
+                if (!provider.isMemberActive) ...[
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEE2E2),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFFCA5A5)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626), size: 28),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Keanggotaan Nonaktif',
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF991B1B)),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                !provider.isPokokPaid
+                                    ? 'Harap bayar Simpanan Pokok (Rp 100.000) agar status aktif.'
+                                    : 'Harap bayar Simpanan Wajib Bulan Ini (Rp 50.000) agar status aktif.',
+                                style: const TextStyle(fontSize: 10, color: Color(0xFF7F1D1D)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const SimpananView()),
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xFFDC2626),
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('BAYAR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 Transform.translate(
                   offset: const Offset(0, -32),
                   child: Card(
@@ -148,7 +205,12 @@ class HomeView extends StatelessWidget {
                               ),
                               const SizedBox(height: 20),
                               OutlinedButton(
-                                onPressed: () => onNavigate(4),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const SimpananView()),
+                                  );
+                                },
                                 style: OutlinedButton.styleFrom(
                                   side: const BorderSide(color: Colors.black26),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

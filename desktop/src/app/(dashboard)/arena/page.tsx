@@ -1,5 +1,8 @@
 import { getArenaData, getBattleHistory, getMemberStats } from "@/actions/arena";
 import { getCurrentMember } from "@/actions/members";
+import { getMemberInventory } from "@/actions/gamification";
+import UseItemClient from "@/components/UseItemClient";
+import AutoMatchmake from "@/components/AutoMatchmake";
 import { redirect } from "next/navigation";
 
 export default async function Page() {
@@ -12,7 +15,7 @@ export default async function Page() {
   
   const myStats = await getMemberStats(currentMember.id);
   const opStats = battle?.opponent?.id ? await getMemberStats(battle.opponent.id) : { missionsCompleted: 0, totalSavings: 0, activeStreak: 0 };
-
+  const inventory = await getMemberInventory(currentMember.id);
   
   const p1 = battle ? (battle.challengerId === currentMember.id ? battle.challengerPoints : battle.opponentPoints) : 0;
   const p2 = battle ? (battle.challengerId === currentMember.id ? battle.opponentPoints : battle.challengerPoints) : 0;
@@ -46,9 +49,7 @@ export default async function Page() {
             </div>
             <h3 className="font-headline-md text-headline-md text-on-surface mb-1">{myName}</h3>
             <span className="font-label-caps text-label-caps text-on-surface-variant mb-6">Anda</span>
-            <button className="px-4 py-2 bg-primary text-on-primary font-label-lg rounded-full mb-6 hover:bg-primary/90 transition shadow-sm">
-              Gunakan Item
-            </button>
+            <UseItemClient currentMemberId={currentMember.id} targetMemberId={battle?.opponent?.id} inventory={inventory} />
             <div className="w-full space-y-6">
               <div>
                 <div className="flex justify-between mb-2">
@@ -67,6 +68,7 @@ export default async function Page() {
               <span className="text-4xl font-black vs-gradient italic">VS</span>
               <div className="absolute -inset-4 border border-tertiary/20 rounded-full animate-pulse"></div>
             </div>
+            {!battle && <AutoMatchmake memberId={currentMember.id} />}
           </div>
 
           <div className="glass-card rounded-xl p-8 flex flex-col items-center border-r-4 border-r-tertiary group transition-all duration-300 hover:translate-y-[-4px]">

@@ -7,6 +7,7 @@ import { getActiveQuests } from "@/actions/quests";
 import { getKoperasiStats } from "@/actions/governance";
 import { redirect } from "next/navigation";
 import MissionList from "@/components/MissionList";
+import Leaderboard from "@/components/Leaderboard";
 
 export default async function DesktopDashboard() {
   const currentMember = await getCurrentMember();
@@ -121,7 +122,7 @@ export default async function DesktopDashboard() {
         </div>
 
         {/* Row 3: Missions, Stats Preview, and Announcements */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Missions Preview */}
           <div className="glass-card border border-outline-variant rounded-2xl p-6 flex flex-col justify-between">
@@ -130,7 +131,7 @@ export default async function DesktopDashboard() {
                 <h3 className="font-bold text-on-surface">Misi Hari Ini</h3>
                 <span className="text-[10px] text-tertiary font-bold">Poin Tersedia</span>
               </div>
-              <MissionList initialQuests={activeQuests} />
+              <MissionList initialQuests={activeQuests} memberId={currentMember.id} />
             </div>
             <div className="pt-4 border-t border-outline-variant/30 mt-6">
               <Link href='/quests' className="text-primary text-xs font-bold flex items-center gap-1 hover:underline">
@@ -138,6 +139,11 @@ export default async function DesktopDashboard() {
                 <span className="material-symbols-outlined text-xs">arrow_forward</span>
               </Link>
             </div>
+          </div>
+
+          {/* Leaderboard */}
+          <div className="col-span-1">
+            <Leaderboard />
           </div>
 
           {/* Cooperative Today Stats Summary */}

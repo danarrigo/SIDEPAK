@@ -1,7 +1,7 @@
-import { getFinancialsData } from "@/actions/financials";
+import { getFinancialsData, getActiveLoan } from "@/actions/financials";
 import { getCurrentMember } from "@/actions/members";
 import { redirect } from "next/navigation";
-import { getWinRate } from "@/actions/gamification";
+import { getWinRate, getMemberInventory, getRecentPointTransactions, getMemberProgress } from "@/actions/gamification";
 import { logout } from "@/actions/auth";
 
 export default async function Page() {
@@ -14,10 +14,55 @@ export default async function Page() {
   
   const { winRate, totalBattles } = await getWinRate(currentMember.id);
 
+  const activeLoan = await getActiveLoan(currentMember.id);
+  const inventory = await getMemberInventory(currentMember.id);
+  const activityLog = await getRecentPointTransactions(currentMember.id);
+  const progress = await getMemberProgress(currentMember.id);
+
+  const level = progress?.level || 1;
+  const xp = progress?.xp || 0;
+  
+  let rankName = "BRONZE";
+  let rankColor = "from-amber-700 to-amber-900";
+  let badgeIcon = "eco";
+  
+  if (level >= 10 && level < 20) { rankName = "SILVER"; rankColor = "from-slate-400 to-slate-600"; badgeIcon = "military_tech"; }
+  else if (level >= 20 && level < 30) { rankName = "GOLD"; rankColor = "from-yellow-400 to-amber-600"; badgeIcon = "crown"; }
+  else if (level >= 30 && level < 40) { rankName = "PLATINUM"; rankColor = "from-cyan-400 to-blue-600"; badgeIcon = "diamond"; }
+  else if (level >= 40) { rankName = "LEGEND"; rankColor = "from-purple-500 to-fuchsia-700"; badgeIcon = "auto_awesome"; }
+
   return (
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">
       
 <div className="flex-1 overflow-y-auto px-6 py-10 space-y-12 pb-32">
+
+{/* Digital Member Card */}
+<section className="relative w-full max-w-xl mx-auto mb-10 group perspective">
+  <div className={`relative w-full h-[220px] rounded-2xl bg-gradient-to-br ${rankColor} p-8 text-white shadow-2xl overflow-hidden transition-transform duration-700 transform-gpu hover:scale-[1.02]`}>
+    <div className="absolute top-0 right-0 p-8 opacity-20">
+      <span className="material-symbols-outlined text-[150px]" style={{ fontVariationSettings: "'FILL' 1" }}>{badgeIcon}</span>
+    </div>
+    <div className="relative z-10 flex flex-col h-full justify-between">
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="font-headline-lg text-3xl font-black tracking-wide drop-shadow-md">{currentMember.namaLengkap}</h2>
+          <p className="font-label-caps text-white/80 mt-1 uppercase tracking-widest">{currentMember.koperasi as string}</p>
+        </div>
+        <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-white/30 shadow-lg">
+          <span className="material-symbols-outlined text-3xl drop-shadow">{badgeIcon}</span>
+        </div>
+      </div>
+      <div>
+        <p className="font-label-caps text-[10px] text-white/80 mb-1 tracking-widest">STATUS ANGGOTA</p>
+        <div className="flex items-end gap-3">
+          <span className="font-headline-md text-2xl font-bold drop-shadow-md">{rankName}</span>
+          <span className="font-points-display text-lg opacity-90 mb-0.5">{xp.toLocaleString()} XP</span>
+        </div>
+      </div>
+    </div>
+    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+  </div>
+</section>
 
 <section>
 <div className="flex items-center justify-between mb-6">
@@ -58,6 +103,105 @@ export default async function Page() {
 </div>
 </div>
 </section>
+
+{/* 3-Column Layout below Dampak Personal */}
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+  {/* Column 1: Loan & Activity */}
+  <div className="lg:col-span-2 space-y-8">
+    {/* Active Loan Tracker */}
+    {activeLoan && (
+      <section className="bento-card rounded-xl p-6 relative overflow-hidden">
+        <div className="flex justify-between items-start mb-6 relative z-10">
+          <div>
+            <h3 className="font-headline-md text-headline-md">Status Pinjaman</h3>
+            <p className="font-body-sm text-on-surface-variant">Cicilan aktif bulan ini</p>
+          </div>
+          <span className="px-3 py-1 bg-primary/20 text-primary rounded-full font-label-caps text-[10px] font-bold uppercase">Aktif</span>
+        </div>
+        <div className="relative z-10 space-y-4">
+          <div className="flex justify-between items-end">
+            <div>
+              <p className="font-label-caps text-[10px] text-on-surface-variant mb-1">TOTAL PINJAMAN</p>
+              <p className="font-headline-lg text-2xl text-on-surface">Rp {activeLoan.amount.toLocaleString('id-ID')}</p>
+            </div>
+            <div className="text-right">
+              <p className="font-label-caps text-[10px] text-on-surface-variant mb-1">BUNGA</p>
+              <p className="font-headline-md text-error font-bold">{activeLoan.interestRate}%</p>
+            </div>
+          </div>
+          <div className="pt-4 border-t border-outline-variant/30 flex justify-between items-center">
+            <p className="font-body-sm text-on-surface-variant">Jatuh tempo: <strong>{activeLoan.dueDate ? new Date(activeLoan.dueDate).toLocaleDateString('id-ID') : 'Belum ditentukan'}</strong></p>
+            <button className="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-caps text-[10px] font-bold hover:bg-primary/90 transition-colors tracking-widest">BAYAR</button>
+          </div>
+        </div>
+        <div className="absolute top-0 right-0 opacity-5 pointer-events-none">
+          <span className="material-symbols-outlined text-[150px]">credit_card</span>
+        </div>
+      </section>
+    )}
+
+    {/* Recent Activity Log */}
+    <section className="bento-card rounded-xl p-6">
+      <h3 className="font-headline-md text-headline-md mb-6">Riwayat Aktivitas Poin</h3>
+      {activityLog.length === 0 ? (
+        <p className="text-on-surface-variant text-sm">Belum ada aktivitas.</p>
+      ) : (
+        <div className="space-y-4">
+          {activityLog.map(log => (
+            <div key={log.id} className="flex items-center justify-between p-3 rounded-lg bg-surface-container-low border border-outline-variant/20">
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${log.amount > 0 ? 'bg-primary/20 text-primary' : 'bg-error/20 text-error'}`}>
+                  <span className="material-symbols-outlined text-sm">{log.amount > 0 ? 'arrow_upward' : 'arrow_downward'}</span>
+                </div>
+                <div>
+                  <p className="font-body-sm font-bold text-on-surface capitalize">{log.description || log.source}</p>
+                  <p className="text-[10px] text-on-surface-variant">{new Date(log.createdAt).toLocaleDateString('id-ID')} {new Date(log.createdAt).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}</p>
+                </div>
+              </div>
+              <span className={`font-points-display font-bold ${log.amount > 0 ? 'text-tertiary' : 'text-error'}`}>
+                {log.amount > 0 ? '+' : ''}{log.amount} XP
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  </div>
+
+  {/* Column 2: Trophy Room */}
+  <div className="lg:col-span-1">
+    <section className="bento-card rounded-xl p-6 h-full">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="font-headline-md text-headline-md">Inventory</h3>
+        <span className="material-symbols-outlined text-tertiary">inventory_2</span>
+      </div>
+      {inventory.length === 0 ? (
+        <div className="text-center py-10 bg-surface-container-low rounded-xl border border-outline-variant/30">
+          <span className="material-symbols-outlined text-4xl text-outline mb-2">category</span>
+          <p className="text-sm text-on-surface-variant">Inventory kosong.</p>
+          <p className="text-[10px] text-primary mt-1">Beli item di Toko Koperasi!</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {inventory.map(inv => (
+            <div key={inv.id} className="p-3 bg-surface-container-highest rounded-xl border border-outline-variant flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-tertiary/10 rounded-lg flex items-center justify-center text-tertiary">
+                  <span className="material-symbols-outlined text-xl">{inv.item.effectType === 'freeze_streak' ? 'ac_unit' : inv.item.effectType === 'prank' ? 'local_fire_department' : 'stars'}</span>
+                </div>
+                <div>
+                  <p className="font-body-sm font-bold text-on-surface">{inv.item.name}</p>
+                  <p className="text-[10px] text-on-surface-variant">Tersedia: {inv.quantity}</p>
+                </div>
+              </div>
+              <button className="bg-surface-container-high hover:bg-tertiary hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold transition-colors">PAKAI</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  </div>
+</div>
 <div className="max-w-4xl mx-auto w-full space-y-6 mt-8">
 <h3 className="font-headline-md text-headline-md text-on-surface">Pengaturan Akun</h3>
 <div className="bg-surface-container rounded-3xl overflow-hidden border border-outline-variant divide-y divide-outline-variant/50">

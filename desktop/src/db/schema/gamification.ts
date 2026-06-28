@@ -10,6 +10,7 @@ export const memberProgress = pgTable("member_progress", {
   currentStreak: integer("current_streak").default(0).notNull(),
   longestStreak: integer("longest_streak").default(0).notNull(),
   lastActivityDate: timestamp("last_activity_date"),
+  activeEffect: varchar("active_effect", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

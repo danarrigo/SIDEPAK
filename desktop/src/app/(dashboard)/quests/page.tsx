@@ -3,6 +3,10 @@ import { getActiveQuests } from "@/actions/quests";
 import { getCurrentMember } from "@/actions/members";
 import { getStoreItems } from "@/actions/gamification";
 import { redirect } from "next/navigation";
+import { db } from "@/db";
+import { items } from "@/db/schema/gamification";
+import { quests } from "@/db/schema/achievements";
+import MissionList from "@/components/MissionList";
 
 export default async function Page() {
   const currentMember = await getCurrentMember();
@@ -10,13 +14,48 @@ export default async function Page() {
 
   const dbData = await getDashboardData(currentMember.id);
   const activeQuests = await getActiveQuests(currentMember.id);
-  const storeItems = await getStoreItems();
+  let storeItems = await getStoreItems();
+  
+  if (storeItems.length === 0) {
+    try {
+      await db.insert(items).values([
+        { name: "Sakit Jantung", description: "Beri efek jantungan (jumpscare) pada teman koperasimu!", priceInPoints: 50, effectType: "prank", effectValue: "sakit_jantung" },
+        { name: "Freeze Streak", description: "Pertahankan streakmu meskipun kamu lupa login sehari.", priceInPoints: 100, effectType: "freeze_streak", effectValue: "1" },
+        { name: "Poin Bomb", description: "Raih 2x XP dari semua aktivitas besok.", priceInPoints: 300, effectType: "point_bomb", effectValue: "2x" }
+      ]);
+      await db.insert(quests).values([
+        { title: "Nabung Yuk!", description: "Lakukan 1x transaksi menabung hari ini.", rewardPoints: 200, frequency: "daily", targetCount: 1 },
+        { title: "Bayar Iuran", description: "Selesaikan iuran wajib bulan ini.", rewardPoints: 500, frequency: "monthly", targetCount: 1 },
+        { title: "Duel Master", description: "Menangkan 3 battle di Arena Koperasi.", rewardPoints: 1000, frequency: "weekly", targetCount: 3 }
+      ]);
+      storeItems = await getStoreItems();
+    } catch(e) {
+      console.log(e);
+    }
+  }
 
   const xp = dbData?.progress?.xp || 0;
   const points = dbData?.progress?.pointsBalance || 0;
   const level = dbData?.progress?.level || 1;
   const nextLevelXp = level * 1000;
   const xpPercent = Math.min(100, (xp / nextLevelXp) * 100);
+
+  let currentRankIndex = 0;
+  if (level >= 10 && level < 20) currentRankIndex = 1;
+  else if (level >= 20 && level < 30) currentRankIndex = 2;
+  else if (level >= 30 && level < 40) currentRankIndex = 3;
+  else if (level >= 40) currentRankIndex = 4;
+
+  const ranks = [
+    { name: "BRONZE", icon: "eco", color: "text-amber-700", bg: "bg-amber-700/20", border: "border-amber-700", glow: "shadow-[0_0_15px_rgba(180,83,9,0.3)]" },
+    { name: "SILVER", icon: "military_tech", color: "text-slate-400", bg: "bg-slate-400/20", border: "border-slate-400", glow: "shadow-[0_0_15px_rgba(148,163,184,0.3)]" },
+    { name: "GOLD", icon: "crown", color: "text-yellow-400", bg: "bg-yellow-400/20", border: "border-yellow-400", glow: "shadow-[0_0_15px_rgba(250,204,21,0.4)]" },
+    { name: "PLATINUM", icon: "diamond", color: "text-cyan-400", bg: "bg-cyan-400/20", border: "border-cyan-400", glow: "shadow-[0_0_15px_rgba(34,211,238,0.4)]" },
+    { name: "LEGEND", icon: "auto_awesome", color: "text-purple-500", bg: "bg-purple-500/20", border: "border-purple-500", glow: "shadow-[0_0_15px_rgba(168,85,247,0.5)]" }
+  ];
+  
+  // Base width per rank is 25% (4 gaps between 5 ranks). Add a bit of progress based on level.
+  const progressPercent = Math.min(100, (currentRankIndex * 25) + ((level % 10) / 10) * 25);
 
   const now = new Date();
   const midnight = new Date();
@@ -77,46 +116,7 @@ export default async function Page() {
             </span>
           </div>
           <div className="space-y-4">
-            {activeQuests.slice(0, 3).map((quest) => {
-              const isCompleted = quest.progress?.isCompleted === true;
-              return (
-                <div
-                  key={quest.id}
-                  className={`flex items-center gap-4 p-4 rounded-lg ${isCompleted ? "bg-surface-container-highest/30 opacity-70" : "bg-surface-container-low hover:border-primary/40 cursor-pointer group"} border border-outline-variant/10 transition-all`}
-                >
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center ${isCompleted ? "bg-primary" : "border-2 border-outline group-hover:border-primary"}`}
-                  >
-                    <span
-                      className={`material-symbols-outlined ${isCompleted ? "text-on-primary" : "text-outline group-hover:text-primary"}`}
-                    >
-                      {isCompleted ? "check" : "radio_button_unchecked"}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <p
-                      className={`font-body-lg text-body-lg ${isCompleted ? "line-through" : ""}`}
-                    >
-                      {quest.title}
-                    </p>
-                    <p className="font-body-md text-body-md text-on-surface-variant">
-                      {quest.description}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    {isCompleted ? (
-                      <p className="font-points-display text-points-display text-outline">
-                        CLAIMED
-                      </p>
-                    ) : (
-                      <p className="font-points-display text-points-display text-tertiary">
-                        +{quest.rewardPoints} XP
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            <MissionList initialQuests={activeQuests} memberId={currentMember.id} />
           </div>
           <button className="w-full mt-6 py-3 rounded-lg border border-primary text-primary font-label-caps text-label-caps hover:bg-primary/10 transition-colors uppercase tracking-widest">
             Lihat Misi Mingguan
@@ -137,51 +137,32 @@ export default async function Page() {
             </h3>
             <div className="flex items-center justify-between gap-4 relative">
               <div className="absolute top-1/2 left-0 w-full h-1 bg-surface-container-highest -translate-y-1/2 z-0"></div>
-              <div className="absolute top-1/2 left-0 w-[60%] h-1 bg-gradient-to-r from-primary to-tertiary -translate-y-1/2 z-0"></div>
+              <div className="absolute top-1/2 left-0 h-1 bg-gradient-to-r from-primary to-tertiary -translate-y-1/2 z-0 transition-all duration-1000" style={{ width: `${progressPercent}%` }}></div>
 
-              <div className="flex flex-col items-center gap-3 relative z-10 opacity-60">
-                <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center border-2 border-outline">
-                  <span className="material-symbols-outlined">eco</span>
-                </div>
-                <span className="font-label-caps text-[10px]">BRONZE</span>
-              </div>
-              <div className="flex flex-col items-center gap-3 relative z-10">
-                <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center border-2 border-primary shadow-[0_0_15px_rgba(193,198,219,0.3)]">
-                  <span className="material-symbols-outlined text-primary">
-                    military_tech
-                  </span>
-                </div>
-                <span className="font-label-caps text-[10px] text-primary">
-                  SILVER
-                </span>
-              </div>
-              <div className="flex flex-col items-center gap-4 relative z-10 -mt-4">
-                <div className="w-20 h-20 rounded-full bg-tertiary/20 flex items-center justify-center border-4 border-tertiary gold-glow transform scale-110">
-                  <span
-                    className="material-symbols-outlined text-tertiary text-4xl"
-                    style={{ fontVariationSettings: "\'FILL\' 1" }}
-                  >
-                    crown
-                  </span>
-                </div>
-                <span className="font-label-caps text-label-caps text-tertiary">
-                  GOLD
-                </span>
-              </div>
-              <div className="flex flex-col items-center gap-3 relative z-10 opacity-40">
-                <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center border-2 border-outline-variant">
-                  <span className="material-symbols-outlined">diamond</span>
-                </div>
-                <span className="font-label-caps text-[10px]">PLATINUM</span>
-              </div>
-              <div className="flex flex-col items-center gap-3 relative z-10 opacity-20 grayscale">
-                <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center border-2 border-outline-variant">
-                  <span className="material-symbols-outlined">
-                    auto_awesome
-                  </span>
-                </div>
-                <span className="font-label-caps text-[10px]">LEGEND</span>
-              </div>
+              {ranks.map((r, idx) => {
+                const isActive = idx === currentRankIndex;
+                const isPast = idx < currentRankIndex;
+                const isFuture = idx > currentRankIndex;
+                
+                let containerClass = "w-12 h-12 bg-surface-container-highest border-outline";
+                if (isActive) containerClass = `w-20 h-20 border-4 ${r.border} ${r.bg} ${r.glow} transform scale-110`;
+                else if (isPast) containerClass = `w-14 h-14 ${r.bg} ${r.border} ${r.glow}`;
+
+                let textClass = "text-on-surface-variant";
+                if (isActive) textClass = `${r.color} text-label-caps font-black`;
+                else if (isPast) textClass = `${r.color} font-bold`;
+                
+                return (
+                  <div key={r.name} className={`flex flex-col items-center gap-3 relative z-10 transition-all duration-500 ${isFuture ? 'opacity-40 grayscale' : ''} ${isActive ? '-mt-4' : ''}`}>
+                    <div className={`rounded-full flex items-center justify-center border-2 transition-all duration-500 ${containerClass}`}>
+                      <span className={`material-symbols-outlined transition-all duration-500 ${isActive || isPast ? r.color : ''} ${isActive ? 'text-4xl' : ''}`} style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                        {r.icon}
+                      </span>
+                    </div>
+                    <span className={`font-label-caps text-[10px] tracking-widest ${textClass}`}>{r.name}</span>
+                  </div>
+                )
+              })}
             </div>
           </div>
         </section>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from 'react-dom';
 import { useRouter } from "next/navigation";
-import { useItem } from "@/actions/gamification";
+import { useItem as applyItem } from "@/actions/gamification";
 
 interface Props {
   currentMemberId: number;
@@ -34,7 +34,7 @@ export default function UseItemClient({ currentMemberId, targetMemberId, invento
     setLoading(true);
     setError(null);
     try {
-      const res = await useItem(currentMemberId, itemId, targetMemberId);
+      const res = await applyItem(currentMemberId, itemId, targetMemberId);
       if (res.success) {
         setSuccess(`Item berhasil digunakan! Efek: ${res.effect}`);
         setTimeout(() => {

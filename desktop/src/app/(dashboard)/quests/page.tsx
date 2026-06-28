@@ -168,7 +168,10 @@ export default async function Page() {
                     </div>
                     <span className={`font-label-caps text-[10px] tracking-widest ${textClass}`}>{r.name}</span>
                     
-                    <div className="absolute top-full mt-2 w-48 p-3 bg-surface-container-highest border border-outline-variant/30 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 left-1/2 -translate-x-1/2 text-left">
+                    {/* Tooltip */}
+                    <div className={`absolute top-full mt-2 w-48 p-3 bg-surface-container-highest border border-outline-variant/30 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-left ${
+                      idx === 0 ? 'left-0' : idx === ranks.length - 1 ? 'right-0' : 'left-1/2 -translate-x-1/2'
+                    }`}>
                       <p className="text-xs font-bold mb-1 text-on-surface">Benefit {r.name}:</p>
                       <ul className="text-[10px] space-y-1 text-on-surface-variant list-disc pl-3">
                         <li>Bunga pinjaman -{idx}%</li>

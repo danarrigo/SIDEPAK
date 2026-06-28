@@ -7,6 +7,8 @@ import { getCurrentMember } from '@/actions/members';
 // Mock the actions
 jest.mock('@/actions/gamification', () => ({
   getLeaderboard: jest.fn(),
+  getLeaderboardProvincial: jest.fn(),
+  getLeaderboardNational: jest.fn(),
 }));
 
 jest.mock('@/actions/members', () => ({
@@ -37,6 +39,10 @@ describe('Leaderboard Component', () => {
       { id: 2, namaLengkap: 'Alice Smith', level: 5, xp: 5000 },
       { id: 1, namaLengkap: 'Bob Brown', level: 4, xp: 4000 },
     ]);
+    
+    const { getLeaderboardProvincial, getLeaderboardNational } = require('@/actions/gamification');
+    (getLeaderboardProvincial as jest.Mock).mockResolvedValueOnce([]);
+    (getLeaderboardNational as jest.Mock).mockResolvedValueOnce([]);
 
     const ui = await Leaderboard();
     render(ui as React.ReactElement);

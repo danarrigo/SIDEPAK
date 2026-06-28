@@ -130,11 +130,13 @@ export default async function Page() {
       </aside>
 
       <div className="col-span-12 lg:col-span-8 space-y-6 animate-slide-up delay-200">
-        <section className="glass-card rounded-xl p-6 mb-8 overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <span className="material-symbols-outlined text-[120px]">
-              account_balance
-            </span>
+        <section className="glass-card rounded-xl p-6 mb-8 relative">
+          <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+            <div className="absolute top-0 right-0 p-8 opacity-10">
+              <span className="material-symbols-outlined text-[120px]">
+                account_balance
+              </span>
+            </div>
           </div>
           <div className="relative z-10">
             <h3 className="font-headline-md text-headline-md mb-8">

@@ -117,21 +117,21 @@ export default async function DesktopDashboard() {
           </div>
 
           {/* Saldo Poin Progress Card */}
-          <div className="glass-card border border-outline-variant rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-tertiary/5 to-transparent pointer-events-none"></div>
+          <div className="glass-card border border-outline-variant rounded-2xl p-6 flex flex-col justify-between relative group cursor-pointer transition-all hover:border-tertiary/50">
+            <div className="absolute inset-0 bg-gradient-to-br from-tertiary/5 to-transparent pointer-events-none rounded-2xl"></div>
+            
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 mt-8 w-48 p-3 bg-surface-container-highest border border-outline-variant/30 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-left pointer-events-none">
+              <p className="text-xs font-bold mb-1 text-on-surface">Benefit {rankName}:</p>
+              <ul className="text-[10px] space-y-1 text-on-surface-variant list-disc pl-3">
+                <li>Bunga pinjaman khusus</li>
+                <li>Prioritas layanan</li>
+                <li>Cashback belanja {level >= 30 ? '15%' : level >= 20 ? '10%' : level >= 10 ? '5%' : '0%'}</li>
+              </ul>
+            </div>
+
             <div className="flex justify-between items-center mb-4 relative z-10">
               <h3 className="text-xs uppercase font-extrabold tracking-widest text-tertiary">SALDO POIN</h3>
-              <div className="relative group cursor-pointer">
-                <span className="bg-tertiary/10 text-tertiary text-[10px] font-extrabold px-3 py-1 rounded-full border border-tertiary/20">{rankName}</span>
-                <div className="absolute right-0 top-full mt-2 w-48 p-3 bg-surface-container-highest border border-outline-variant/30 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-left">
-                  <p className="text-xs font-bold mb-1 text-on-surface">Benefit {rankName}:</p>
-                  <ul className="text-[10px] space-y-1 text-on-surface-variant list-disc pl-3">
-                    <li>Bunga pinjaman khusus</li>
-                    <li>Prioritas layanan</li>
-                    <li>Cashback belanja {level >= 30 ? '15%' : level >= 20 ? '10%' : level >= 10 ? '5%' : '0%'}</li>
-                  </ul>
-                </div>
-              </div>
+              <span className="bg-tertiary/10 text-tertiary text-[10px] font-extrabold px-3 py-1 rounded-full border border-tertiary/20">{rankName}</span>
             </div>
 
             <div className="flex items-center gap-4 my-2 relative z-10">

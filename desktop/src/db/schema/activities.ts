@@ -5,6 +5,7 @@ import { cooperatives } from "./cooperatives";
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   cooperativeId: integer("cooperative_id").notNull().references(() => cooperatives.id, { onDelete: 'cascade' }),
+  creatorId: integer("creator_id").references(() => members.id, { onDelete: 'set null' }),
   name: varchar("name", { length: 255 }).notNull(),
   description: varchar("description", { length: 1000 }),
   startDate: timestamp("start_date").notNull(),

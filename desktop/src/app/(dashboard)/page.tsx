@@ -5,9 +5,11 @@ import { getCurrentMember } from "@/actions/members";
 import { getFinancialsData } from "@/actions/financials";
 import { getActiveQuests } from "@/actions/quests";
 import { getKoperasiStats } from "@/actions/governance";
+import { getEventsByCooperative, getMemberEventParticipations } from "@/actions/events";
 import { redirect } from "next/navigation";
 import MissionList from "@/components/MissionList";
 import Leaderboard from "@/components/Leaderboard";
+import WeeklyCalendar from "@/components/WeeklyCalendar";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function DesktopDashboard() {
@@ -40,6 +42,10 @@ export default async function DesktopDashboard() {
   const financials = await getFinancialsData(currentMember.id);
   const activeQuests = await getActiveQuests(currentMember.id);
   const koperasiStats = await getKoperasiStats(currentMember.cooperativeId as number);
+  
+  const { events: coopEvents } = await getEventsByCooperative(currentMember.cooperativeId as number);
+  const { participations } = await getMemberEventParticipations(currentMember.id);
+  const joinedEventIds = participations?.map(p => p.event.id) || [];
   
   const points = dbData?.progress?.pointsBalance || 0;
   const streak = dbData?.progress?.currentStreak || 0;
@@ -194,6 +200,15 @@ export default async function DesktopDashboard() {
             </div>
           </div>
 
+        </div>
+
+        {/* Row 4: Weekly Calendar */}
+        <div className="grid grid-cols-1 gap-6">
+          <WeeklyCalendar 
+            events={coopEvents || []} 
+            joinedEventIds={joinedEventIds} 
+            memberId={currentMember.id} 
+          />
         </div>
 
       </div>

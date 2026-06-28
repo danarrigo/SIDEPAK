@@ -70,3 +70,32 @@ export async function getMemberEventParticipations(memberId: number) {
     return { success: false, error: "Gagal mengambil data partisipasi event." };
   }
 }
+
+export async function createEvent(memberId: number, name: string, description: string, startDate: Date, endDate: Date) {
+  try {
+    const progress = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
+    if (progress.length === 0 || progress[0].level < 20) {
+      return { success: false, error: "Level tidak mencukupi untuk membuat event. Dibutuhkan minimal Level 20." };
+    }
+
+    const { members } = await import("@/db/schema/members");
+    const [member] = await db.select().from(members).where(eq(members.id, memberId));
+    if (!member || !member.cooperativeId) {
+      return { success: false, error: "Anggota tidak terdaftar pada koperasi mana pun." };
+    }
+
+    await db.insert(events).values({
+      cooperativeId: member.cooperativeId,
+      creatorId: memberId,
+      name,
+      description,
+      startDate,
+      endDate
+    });
+
+    return { success: true, message: "Berhasil membuat event koperasi!" };
+  } catch (error) {
+    console.error("Create Event DB Error:", error);
+    return { success: false, error: "Gagal membuat event." };
+  }
+}

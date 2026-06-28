@@ -85,11 +85,8 @@ class KoperasiProvider extends ChangeNotifier {
     loadSavedSession();
   }
 
-  String _apiHost() {
-    if (Uri.base.host.isNotEmpty) {
-      return '${Uri.base.host}:3000';
-    }
-    return 'localhost:3000';
+  String _apiBase() {
+    return 'https://hackathon-kopdes.vercel.app';
   }
 
   Future<void> loadSavedSession() async {
@@ -116,7 +113,7 @@ class KoperasiProvider extends ChangeNotifier {
   Future<bool> login(String emailInput, String passwordInput) async {
     try {
       final response = await http.post(
-        Uri.parse('http://${_apiHost()}/api/auth/login'),
+        Uri.parse('${_apiBase()}/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': emailInput, 'password': passwordInput}),
       );
@@ -158,7 +155,7 @@ class KoperasiProvider extends ChangeNotifier {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('http://${_apiHost()}/api/auth/signup'),
+        Uri.parse('${_apiBase()}/api/auth/signup'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': email,
@@ -204,7 +201,7 @@ class KoperasiProvider extends ChangeNotifier {
       notifyListeners();
 
       final response = await http.get(
-        Uri.parse('http://${_apiHost()}/api/mobile-sync'),
+        Uri.parse('${_apiBase()}/api/mobile-sync'),
         headers: {if (token != null) 'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
@@ -380,7 +377,7 @@ class KoperasiProvider extends ChangeNotifier {
   Future<String> claimMission(String id, int? questRewardPoints) async {
     try {
       final res = await http.post(
-        Uri.parse('http://${_apiHost()}/api/mobile-sync/action'),
+        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
         headers: {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token'
@@ -410,7 +407,7 @@ class KoperasiProvider extends ChangeNotifier {
     }
     try {
       final res = await http.post(
-        Uri.parse('http://${_apiHost()}/api/mobile-sync/action'),
+        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
         headers: {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token'
@@ -438,7 +435,7 @@ class KoperasiProvider extends ChangeNotifier {
   Future<String> useInventoryItem(int itemId, {int? targetMemberId}) async {
     try {
       final res = await http.post(
-        Uri.parse('http://${_apiHost()}/api/mobile-sync/action'),
+        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
         headers: {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token'
@@ -468,7 +465,7 @@ class KoperasiProvider extends ChangeNotifier {
     final proposalId = proposal?['id'] ?? 1;
     try {
       final res = await http.post(
-        Uri.parse('http://${_apiHost()}/api/mobile-sync/action'),
+        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
         headers: {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token'
@@ -496,7 +493,7 @@ class KoperasiProvider extends ChangeNotifier {
   Future<String> submitProposal(String title, String description) async {
     try {
       final res = await http.post(
-        Uri.parse('http://${_apiHost()}/api/mobile-sync/action'),
+        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
         headers: {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token'

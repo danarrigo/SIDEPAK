@@ -10,7 +10,7 @@ export default async function Header() {
     progress = await getMemberProgress(member.id);
   }
 
-  const streak = progress?.currentStreak ?? 0;
+  const streak = Math.max(1, progress?.currentStreak ?? 1);
   const xp = progress?.xp ?? 0;
   const level = progress?.level ?? 1;
 
@@ -30,7 +30,7 @@ export default async function Header() {
 <div className="flex items-center gap-6">
 <div className="hidden lg:flex items-center gap-2 bg-surface-container p-2 rounded-full px-4 border border-outline-variant/20">
 <span className="material-symbols-outlined text-tertiary text-sm" style={{ fontVariationSettings: "\'FILL\' 1" }}>local_fire_department</span>
-<span className="font-points-display text-points-display text-on-surface">{streak} 🔥 Hari Beruntun</span>
+<span className="font-points-display text-points-display text-on-surface">{streak} Hari Beruntun</span>
 </div>
 <div className="flex items-center gap-3">
         <NotificationBell />

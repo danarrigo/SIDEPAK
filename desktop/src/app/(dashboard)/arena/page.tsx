@@ -25,12 +25,12 @@ export default async function Page() {
       
         <div className="fixed inset-0 pointer-events-none opacity-20"></div>
 
-        <div className="mb-12 text-center relative z-10">
+        <div className="mb-12 text-center relative z-10 animate-slide-up">
           <p className="font-label-caps text-label-caps text-tertiary mb-2 uppercase tracking-widest">Weekly Battle • Arena</p>
           <h2 className="font-headline-lg text-headline-lg text-on-surface">Duel Koperasi Pekan Ini</h2>
         </div>
 
-        <section className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-8 items-center mb-16 relative z-10">
+        <section className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-8 items-center mb-16 relative z-10 animate-slide-up delay-100">
 
           <div className="glass-card rounded-xl p-8 flex flex-col items-center border-l-4 border-l-primary group transition-all duration-300 hover:translate-y-[-4px]">
             <div className="relative mb-6">
@@ -86,7 +86,7 @@ export default async function Page() {
           </div>
         </section>
 
-        <section className="relative z-10">
+        <section className="relative z-10 animate-slide-up delay-200">
           <div className="flex justify-between items-end mb-6">
             <div>
               <h3 className="font-headline-md text-headline-md text-on-surface">Riwayat Pertandingan</h3>

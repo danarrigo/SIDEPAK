@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { claimQuestReward } from "@/actions/quests";
 import { useRouter } from "next/navigation";
 
-export default function MissionList({ initialQuests = [], memberId }: { initialQuests?: any[], memberId: number }) {
+export default function MissionList({ initialQuests = [], memberId, frequency = "daily" }: { initialQuests?: any[], memberId: number, frequency?: "daily" | "weekly" | "monthly" }) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
@@ -20,7 +20,7 @@ export default function MissionList({ initialQuests = [], memberId }: { initialQ
 
   return (
     <ul className="space-y-4">
-      {initialQuests.filter(m => m.frequency === "daily").slice(0, 3).map((quest) => {
+      {initialQuests.filter(m => m.frequency === frequency).slice(0, 3).map((quest) => {
         const currentProgress = quest.progress?.progress || 0;
         const target = quest.targetCount || 1;
         const isCompleted = quest.progress?.isCompleted || false;

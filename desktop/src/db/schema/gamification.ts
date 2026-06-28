@@ -43,3 +43,25 @@ export const pointTransactions = pgTable("point_transactions", {
   description: varchar("description", { length: 500 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const marketplaceItems = pgTable("marketplace_items", {
+  id: serial("id").primaryKey(),
+  sellerId: integer("seller_id").notNull().references(() => members.id, { onDelete: 'cascade' }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: varchar("description", { length: 1000 }),
+  priceInPoints: integer("price_in_points").notNull(),
+  stock: integer("stock").default(1).notNull(),
+  imageUrl: varchar("image_url", { length: 500 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const marketplaceTransactions = pgTable("marketplace_transactions", {
+  id: serial("id").primaryKey(),
+  buyerId: integer("buyer_id").notNull().references(() => members.id, { onDelete: 'cascade' }),
+  sellerId: integer("seller_id").notNull().references(() => members.id, { onDelete: 'cascade' }),
+  marketplaceItemId: integer("marketplace_item_id").notNull().references(() => marketplaceItems.id, { onDelete: 'cascade' }),
+  quantity: integer("quantity").default(1).notNull(),
+  totalPrice: integer("total_price").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

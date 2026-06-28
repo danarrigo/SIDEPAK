@@ -38,7 +38,7 @@ export default async function Page() {
 <div className="flex-1 overflow-y-auto px-6 py-10 space-y-12 pb-32">
 
 {/* Digital Member Card */}
-<section className="relative w-full max-w-xl mx-auto mb-10 group perspective">
+<section className="relative w-full max-w-xl mx-auto mb-10 group perspective animate-slide-up">
   <div className={`relative w-full h-[220px] rounded-2xl bg-gradient-to-br ${rankColor} p-8 text-white shadow-2xl overflow-hidden transition-transform duration-700 transform-gpu hover:scale-[1.02]`}>
     <div className="absolute top-0 right-0 p-8 opacity-20">
       <span className="material-symbols-outlined text-[150px]" style={{ fontVariationSettings: "'FILL' 1" }}>{badgeIcon}</span>
@@ -65,14 +65,14 @@ export default async function Page() {
   </div>
 </section>
 
-<section>
+<section className="animate-slide-up delay-100">
 <div className="flex items-center justify-between mb-6">
 <h3 className="font-headline-md text-headline-md text-on-surface">Dampak Personal</h3>
 <p className="font-body-md text-body-md text-tertiary cursor-pointer hover:underline">Lihat Laporan Tahunan</p>
 </div>
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all flex flex-col justify-between">
+<div className="glass-card rounded-3xl p-6 border border-outline-variant transition-all flex flex-col justify-between">
 <div>
   <div className="w-12 h-12 bg-primary-container rounded-2xl flex items-center justify-center mb-4 text-primary">
     <span className="material-symbols-outlined">swap_horiz</span>
@@ -85,7 +85,7 @@ export default async function Page() {
                             </p>
 </div>
 
-<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all flex flex-col justify-between">
+<div className="glass-card rounded-3xl p-6 border border-outline-variant transition-all flex flex-col justify-between">
 <div>
   <div className="w-12 h-12 bg-tertiary-container rounded-2xl flex items-center justify-center mb-4 text-tertiary">
     <span className="material-symbols-outlined" style={{ fontVariationSettings: "\'FILL\' 1" }}>savings</span>
@@ -96,7 +96,7 @@ export default async function Page() {
 <p className="font-body-md text-body-md text-tertiary mt-2">Tahun Buku 2024</p>
 </div>
 
-<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all flex flex-col justify-between">
+<div className="glass-card rounded-3xl p-6 border border-outline-variant transition-all flex flex-col justify-between">
 <div>
   <div className="w-12 h-12 bg-primary-container rounded-2xl flex items-center justify-center mb-4 text-primary">
     <span className="material-symbols-outlined">payments</span>
@@ -109,7 +109,7 @@ export default async function Page() {
 </div>
 </div>
 
-<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all flex flex-col justify-between">
+<div className="glass-card rounded-3xl p-6 border border-outline-variant transition-all flex flex-col justify-between">
 <div>
   <div className="w-12 h-12 bg-error-container rounded-2xl flex items-center justify-center mb-4 text-error">
     <span className="material-symbols-outlined">rocket_launch</span>
@@ -119,16 +119,17 @@ export default async function Page() {
 </div>
 <p className="font-body-md text-body-md text-error mt-2">Dari {totalBattles} Kompetisi</p>
 </div>
+
 </div>
 </section>
 
 {/* 3-Column Layout below Dampak Personal */}
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8 animate-slide-up delay-200">
   {/* Column 1: Loan & Activity */}
-  <div className="lg:col-span-2 space-y-8">
+  <div className="lg:col-span-2 flex flex-col gap-8">
     {/* Active Loan Tracker */}
     {activeLoan && (
-      <section className="bento-card rounded-xl p-6 relative overflow-hidden">
+      <section className="glass-card rounded-xl p-6 relative overflow-hidden">
         <div className="flex justify-between items-start mb-6 relative z-10">
           <div>
             <h3 className="font-headline-md text-headline-md">Status Pinjaman</h3>
@@ -159,7 +160,7 @@ export default async function Page() {
     )}
 
     {/* Recent Activity Log */}
-    <section className="bento-card rounded-xl p-6">
+    <section className="glass-card rounded-xl p-6 flex-1 flex flex-col">
       <h3 className="font-headline-md text-headline-md mb-6">Riwayat Aktivitas Poin</h3>
       {activityLog.length === 0 ? (
         <p className="text-on-surface-variant text-sm">Belum ada aktivitas.</p>
@@ -188,7 +189,7 @@ export default async function Page() {
 
   {/* Column 2: Trophy Room */}
   <div className="lg:col-span-1">
-    <section className="bento-card rounded-xl p-6 h-full">
+    <section className="glass-card rounded-xl p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <h3 className="font-headline-md text-headline-md">Inventory</h3>
         <span className="material-symbols-outlined text-tertiary">inventory_2</span>
@@ -197,7 +198,7 @@ export default async function Page() {
         <div className="text-center py-10 bg-surface-container-low rounded-xl border border-outline-variant/30">
           <span className="material-symbols-outlined text-4xl text-outline mb-2">category</span>
           <p className="text-sm text-on-surface-variant">Inventory kosong.</p>
-          <p className="text-[10px] text-primary mt-1">Beli item di Toko Koperasi!</p>
+          <p className="text-[10px] text-primary mt-1">Beli item di Marketplace!</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -220,11 +221,11 @@ export default async function Page() {
     </section>
   </div>
 </div>
-<div className="max-w-4xl mx-auto w-full space-y-6 mt-8">
-<h3 className="font-headline-md text-headline-md text-on-surface">Pengaturan Akun</h3>
-<div className="bg-surface-container rounded-3xl overflow-hidden border border-outline-variant divide-y divide-outline-variant/50">
+<div className="w-full space-y-6 mt-12 animate-slide-up delay-300">
+<h3 className="font-headline-md text-headline-md text-on-surface px-2">Pengaturan Akun</h3>
+<div className="glass-card rounded-3xl overflow-hidden border border-outline-variant divide-y divide-outline-variant/50">
 
-<div className="p-6 hover:bg-surface-container-high transition-colors cursor-pointer flex items-center justify-between group">
+<div className="p-6 hover:bg-primary/5 transition-colors cursor-pointer flex items-center justify-between group">
 <div className="flex items-center gap-5">
 <div className="w-12 h-12 rounded-2xl bg-surface-container-highest flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
 <span className="material-symbols-outlined">security</span>
@@ -237,7 +238,7 @@ export default async function Page() {
 <span className="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
 </div>
 
-<div className="p-6 hover:bg-surface-container-high transition-colors cursor-pointer flex items-center justify-between group">
+<div className="p-6 hover:bg-primary/5 transition-colors cursor-pointer flex items-center justify-between group">
 <div className="flex items-center gap-5">
 <div className="w-12 h-12 rounded-2xl bg-surface-container-highest flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
 <span className="material-symbols-outlined">notifications_active</span>
@@ -250,7 +251,7 @@ export default async function Page() {
 <span className="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
 </div>
 
-<div className="p-6 hover:bg-surface-container-high transition-colors cursor-pointer flex items-center justify-between group">
+<div className="p-6 hover:bg-primary/5 transition-colors cursor-pointer flex items-center justify-between group">
 <div className="flex items-center gap-5">
 <div className="w-12 h-12 rounded-2xl bg-surface-container-highest flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
 <span className="material-symbols-outlined">payments</span>
@@ -263,7 +264,7 @@ export default async function Page() {
 <span className="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
 </div>
 
-<div className="p-6 hover:bg-surface-container-high transition-colors cursor-pointer flex items-center justify-between group">
+<div className="p-6 hover:bg-primary/5 transition-colors cursor-pointer flex items-center justify-between group">
 <div className="flex items-center gap-5">
 <div className="w-12 h-12 rounded-2xl bg-surface-container-highest flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
 <span className="material-symbols-outlined">diversity_3</span>
@@ -277,9 +278,9 @@ export default async function Page() {
 </div>
 </div>
 
-<div className="mt-8">
+<div className="mt-8 px-2 pb-8">
 <form action={logout}>
-<button type="submit" className="flex items-center gap-3 px-6 py-4 rounded-2xl border border-error/30 text-error hover:bg-error/5 transition-colors w-full md:w-auto">
+<button type="submit" className="glass-card flex items-center gap-3 px-6 py-4 rounded-2xl border border-error/30 text-error hover:bg-error/10 hover:border-error/50 transition-colors w-full md:w-auto">
 <span className="material-symbols-outlined">logout</span>
 <span className="font-body-lg text-body-lg font-bold">Keluar dari Aplikasi</span>
 </button>

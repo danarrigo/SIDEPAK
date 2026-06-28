@@ -20,6 +20,7 @@ export default function Sidebar() {
     { href: "/quests", icon: "assignment", label: "Misi" },
     { href: "/arena", icon: "emoji_events", label: "Bertanding" },
     { href: "/governance", icon: "account_balance", label: "Koperasi" },
+    { href: "/marketplace", icon: "storefront", label: "Marketplace" },
     { href: "/profile", icon: "person", label: "Profil" },
   ];
 

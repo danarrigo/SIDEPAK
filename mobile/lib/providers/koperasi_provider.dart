@@ -16,25 +16,29 @@ class KoperasiProvider extends ChangeNotifier {
   bool isLoggedIn = false;
 
   // Global State
-  int points = 1350;
-  int streak = 14;
-  int userWinRate = 62;
+  int points = 0;
+  int streak = 0;
+  int userWinRate = 50;
   String? voteSelection;
   bool isLoading = true;
 
   // Savings breakdown
-  int simpananPokok = 750000;
-  int simpananWajib = 750000;
-  int simpananSukarela = 7254000;
+  int simpananPokok = 0;
+  int simpananWajib = 0;
+  int simpananSukarela = 0;
   List<dynamic> listSavings = [];
   List<dynamic> listLoans = [];
   Map<String, dynamic>? activeBattle;
+  String? activeBattleEndDate;
 
   // Koperasi Stats
-  int kopTransaksi = 37;
-  int kopAnggotaBaru = 8;
-  int kopOmzet = 14;
-  int kopUmkm = 12;
+  int kopTransaksi = 0;
+  int kopAnggotaBaru = 0;
+  int kopOmzet = 0;
+  int kopUmkm = 0;
+
+  // Governance
+  List<dynamic> activeProposals = [];
 
   // Streak days
   final Map<String, bool> streakDays = {
@@ -292,6 +296,16 @@ class KoperasiProvider extends ChangeNotifier {
           if (arena != null) {
             if (arena['activeBattles'] != null && (arena['activeBattles'] as List).isNotEmpty) {
               activeBattle = arena['activeBattles'][0];
+              activeBattleEndDate = activeBattle?['endDate']?.toString().split('T')[0];
+              // Compute win rate from scores
+              final myScore = activeBattle?['challengerId'] == memberId
+                  ? activeBattle?['challengerPoints'] ?? 0
+                  : activeBattle?['opponentPoints'] ?? 0;
+              final opScore = activeBattle?['challengerId'] == memberId
+                  ? activeBattle?['opponentPoints'] ?? 0
+                  : activeBattle?['challengerPoints'] ?? 0;
+              final totalScore = (myScore as int) + (opScore as int);
+              userWinRate = totalScore > 0 ? ((myScore / totalScore) * 100).round() : 50;
             }
             final past = arena['pastBattles'];
             if (past != null && past is List) {
@@ -306,6 +320,11 @@ class KoperasiProvider extends ChangeNotifier {
                 );
               }).toList();
             }
+          }
+
+          final governance = data['governance'];
+          if (governance != null) {
+            activeProposals = governance['activeProposals'] ?? [];
           }
         }
       }

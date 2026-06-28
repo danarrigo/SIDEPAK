@@ -66,10 +66,10 @@ class KoperasiView extends StatelessWidget {
                           mainAxisSpacing: 12,
                           childAspectRatio: 1.5,
                           children: [
-                            _buildWhiteStatCard('Total Anggota', '1.284', '+8 Minggu Ini'),
-                            _buildWhiteStatCard('Pendapatan', 'Rp 840Jt', '+12% dari Minggu lalu'),
-                            _buildWhiteStatCard('SHU Berjalan', 'Rp 120Jt', 'Estimasi', italic: true),
-                            _buildWhiteStatCard('UMKM Aktif', '47', '+3 Bulan ini'),
+                            _buildWhiteStatCard('Total Anggota', '${provider.kopAnggotaBaru}', '+${provider.kopAnggotaBaru} Terdaftar'),
+                            _buildWhiteStatCard('Total Transaksi', '${provider.kopTransaksi}', 'Simpanan & Pinjaman'),
+                            _buildWhiteStatCard('SHU Berjalan', 'Estimasi', 'Menunggu Data', italic: true),
+                            _buildWhiteStatCard('Omzet Harian', provider.kopOmzet > 0 ? 'Rp ${provider.kopOmzet}Jt' : '-', '+${provider.kopUmkm} UMKM Aktif'),
                           ],
                         ),
                       ],
@@ -137,13 +137,15 @@ class KoperasiView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Text(
-                        'Agenda E-RAT #42',
+                        'Agenda E-RAT',
                         style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Pengadaan traktor digital untuk kelompok tani Sektor Utara Desa Sukamaju periode anggaran 2026.',
-                        style: TextStyle(color: Colors.white70, fontSize: 11, height: 1.4),
+                      Text(
+                        provider.activeProposals.isNotEmpty
+                            ? provider.activeProposals[0]['title'] ?? 'Belum ada agenda aktif'
+                            : 'Belum ada agenda aktif',
+                        style: const TextStyle(color: Colors.white70, fontSize: 11, height: 1.4),
                       ),
                       const SizedBox(height: 16),
                       if (provider.voteSelection != null)

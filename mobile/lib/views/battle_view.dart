@@ -123,9 +123,19 @@ class BattleView extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildPlayerCol('AS', 'Agung (Kamu)', '$p1 Poin', Colors.grey),
+                        _buildPlayerCol(
+                          provider.fullName?.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join('').toUpperCase() ?? 'AG',
+                          '${provider.fullName?.split(' ')[0] ?? 'Kamu'} (Kamu)',
+                          '${p1} Poin',
+                          Colors.grey,
+                        ),
                             const Text('VS', style: TextStyle(color: Colors.white38, fontSize: 20, fontStyle: FontStyle.italic, fontWeight: FontWeight.w900)),
-                            _buildPlayerCol('BW', 'Budi', '$p2 Poin', Colors.grey),
+                        _buildPlayerCol(
+                          provider.activeBattle?['opponent']?['namaLengkap']?.toString().trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join('').toUpperCase() ?? '??',
+                          provider.activeBattle?['opponent']?['namaLengkap']?.toString().split(' ')[0] ?? 'Lawan',
+                          '${p2} Poin',
+                          Colors.grey,
+                        ),
                           ],
                         ),
                         const SizedBox(height: 20),
@@ -157,21 +167,23 @@ class BattleView extends StatelessWidget {
                           padding: const EdgeInsets.all(12),
                           child: Column(
                             children: [
-                              _buildComparisonRow('Transaksi Minggu Ini', '8', '5'),
+                            _buildComparisonRow('Transaksi Minggu Ini', '${p1 ~/ 1000}', '${p2 ~/ 1000}'),
                               const Divider(color: Colors.white12),
-                              _buildComparisonRow('Misi Diselesaikan', '12', '9'),
+                              _buildComparisonRow('Misi Diselesaikan', '${provider.missions.where((m) => m.completed).length}', '-'),
                               const Divider(color: Colors.white12),
-                              _buildComparisonRow('Total Tabungan', 'Rp 8,25Jt', 'Rp 6,1Jt'),
+                              _buildComparisonRow('Total Tabungan', 'Rp ${(provider.simpananPokok + provider.simpananWajib + provider.simpananSukarela) >= 1000000 ? ((provider.simpananPokok + provider.simpananWajib + provider.simpananSukarela) / 1000000).toStringAsFixed(1) + 'Jt' : (provider.simpananPokok + provider.simpananWajib + provider.simpananSukarela).toString()}', '-'),
                               const Divider(color: Colors.white12),
-                              _buildComparisonRow('Kehadiran Acara', '2', '1'),
+                              _buildComparisonRow('Streak Aktif', '${provider.streak} hari', '-'),
                             ],
                           ),
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          'Battle berakhir: Minggu, 29 June 2026 ; 23:59',
+                          Text(
+                          provider.activeBattleEndDate != null
+                              ? 'Battle berakhir: ${provider.activeBattleEndDate}'
+                              : 'Belum ada battle aktif',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white60, fontSize: 9, fontWeight: FontWeight.bold),
+                          style: const TextStyle(color: Colors.white60, fontSize: 9, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
                         Row(

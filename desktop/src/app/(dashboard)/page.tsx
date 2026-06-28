@@ -8,10 +8,33 @@ import { getKoperasiStats } from "@/actions/governance";
 import { redirect } from "next/navigation";
 import MissionList from "@/components/MissionList";
 import Leaderboard from "@/components/Leaderboard";
+import { createClient } from "@/utils/supabase/server";
 
 export default async function DesktopDashboard() {
   const currentMember = await getCurrentMember();
-  if (!currentMember) redirect("/login");
+  if (!currentMember) {
+    // If Supabase has a session but the user is not in the database (e.g. after a DB reset),
+    // redirecting to /login causes an infinite loop because middleware redirects back to /.
+    // So we show a clear session button here.
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-slate-50">
+        <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200 text-center max-w-md">
+          <h2 className="text-xl font-semibold mb-2">Sesi Tidak Valid</h2>
+          <p className="text-slate-500 mb-6">Database telah direset. Akun Anda tidak ditemukan di database kami, namun sesi Anda masih tersimpan di browser.</p>
+          <form action={async () => {
+            "use server";
+            const supabase = await createClient();
+            await supabase.auth.signOut();
+            redirect("/login");
+          }}>
+            <button type="submit" className="w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors">
+              Hapus Sesi & Login Ulang
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   const dbData = await getDashboardData(currentMember.id);
   const financials = await getFinancialsData(currentMember.id);

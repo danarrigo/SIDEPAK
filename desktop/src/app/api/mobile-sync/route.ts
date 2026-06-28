@@ -38,7 +38,7 @@ export async function GET() {
       getActiveQuests(memberId),
       getGovernanceData(cooperativeId),
       getArenaData(memberId),
-      getKoperasiStats(),
+      getKoperasiStats(cooperativeId),
       getBattleHistory(memberId),
       getMemberBadges(memberId),
       getWinRate(memberId),

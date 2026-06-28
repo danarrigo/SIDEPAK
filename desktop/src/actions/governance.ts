@@ -91,12 +91,18 @@ export async function getKoperasiStats(cooperativeId: number) {
 
 export async function submitProposal(memberId: number, title: string, description: string) {
   try {
+    const [member] = await db.select().from(members).where(eq(members.id, memberId));
+    if (!member || !member.cooperativeId) {
+      return { success: false, error: "Anggota tidak terikat ke koperasi." };
+    }
+
     const [proposal] = await db.insert(proposals).values({
       title,
       description,
       status: 'active',
       targetQuorumPercentage: 50,
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      cooperativeId: member.cooperativeId,
     }).returning();
     return { success: true, proposal };
   } catch (error) {

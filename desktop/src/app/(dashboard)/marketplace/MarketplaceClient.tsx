@@ -77,9 +77,9 @@ export default function MarketplaceClient({ memberId, inAppItems, physicalItems 
       </div>
 
       {activeTab === "in_app" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up delay-100">
           {inAppItems.map(item => (
-            <div key={item.id} className="glass-card p-6 rounded-2xl flex flex-col justify-between border border-outline-variant hover:border-primary/50 transition-all">
+            <div key={item.id} className="glass-card p-6 rounded-2xl flex flex-col justify-between border border-outline-variant transition-all">
               <div>
                 <h3 className="font-bold text-lg">{item.name}</h3>
                 <p className="text-sm text-on-surface-variant mt-2 line-clamp-2">{item.description}</p>
@@ -104,7 +104,7 @@ export default function MarketplaceClient({ memberId, inAppItems, physicalItems 
       )}
 
       {activeTab === "physical" && (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-slide-up delay-100">
           <div className="flex justify-between items-center">
             <p className="text-sm text-on-surface-variant">Beli barang yang dijual oleh anggota koperasi lain.</p>
             <button 
@@ -149,7 +149,7 @@ export default function MarketplaceClient({ memberId, inAppItems, physicalItems 
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {physicalItems.map(item => (
-              <div key={item.id} className="glass-card rounded-2xl flex flex-col justify-between border border-outline-variant hover:border-tertiary/50 transition-all overflow-hidden">
+              <div key={item.id} className="glass-card rounded-2xl flex flex-col justify-between border border-outline-variant transition-all overflow-hidden">
                 <div className="h-40 bg-surface-container-highest relative flex items-center justify-center">
                   {item.imageUrl ? (
                     <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />

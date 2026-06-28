@@ -15,7 +15,7 @@ export default async function MarketplacePage() {
   return (
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">
       <div className="flex-1 overflow-y-auto px-6 py-10 space-y-8 pb-32 w-full">
-        <div className="glass-card border border-outline-variant rounded-2xl p-8">
+        <div className="glass-card animate-slide-up border border-outline-variant rounded-2xl p-8">
           <div className="flex justify-between items-center mb-4">
             <div>
               <h2 className="text-2xl font-black text-on-surface">

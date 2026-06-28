@@ -37,7 +37,7 @@ export default async function Page() {
 <div className="flex-1 overflow-y-auto px-6 py-10 space-y-12 pb-32">
 
 {/* Digital Member Card */}
-<section className="relative w-full max-w-xl mx-auto mb-10 group perspective">
+<section className="relative w-full max-w-xl mx-auto mb-10 group perspective animate-slide-up">
   <div className={`relative w-full h-[220px] rounded-2xl bg-gradient-to-br ${rankColor} p-8 text-white shadow-2xl overflow-hidden transition-transform duration-700 transform-gpu hover:scale-[1.02]`}>
     <div className="absolute top-0 right-0 p-8 opacity-20">
       <span className="material-symbols-outlined text-[150px]" style={{ fontVariationSettings: "'FILL' 1" }}>{badgeIcon}</span>
@@ -64,14 +64,14 @@ export default async function Page() {
   </div>
 </section>
 
-<section>
+<section className="animate-slide-up delay-100">
 <div className="flex items-center justify-between mb-6">
 <h3 className="font-headline-md text-headline-md text-on-surface">Dampak Personal</h3>
 <p className="font-body-md text-body-md text-tertiary cursor-pointer hover:underline">Lihat Laporan Tahunan</p>
 </div>
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all">
+<div className="glass-card rounded-3xl p-6 border border-outline-variant transition-all">
 <div className="w-12 h-12 bg-primary-container rounded-2xl flex items-center justify-center mb-4 text-primary">
 <span className="material-symbols-outlined">swap_horiz</span>
 </div>
@@ -82,7 +82,7 @@ export default async function Page() {
                             </p>
 </div>
 
-<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all">
+<div className="glass-card rounded-3xl p-6 border border-outline-variant transition-all">
 <div className="w-12 h-12 bg-tertiary-container rounded-2xl flex items-center justify-center mb-4 text-tertiary">
 <span className="material-symbols-outlined" style={{ fontVariationSettings: "\'FILL\' 1" }}>savings</span>
 </div>
@@ -93,7 +93,7 @@ export default async function Page() {
 
 
 
-<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all">
+<div className="glass-card rounded-3xl p-6 border border-outline-variant transition-all">
 <div className="w-12 h-12 bg-error-container rounded-2xl flex items-center justify-center mb-4 text-error">
 <span className="material-symbols-outlined">rocket_launch</span>
 </div>
@@ -105,12 +105,12 @@ export default async function Page() {
 </section>
 
 {/* 3-Column Layout below Dampak Personal */}
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8 animate-slide-up delay-200">
   {/* Column 1: Loan & Activity */}
   <div className="lg:col-span-2 space-y-8">
     {/* Active Loan Tracker */}
     {activeLoan && (
-      <section className="bento-card rounded-xl p-6 relative overflow-hidden">
+      <section className="glass-card rounded-xl p-6 relative overflow-hidden">
         <div className="flex justify-between items-start mb-6 relative z-10">
           <div>
             <h3 className="font-headline-md text-headline-md">Status Pinjaman</h3>
@@ -141,7 +141,7 @@ export default async function Page() {
     )}
 
     {/* Recent Activity Log */}
-    <section className="bento-card rounded-xl p-6">
+    <section className="glass-card rounded-xl p-6">
       <h3 className="font-headline-md text-headline-md mb-6">Riwayat Aktivitas Poin</h3>
       {activityLog.length === 0 ? (
         <p className="text-on-surface-variant text-sm">Belum ada aktivitas.</p>
@@ -170,7 +170,7 @@ export default async function Page() {
 
   {/* Column 2: Trophy Room */}
   <div className="lg:col-span-1">
-    <section className="bento-card rounded-xl p-6 h-full">
+    <section className="glass-card rounded-xl p-6 h-full">
       <div className="flex items-center justify-between mb-6">
         <h3 className="font-headline-md text-headline-md">Inventory</h3>
         <span className="material-symbols-outlined text-tertiary">inventory_2</span>

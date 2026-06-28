@@ -66,7 +66,7 @@ export default async function DesktopDashboard() {
       <div className="flex-1 overflow-y-auto px-6 py-10 space-y-8 pb-32 w-full">
         
         {/* Row 1: Greeting & Title Banner */}
-        <div className="glass-card border border-outline-variant rounded-2xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="glass-card animate-slide-up border border-outline-variant rounded-2xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h2 className="text-2xl font-black text-on-surface">Selamat Datang kembali, {memberName}!</h2>
             <p className="text-on-surface-variant text-sm mt-1">Status Keanggotaan Anda sangat baik. Mari capai {nextRankName} bulan ini!</p>
@@ -78,7 +78,7 @@ export default async function DesktopDashboard() {
         </div>
 
         {/* Row 2: Grid for Savings and Points */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up delay-100">
           
           {/* Savings Summary Card */}
           <div className="glass-card border border-outline-variant rounded-2xl overflow-hidden flex flex-col justify-between col-span-1 lg:col-span-2">

@@ -84,7 +84,7 @@ export default async function Page() {
   return (
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">
       <div className="flex-1 overflow-y-auto px-6 py-10 space-y-8 pb-32 w-full">
-        <div className="relative w-full h-[200px] rounded-xl overflow-hidden mb-8 bento-card flex items-center px-10">
+        <div className="relative w-full h-[200px] rounded-xl overflow-hidden mb-8 glass-card animate-slide-up flex items-center px-10">
           <div className="relative z-10">
             <h1 className="font-headline-lg text-headline-lg mb-2">
               Governance Dashboard
@@ -97,8 +97,8 @@ export default async function Page() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Link href="/governance/members" className="bento-card p-6 rounded-xl flex flex-col justify-between hover:border-primary border border-transparent transition-colors cursor-pointer">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-slide-up delay-100">
+          <Link href="/governance/members" className="glass-card p-6 rounded-xl flex flex-col justify-between border border-transparent hover:border-primary transition-colors cursor-pointer">
             <div className="flex justify-between items-start mb-4">
               <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">
                 group
@@ -114,7 +114,7 @@ export default async function Page() {
             </div>
           </Link>
 
-          <div className="bento-card p-6 rounded-xl flex flex-col justify-between border-l-4 border-tertiary">
+          <div className="glass-card p-6 rounded-xl flex flex-col justify-between border-l-4 border-tertiary">
             <div className="flex justify-between items-start mb-4">
               <span
                 className="material-symbols-outlined text-tertiary bg-tertiary/10 p-2 rounded-lg"
@@ -136,7 +136,7 @@ export default async function Page() {
             </div>
           </div>
 
-          <div className="bento-card p-6 rounded-xl flex flex-col justify-between">
+          <div className="glass-card p-6 rounded-xl flex flex-col justify-between border border-transparent">
             <div className="flex justify-between items-start mb-4">
               <span className="material-symbols-outlined text-error bg-error/10 p-2 rounded-lg">
                 speed
@@ -153,7 +153,7 @@ export default async function Page() {
           </div>
         </div>
 
-        <section className="bento-card rounded-xl p-6">
+        <section className="glass-card rounded-xl p-6">
           {mainProposal ? (
             <>
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -225,7 +225,7 @@ export default async function Page() {
 
         {/* Events Section */}
         <div className="grid grid-cols-1 gap-8 mb-8 mt-8">
-          <section className="bento-card rounded-xl p-6">
+          <section className="glass-card rounded-xl p-6">
             <h3 className="font-headline-md text-headline-md mb-6">Event Koperasi Mendatang</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {coopEvents && coopEvents.length > 0 ? (
@@ -249,7 +249,7 @@ export default async function Page() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 mt-8">
           {/* Financial Breakdown */}
-          <section className="bento-card rounded-xl p-6">
+          <section className="glass-card rounded-xl p-6">
             <h3 className="font-headline-md text-headline-md mb-6">
               Distribusi Aset Desa
             </h3>
@@ -309,7 +309,7 @@ export default async function Page() {
           </section>
 
           {/* Top Contributors */}
-          <section className="bento-card rounded-xl p-6">
+          <section className="glass-card rounded-xl p-6">
             <h3 className="font-headline-md text-headline-md mb-6">
               Top Kontributor (Leaderboard)
             </h3>
@@ -345,7 +345,7 @@ export default async function Page() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Submit Proposal */}
-          <section className="bento-card rounded-xl p-6 relative overflow-hidden">
+          <section className="glass-card rounded-xl p-6 relative overflow-hidden">
             <h3 className="font-headline-md text-headline-md mb-2">
               Ajukan Proposal Desa
             </h3>
@@ -410,7 +410,7 @@ export default async function Page() {
           </section>
 
           {/* Create Event Form */}
-          <section className="bento-card rounded-xl p-6 relative overflow-hidden">
+          <section className="glass-card rounded-xl p-6 relative overflow-hidden">
             <h3 className="font-headline-md text-headline-md mb-2">
               Buat Event Koperasi
             </h3>
@@ -501,7 +501,7 @@ export default async function Page() {
 
         <div className="grid grid-cols-1 gap-8 mb-8 mt-8">
           {/* Voting History */}
-          <section className="bento-card rounded-xl p-6">
+          <section className="glass-card rounded-xl p-6">
             <h3 className="font-headline-md text-headline-md mb-6">
               Arsip Keputusan (History)
             </h3>

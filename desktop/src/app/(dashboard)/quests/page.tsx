@@ -66,7 +66,7 @@ export default async function Page() {
 
   return (
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">
-      <aside className="col-span-12 lg:col-span-4 space-y-6">
+      <aside className="col-span-12 lg:col-span-4 space-y-6 animate-slide-up">
         <section className="glass-card rounded-xl p-6 relative overflow-hidden">
           <div className="relative z-10">
             <div className="flex justify-between items-start mb-6">
@@ -107,7 +107,7 @@ export default async function Page() {
           </div>
         </section>
 
-        <section className="glass-card rounded-xl p-6">
+        <section className="glass-card rounded-xl p-6 animate-slide-up delay-100">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-headline-md text-headline-md">Misi Harian</h3>
             <span className="font-label-caps text-label-caps text-primary">
@@ -123,8 +123,8 @@ export default async function Page() {
         </section>
       </aside>
 
-      <div className="col-span-12 lg:col-span-8 space-y-8">
-        <section className="glass-card rounded-xl p-8 overflow-hidden relative">
+      <div className="col-span-12 lg:col-span-8 space-y-6 animate-slide-up delay-200">
+        <section className="glass-card rounded-xl p-6 mb-8 overflow-hidden relative">
           <div className="absolute top-0 right-0 p-8 opacity-10">
             <span className="material-symbols-outlined text-[120px]">
               account_balance

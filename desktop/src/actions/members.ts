@@ -23,17 +23,20 @@ export async function getCurrentMember() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
-    const member = await db.query.members.findFirst({
-      where: eq(members.userId, user.id),
-      with: {
-        cooperative: true,
-      }
-    });
+    const [member] = await db.select().from(members).where(eq(members.userId, user.id));
     if (!member) return null;
+
+    let cooperativeName = null;
+    if (member.cooperativeId) {
+      // Import cooperatives if not already imported at top
+      const { cooperatives } = await import("@/db/schema/cooperatives");
+      const [coop] = await db.select().from(cooperatives).where(eq(cooperatives.id, member.cooperativeId));
+      cooperativeName = coop?.name || null;
+    }
     
     return {
       ...member,
-      koperasi: member.cooperative?.name || null
+      koperasi: cooperativeName
     };
   } catch (error) {
     console.error("GetCurrentMember Error:", error);

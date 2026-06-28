@@ -3,6 +3,7 @@ import { getCurrentMember } from "@/actions/members";
 import { redirect } from "next/navigation";
 import { getWinRate, getMemberInventory, getRecentPointTransactions, getMemberProgress } from "@/actions/gamification";
 import { logout } from "@/actions/auth";
+import TopUpModal from "@/components/TopUpModal";
 
 export default async function Page() {
   const currentMember = await getCurrentMember();
@@ -71,34 +72,51 @@ export default async function Page() {
 </div>
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all">
-<div className="w-12 h-12 bg-primary-container rounded-2xl flex items-center justify-center mb-4 text-primary">
-<span className="material-symbols-outlined">swap_horiz</span>
+<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all flex flex-col justify-between">
+<div>
+  <div className="w-12 h-12 bg-primary-container rounded-2xl flex items-center justify-center mb-4 text-primary">
+    <span className="material-symbols-outlined">swap_horiz</span>
+  </div>
+  <p className="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">Total Transaksi</p>
+  <h4 className="font-headline-lg text-headline-lg text-on-surface">{totalTransaksi}</h4>
 </div>
-<p className="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">Total Transaksi</p>
-<h4 className="font-headline-lg text-headline-lg text-on-surface">{totalTransaksi}</h4>
 <p className="font-body-md text-body-md text-primary mt-2 flex items-center gap-1">
 <span className="material-symbols-outlined text-sm">trending_up</span> Aktif bertransaksi
                             </p>
 </div>
 
-<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all">
-<div className="w-12 h-12 bg-tertiary-container rounded-2xl flex items-center justify-center mb-4 text-tertiary">
-<span className="material-symbols-outlined" style={{ fontVariationSettings: "\'FILL\' 1" }}>savings</span>
+<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all flex flex-col justify-between">
+<div>
+  <div className="w-12 h-12 bg-tertiary-container rounded-2xl flex items-center justify-center mb-4 text-tertiary">
+    <span className="material-symbols-outlined" style={{ fontVariationSettings: "\'FILL\' 1" }}>savings</span>
+  </div>
+  <p className="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">Estimasi SHU</p>
+  <h4 className="font-headline-lg text-headline-lg text-on-surface">Rp {estimasiSHU.toLocaleString('id-ID')}</h4>
 </div>
-<p className="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">Estimasi SHU</p>
-<h4 className="font-headline-lg text-headline-lg text-on-surface">Rp {estimasiSHU.toLocaleString('id-ID')}</h4>
 <p className="font-body-md text-body-md text-tertiary mt-2">Tahun Buku 2024</p>
 </div>
 
-
-
-<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all">
-<div className="w-12 h-12 bg-error-container rounded-2xl flex items-center justify-center mb-4 text-error">
-<span className="material-symbols-outlined">rocket_launch</span>
+<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all flex flex-col justify-between">
+<div>
+  <div className="w-12 h-12 bg-primary-container rounded-2xl flex items-center justify-center mb-4 text-primary">
+    <span className="material-symbols-outlined">payments</span>
+  </div>
+  <p className="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">Saldo Dompet</p>
+  <h4 className="font-headline-lg text-headline-lg text-on-surface">Rp {progress?.walletBalance?.toLocaleString('id-ID') || 0}</h4>
 </div>
-<p className="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">Win Rate</p>
-<h4 className="font-headline-lg text-headline-lg text-on-surface">{winRate.toFixed(1)}%</h4>
+<div className="mt-4">
+  <TopUpModal memberId={currentMember.id} />
+</div>
+</div>
+
+<div className="bg-surface-container rounded-3xl p-6 border border-outline-variant glow-card transition-all flex flex-col justify-between">
+<div>
+  <div className="w-12 h-12 bg-error-container rounded-2xl flex items-center justify-center mb-4 text-error">
+    <span className="material-symbols-outlined">rocket_launch</span>
+  </div>
+  <p className="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">Win Rate</p>
+  <h4 className="font-headline-lg text-headline-lg text-on-surface">{winRate.toFixed(1)}%</h4>
+</div>
 <p className="font-body-md text-body-md text-error mt-2">Dari {totalBattles} Kompetisi</p>
 </div>
 </div>

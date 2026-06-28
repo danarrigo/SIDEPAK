@@ -3,11 +3,13 @@ import { castVote, submitProposal } from "@/actions/governance";
 import { claimQuestReward } from "@/actions/quests";
 import { buyShopItem } from "@/actions/shop";
 import { useItem as applyItem } from "@/actions/gamification";
+import { createTopUpInvoice, verifyInvoicePayment } from "@/actions/wallet";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
 import { members } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
+
 
 export async function POST(request: Request) {
   try {
@@ -48,6 +50,12 @@ export async function POST(request: Request) {
     } else if (action === 'submit-proposal') {
       const { title, description } = body;
       result = await submitProposal(memberId, title, description);
+    } else if (action === 'create-topup') {
+      const { amount } = body;
+      result = await createTopUpInvoice(memberId, amount);
+    } else if (action === 'verify-topup') {
+      const { invoiceId } = body;
+      result = await verifyInvoicePayment(memberId, invoiceId);
     }
 
     return NextResponse.json(result, {

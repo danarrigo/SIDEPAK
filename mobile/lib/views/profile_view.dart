@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/koperasi_provider.dart';
+import 'dart:js' as js;
 
 const _rankColors = <String, List<Color>>{
   'Perunggu': [Color(0xFFB45309), Color(0xFF78350F)],
@@ -129,6 +130,66 @@ class ProfileView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Wallet Balance Card
+                Card(
+                  color: const Color(0xFF1E293B),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'SALDO DOMPET DIGITAL',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                            Icon(Icons.account_balance_wallet, color: Theme.of(context).primaryColor, size: 20),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          fmtMoney(provider.walletBalance),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            _showTopUpDialog(context, provider);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF3B82F6),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          icon: const Icon(Icons.add_card, size: 16),
+                          label: const Text(
+                            'TOP UP SALDO',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 // Ranking row (mobile-only, but uses DB-backed rankName/level)
                 const Text('Ranking', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
                 const SizedBox(height: 8),
@@ -633,6 +694,241 @@ class ProfileView extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showTopUpDialog(BuildContext context, KoperasiProvider provider) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        int amount = 50000;
+        bool isLoading = false;
+        String? invoiceUrl;
+        String? invoiceId;
+        String? error;
+        String? verificationStatus;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF1E293B),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Top Up Saldo', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white70),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      if (verificationStatus == 'paid') {
+                        provider.fetchData();
+                      }
+                    },
+                  ),
+                ],
+              ),
+              content: SizedBox(
+                width: 320,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (invoiceUrl == null) ...[
+                      const Text(
+                        'Masukkan jumlah saldo yang ingin Anda tambahkan.',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        keyboardType: TextInputType.number,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        decoration: InputDecoration(
+                          prefixText: 'Rp ',
+                          prefixStyle: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
+                          hintText: '50000',
+                          hintStyle: const TextStyle(color: Colors.white30),
+                          filled: true,
+                          fillColor: const Color(0xFF0F172A),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        ),
+                        onChanged: (val) {
+                          amount = int.tryParse(val) ?? 0;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [20000, 50000, 100000].map((preset) {
+                          return OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                amount = preset;
+                              });
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: amount == preset ? const Color(0xFF3B82F6) : Colors.white24),
+                              backgroundColor: amount == preset ? const Color(0xFF3B82F6).withOpacity(0.1) : null,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: Text(
+                              'Rp ${preset ~/ 1000}k',
+                              style: TextStyle(color: amount == preset ? const Color(0xFF3B82F6) : Colors.white70, fontSize: 11),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      if (error != null) ...[
+                        const SizedBox(height: 12),
+                        Text(error!, style: const TextStyle(color: Colors.redAccent, fontSize: 11)),
+                      ],
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: isLoading ? null : () async {
+                          if (amount < 10000) {
+                            setState(() {
+                              error = 'Minimal top up adalah Rp 10.000';
+                            });
+                            return;
+                          }
+                          setState(() {
+                            isLoading = true;
+                            error = null;
+                          });
+                          final res = await provider.createTopUp(amount);
+                          setState(() {
+                            isLoading = false;
+                          });
+                          if (res['success'] == true) {
+                            setState(() {
+                              invoiceUrl = res['invoiceUrl'];
+                              invoiceId = res['invoiceId'];
+                            });
+                            js.context.callMethod('open', [invoiceUrl, '_blank']);
+                          } else {
+                            setState(() {
+                              error = res['error'] ?? 'Gagal membuat invoice.';
+                            });
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3B82F6),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          minimumSize: const Size(double.infinity, 44),
+                        ),
+                        child: isLoading
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : const Text('Lanjutkan Pembayaran', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                    ] else ...[
+                      const Icon(Icons.credit_card, color: Colors.blueAccent, size: 48),
+                      const SizedBox(height: 12),
+                      const Text('Invoice Pembayaran Dibuat', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                      const SizedBox(height: 6),
+                      const Text('Invoice Xendit telah dibuka di tab baru.', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(color: const Color(0xFF0F172A), borderRadius: BorderRadius.circular(12)),
+                        child: Column(
+                          children: [
+                            const Text('Jumlah Top Up', style: TextStyle(color: Colors.white54, fontSize: 10)),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Rp ${amount.toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}',
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (error != null) ...[
+                        const SizedBox(height: 12),
+                        Text(error!, style: const TextStyle(color: Colors.redAccent, fontSize: 11)),
+                      ],
+                      const SizedBox(height: 20),
+                      if (verificationStatus == 'paid') ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.green)),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.check_circle, color: Colors.green),
+                              SizedBox(width: 10),
+                              Text('Top Up Berhasil!', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            provider.fetchData();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            minimumSize: const Size(double.infinity, 44),
+                          ),
+                          child: const Text('Selesai', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        ),
+                      ] else ...[
+                        ElevatedButton(
+                          onPressed: () {
+                            js.context.callMethod('open', [invoiceUrl, '_blank']);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0F172A),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            minimumSize: const Size(double.infinity, 44),
+                          ),
+                          child: const Text('Buka Kembali Pembayaran', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: isLoading ? null : () async {
+                            setState(() {
+                              isLoading = true;
+                              error = null;
+                            });
+                            final res = await provider.verifyTopUp(invoiceId!);
+                            setState(() {
+                              isLoading = false;
+                            });
+                            if (res['success'] == true) {
+                              if (res['status'] == 'paid') {
+                                setState(() {
+                                  verificationStatus = 'paid';
+                                });
+                              } else {
+                                setState(() {
+                                  error = 'Pembayaran belum terdeteksi. Silakan selesaikan pembayaran.';
+                                });
+                              }
+                            } else {
+                              setState(() {
+                                error = res['error'] ?? 'Gagal memverifikasi pembayaran.';
+                              });
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF10B981),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            minimumSize: const Size(double.infinity, 44),
+                          ),
+                          child: isLoading
+                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              : const Text('Cek Status Pembayaran', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        ),
+                      ]
+                    ]
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

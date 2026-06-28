@@ -11,6 +11,7 @@ export const memberProgress = pgTable("member_progress", {
   longestStreak: integer("longest_streak").default(0).notNull(),
   lastActivityDate: timestamp("last_activity_date"),
   activeEffect: varchar("active_effect", { length: 255 }),
+  walletBalance: integer("wallet_balance").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -26,6 +26,7 @@ class KoperasiProvider extends ChangeNotifier {
   int nextLevelPoints = 1000;
   String? voteSelection;
   bool isLoading = true;
+  int walletBalance = 0;
 
   // Savings breakdown
   int simpananPokok = 0;
@@ -215,6 +216,7 @@ class KoperasiProvider extends ChangeNotifier {
             xp = (progress['xp'] as num?)?.toInt() ?? xp;
             streak = (progress['currentStreak'] as num?)?.toInt() ?? streak;
             level = (progress['level'] as num?)?.toInt() ?? level;
+            walletBalance = (progress['walletBalance'] as num?)?.toInt() ?? walletBalance;
             _recomputeRank();
             _computeWeeklyStreak(progress['lastActivityDate']);
           }
@@ -514,6 +516,64 @@ class KoperasiProvider extends ChangeNotifier {
     } catch (e) {
       print('Submit proposal error: $e');
       return 'Gagal mengajukan proposal.';
+    }
+  }
+
+  Future<Map<String, dynamic>> createTopUp(int amount) async {
+    try {
+      final res = await http.post(
+        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token'
+        },
+        body: json.encode({
+          'action': 'create-topup',
+          'memberId': memberId,
+          'amount': amount,
+        }),
+      );
+      final body = json.decode(res.body);
+      if (res.statusCode == 200 && body['success'] == true) {
+        return {
+          'success': true,
+          'invoiceId': body['invoiceId'],
+          'invoiceUrl': body['invoiceUrl'],
+        };
+      }
+      return {'success': false, 'error': body['error'] ?? 'Gagal membuat invoice.'};
+    } catch (e) {
+      print('Create topup error: $e');
+      return {'success': false, 'error': 'Gagal menghubungi server.'};
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyTopUp(String invoiceId) async {
+    try {
+      final res = await http.post(
+        Uri.parse('${_apiBase()}/api/mobile-sync/action'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token'
+        },
+        body: json.encode({
+          'action': 'verify-topup',
+          'memberId': memberId,
+          'invoiceId': invoiceId,
+        }),
+      );
+      final body = json.decode(res.body);
+      if (res.statusCode == 200 && body['success'] == true) {
+        if (body['status'] == 'paid') {
+          await fetchData();
+          return {'success': true, 'status': 'paid'};
+        }
+        return {'success': true, 'status': 'pending'};
+      }
+      return {'success': false, 'error': body['error'] ?? 'Gagal verifikasi.'};
+    } catch (e) {
+      print('Verify topup error: $e');
+      return {'success': false, 'error': 'Gagal menghubungi server.'};
     }
   }
 }

@@ -1,6 +1,7 @@
 "use server";
 import { db } from "@/db";
 import { savings, loans, dues } from "@/db/schema/financials";
+import { walletTransactions } from "@/db/schema/wallet";
 import { eq, and, or, desc } from "drizzle-orm";
 import { awardPoints, getMemberProgress } from "@/actions/gamification";
 
@@ -9,6 +10,10 @@ export async function getFinancialsData(memberId: number) {
     const memberSavings = await db.select().from(savings).where(eq(savings.memberId, memberId));
     const memberLoans = await db.select().from(loans).where(eq(loans.memberId, memberId));
     const memberDues = await db.select().from(dues).where(eq(dues.memberId, memberId));
+    const memberWalletTxs = await db.select()
+      .from(walletTransactions)
+      .where(eq(walletTransactions.memberId, memberId))
+      .orderBy(desc(walletTransactions.createdAt));
     
     const totalSavingsAmount = memberSavings.reduce((acc, curr) => acc + (curr.type === 'deposit' ? curr.amount : -curr.amount), 0);
     const simpananPokok = memberDues.filter(d => d.type === 'initial' && d.status === 'paid').reduce((acc, curr) => acc + curr.amount, 0);
@@ -20,6 +25,7 @@ export async function getFinancialsData(memberId: number) {
       savings: memberSavings, 
       loans: memberLoans, 
       dues: memberDues, 
+      walletTransactions: memberWalletTxs,
       totalSavings: totalKonsolidasi,
       simpananPokok,
       simpananWajib,

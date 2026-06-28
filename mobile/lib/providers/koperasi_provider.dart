@@ -36,6 +36,7 @@ class KoperasiProvider extends ChangeNotifier {
   List<dynamic> listSavings = [];
   List<dynamic> listLoans = [];
   List<dynamic> listDues = [];
+  List<dynamic> listWalletTxs = [];
   Map<String, dynamic>? activeBattle;
   String? activeBattleEndDate;
 
@@ -87,7 +88,7 @@ class KoperasiProvider extends ChangeNotifier {
   }
 
   String _apiUrl(String path) {
-    return 'https://hackathon-kopdes-ekgie9nai-darrigos-projects.vercel.app$path?x-vercel-protection-bypass=x7R9wK2mP5qN4vB8zY1tC6sX3dL0fG9j';
+    return 'http://localhost:3000$path';
   }
 
   Map<String, String> _headers({bool isJson = false}) {
@@ -243,6 +244,7 @@ class KoperasiProvider extends ChangeNotifier {
             listSavings = financials['savings'] ?? [];
             listLoans = financials['loans'] ?? [];
             listDues = financials['dues'] ?? [];
+            listWalletTxs = financials['walletTransactions'] ?? [];
           }
 
           final quests = data['quests'];

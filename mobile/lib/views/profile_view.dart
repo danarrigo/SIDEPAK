@@ -359,10 +359,9 @@ class ProfileView extends StatelessWidget {
                   elevation: 1,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                    child: Column(                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (provider.listSavings.isEmpty && provider.listLoans.isEmpty)
+                        if (provider.listSavings.isEmpty && provider.listLoans.isEmpty && provider.listWalletTxs.isEmpty)
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 20),
                             child: Text('Belum ada transaksi tercatat.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 12)),
@@ -439,6 +438,55 @@ class ProfileView extends StatelessWidget {
                                     Text(
                                       fmtMoney(amount),
                                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                            const SizedBox(height: 12),
+                          ],
+                          if (provider.listWalletTxs.isNotEmpty) ...[
+                            if (provider.listSavings.isNotEmpty || provider.listLoans.isNotEmpty) ...[
+                              const Divider(height: 1),
+                              const SizedBox(height: 12),
+                            ],
+                            const Text('Top Up & Transaksi Dompet', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
+                            const SizedBox(height: 8),
+                            ...provider.listWalletTxs.map((w) {
+                              final int amount = (w['amount'] as num?)?.toInt() ?? 0;
+                              final String status = w['status'] ?? 'pending';
+                              final String date = w['createdAt'] != null ? w['createdAt'].toString().split('T')[0] : '';
+                              final Color statusColor = status == 'paid' ? const Color(0xFF16A34A) : const Color(0xFFF59E0B);
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Top Up Saldo Dompet', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            Text(date, style: const TextStyle(fontSize: 9, color: Colors.grey)),
+                                            const SizedBox(width: 6),
+                                            Container(
+                                              decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                              child: Text(status.toUpperCase(), style: TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: statusColor)),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      '+ ${fmtMoney(amount)}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF16A34A),
+                                      ),
                                     ),
                                   ],
                                 ),

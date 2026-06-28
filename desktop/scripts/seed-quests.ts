@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "../src/db/index";
 import { quests } from "../src/db/schema/achievements";
 

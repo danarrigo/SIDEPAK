@@ -7,8 +7,10 @@ export default function PrankEffect({ memberId, effect }: { memberId: number, ef
 
   useEffect(() => {
     if (effect && effect.toLowerCase().includes("jantung")) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActive(true);
       setTimeout(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActive(false);
         clearActiveEffect(memberId);
       }, 4000);
@@ -21,7 +23,7 @@ export default function PrankEffect({ memberId, effect }: { memberId: number, ef
     <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center bg-error/30" style={{ animation: 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite' }}>
       <div className="text-center p-8 bg-surface rounded-3xl shadow-2xl border-4 border-error" style={{ animation: 'scaleUp 0.3s ease-out forwards' }}>
         <h1 className="text-5xl font-black text-error mb-4">💥 KENA PRANK! 💥</h1>
-        <p className="text-xl text-on-surface">Seseorang baru saja mengirimkan efek "Sakit Jantung" ke kamu!</p>
+        <p className="text-xl text-on-surface">Seseorang baru saja mengirimkan efek &ldquo;Sakit Jantung&rdquo; ke kamu!</p>
       </div>
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes shake {

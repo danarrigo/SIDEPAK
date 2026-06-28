@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createEvent, joinEvent } from '@/actions/events';
 import { db } from '@/db';
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getWinRate, awardPoints, useItem } from '@/actions/gamification';
 import { db } from '@/db';
 

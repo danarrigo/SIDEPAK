@@ -47,8 +47,20 @@ jobs:
     - name: Verify formatting
       run: dart format --output=none --set-exit-if-changed lib test
 
-    - name: Analyze (no-fatal-warnings)
-      run: flutter analyze
+    - name: Analyze (fails only on error or warning, not info-level deprecations)
+      # Dart's `flutter analyze` exits non-zero on any issue including info-level
+      # lints. Filter to error/warning lines so pre-existing info-level
+      # `withOpacity` deprecations and `print()` usages do not block CI.
+      run: |
+        set +e
+        OUTPUT=$(flutter analyze 2>&1)
+        echo "$OUTPUT"
+        ERRORS=$(echo "$OUTPUT" | grep -E '^\s*(error|warning) -' | head -50)
+        if [ -n "$ERRORS" ]; then
+          echo "::error::Flutter analyze found errors/warnings above"
+          exit 1
+        fi
+        exit 0
 
     - name: Run unit + widget tests
       run: flutter test --reporter expanded

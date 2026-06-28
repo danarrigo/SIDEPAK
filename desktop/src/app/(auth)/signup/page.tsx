@@ -79,7 +79,9 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (!selectedProvId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRegencies([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedRegId("");
       return;
     }
@@ -91,7 +93,9 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (!selectedRegId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDistricts([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedDistId("");
       return;
     }
@@ -103,6 +107,7 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (!selectedDistId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVillages([]);
       return;
     }

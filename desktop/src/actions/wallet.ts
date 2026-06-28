@@ -2,7 +2,7 @@
 import { db } from "@/db";
 import { walletTransactions } from "@/db/schema/wallet";
 import { memberProgress } from "@/db/schema/gamification";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 const XENDIT_SECRET_KEY = process.env.XENDIT_SECRET_KEY || "";
 

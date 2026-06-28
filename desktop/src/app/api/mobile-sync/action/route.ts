@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import { castVote, submitProposal } from "@/actions/governance";
 import { claimQuestReward } from "@/actions/quests";

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/koperasi_provider.dart';
+import 'members_directory_view.dart';
 
 class KoperasiView extends StatelessWidget {
   const KoperasiView({super.key});
@@ -66,7 +67,39 @@ class KoperasiView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Statistik Koperasi', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Statistik Koperasi', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const MembersDirectoryView()),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.white30),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Lihat Anggota',
+                                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                    ),
+                                    SizedBox(width: 2),
+                                    Icon(Icons.arrow_forward, color: Colors.white, size: 12),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 16),
                         GridView.count(
                           crossAxisCount: 2,
@@ -137,9 +170,15 @@ class KoperasiView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Agenda E-RAT Aktif',
-                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Agenda E-RAT Aktif',
+                            style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                          if (mainProposal != null) _buildSisaWaktu(mainProposal),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -151,6 +190,30 @@ class KoperasiView extends StatelessWidget {
                         Text(
                           proposalDesc,
                           style: const TextStyle(color: Colors.white70, fontSize: 11, height: 1.4),
+                        ),
+                      ],
+                      if (mainProposal != null && mainProposal['targetQuorumPercentage'] != null) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.white24),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'TARGET QUORUM',
+                                style: TextStyle(color: Colors.white70, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1),
+                              ),
+                              Text(
+                                '${mainProposal['targetQuorumPercentage']}%',
+                                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                       const SizedBox(height: 16),
@@ -372,6 +435,43 @@ class KoperasiView extends StatelessWidget {
         ],
       ),
     ));
+  }
+
+  Widget _buildSisaWaktu(Map<String, dynamic> proposal) {
+    final end = proposal['endDate'];
+    if (end == null) return const SizedBox.shrink();
+    final endDate = DateTime.tryParse(end.toString());
+    if (endDate == null) return const SizedBox.shrink();
+    final diff = endDate.difference(DateTime.now());
+    final days = diff.inDays;
+    final hours = diff.inHours % 24;
+    String label;
+    if (diff.isNegative) {
+      label = 'Selesai';
+    } else if (days >= 1) {
+      label = '$days hari ${hours}j lagi';
+    } else {
+      label = '${diff.inHours}j ${diff.inMinutes % 60}m lagi';
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.white30),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.timer, size: 10, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildWhiteStatCard(String label, String val, String subText) {

@@ -141,6 +141,14 @@ class MisiView extends StatelessWidget {
                       ),
                     ),
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Misi Harian', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF334155))),
+                      _buildResetCountdown(),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                   _buildMissionSectionCard(context, 'Misi Harian', true),
                   const SizedBox(height: 16),
                   _buildMissionSectionCard(context, 'Misi Mingguan', false),
@@ -281,6 +289,32 @@ class MisiView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildResetCountdown() {
+    final now = DateTime.now();
+    final midnight = DateTime(now.year, now.month, now.day).add(const Duration(days: 1));
+    final diff = midnight.difference(now);
+    final hours = diff.inHours;
+    final minutes = diff.inMinutes % 60;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFACC15).withOpacity(0.15),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.refresh, size: 10, color: Color(0xFFB45309)),
+          const SizedBox(width: 4),
+          Text(
+            'Reset ${hours}j ${minutes}m',
+            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFFB45309)),
+          ),
+        ],
       ),
     );
   }

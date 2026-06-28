@@ -75,20 +75,25 @@ class ProfileView extends StatelessWidget {
                           style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.3),
                         ),
                         const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.white30),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(rankIcon, color: Colors.white, size: 14),
-                              const SizedBox(width: 4),
-                              Text('RANK ${provider.rankName.toUpperCase()}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                            ],
+                        GestureDetector(
+                          onLongPress: () => _showBenefitSheet(context, provider.rankName),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.white30),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(rankIcon, color: Colors.white, size: 14),
+                                const SizedBox(width: 4),
+                                Text('RANK ${provider.rankName.toUpperCase()}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                const SizedBox(width: 4),
+                                const Icon(Icons.info_outline, color: Colors.white70, size: 10),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -233,6 +238,10 @@ class ProfileView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                // Active Loan Card (Phase 4c)
+                if (provider.activeLoan != null) _buildActiveLoanCard(provider.activeLoan!),
+                if (provider.activeLoan != null) const SizedBox(height: 16),
 
                 // Dampak Personal (DB-backed)
                 const Text('Dampak Personal', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
@@ -692,6 +701,233 @@ class ProfileView extends StatelessWidget {
         ],
       ),
     ));
+  }
+
+  Widget _buildActiveLoanCard(Map<String, dynamic> loan) {
+    final amount = (loan['amount'] as num?)?.toInt() ?? 0;
+    final interestRate = (loan['interestRate'] as num?)?.toInt() ?? 0;
+    final status = (loan['status'] as String?)?.toUpperCase() ?? 'PENDING';
+    final dueDate = loan['dueDate'] != null
+        ? DateTime.tryParse(loan['dueDate'].toString())
+        : null;
+    final dueDateStr = dueDate != null
+        ? '${dueDate.day.toString().padLeft(2, '0')}/${dueDate.month.toString().padLeft(2, '0')}/${dueDate.year}'
+        : 'Belum ditentukan';
+
+    final statusColor = status == 'APPROVED'
+        ? const Color(0xFF3B82F6)
+        : status == 'PAID'
+            ? const Color(0xFF16A34A)
+            : const Color(0xFFF59E0B);
+
+    String fmtMoney(int v) =>
+        'Rp ${v.toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.credit_card, color: Color(0xFF1E293B), size: 18),
+                  SizedBox(width: 6),
+                  Text(
+                    'Status Pinjaman',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: statusColor),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('TOTAL PINJAMAN', style: TextStyle(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  const SizedBox(height: 2),
+                  Text(
+                    fmtMoney(amount),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF1E293B)),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text('BUNGA', style: TextStyle(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$interestRate%',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFFDC2626)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.event, size: 14, color: Color(0xFF64748B)),
+                const SizedBox(width: 6),
+                Text(
+                  'Jatuh tempo: $dueDateStr',
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF1E293B), fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F172A),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'BAYAR',
+                    style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showBenefitSheet(BuildContext context, String rank) {
+    final benefits = _getRankBenefits(rank);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                const Icon(Icons.workspace_premium, color: Color(0xFFFACC15), size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  'Benefit Rank $rank',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ...benefits.map((b) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle, size: 16, color: Color(0xFF16A34A)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      b,
+                      style: const TextStyle(fontSize: 13, color: Color(0xFF1E293B), fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            )),
+            const SizedBox(height: 8),
+            Text(
+              'Tingkatkan rank untuk membuka benefit eksklusif lainnya!',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 10, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<String> _getRankBenefits(String rank) {
+    switch (rank) {
+      case 'Perunggu':
+        return [
+          'Bunga pinjaman standar',
+          'Akses semua misi dasar',
+          'Cashback belanja 0%',
+        ];
+      case 'Perak':
+        return [
+          'Bunga pinjaman -1%',
+          'Prioritas layanan Silver',
+          'Cashback belanja 5%',
+          'Akses misi premium',
+        ];
+      case 'Emas':
+        return [
+          'Bunga pinjaman -2%',
+          'Prioritas layanan Gold',
+          'Cashback belanja 10%',
+          'Bisa mengajukan proposal',
+          'Bisa membuat event',
+        ];
+      case 'Platinum':
+        return [
+          'Bunga pinjaman -3%',
+          'Prioritas layanan Platinum',
+          'Cashback belanja 15%',
+          'Limit pinjaman lebih tinggi',
+        ];
+      case 'Legenda':
+        return [
+          'Bunga pinjaman -5%',
+          'Prioritas tertinggi',
+          'Cashback belanja 20%',
+          'Limit pinjaman maksimal',
+          'Akses fitur eksklusif',
+        ];
+      default:
+        return ['Benefit standar'];
+    }
   }
 
   Widget _buildTopBadge(IconData icon, String text, Color textCol, Color bgCol, {Color? iconColor}) {

@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { castVote, submitProposal } from "@/actions/governance";
 import { claimQuestReward } from "@/actions/quests";
-import { buyShopItem } from "@/actions/shop";
+import { buyShopItem, listMarketplaceItem, buyMarketplaceItem } from "@/actions/shop";
 import { useItem as applyItem } from "@/actions/gamification";
 import { createTopUpInvoice, verifyInvoicePayment } from "@/actions/wallet";
 import { payDuesFromWallet, depositSavingsFromWallet } from "@/actions/financials";
+import { joinEvent, createEvent } from "@/actions/events";
+import { matchmakeWeeklyBattle } from "@/actions/arena";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
 import { members } from '@/db/schema';
@@ -16,21 +18,33 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { action } = body;
-    let memberId = body.memberId || 1;
 
     const headerList = await headers();
     const authHeader = headerList.get('authorization');
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      const supabase = createSupabaseClient();
-      const { data: { user } } = await supabase.auth.getUser(token);
-      if (user) {
-        const [member] = await db.select().from(members).where(eq(members.userId, user.id));
-        if (member) {
-          memberId = member.id;
-        }
-      }
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required: missing Bearer token' },
+        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
     }
+    const token = authHeader.substring(7);
+    const supabase = createSupabaseClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or expired session token' },
+        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
+    }
+    const [member] = await db.select().from(members).where(eq(members.userId, user.id));
+    if (!member) {
+      return NextResponse.json(
+        { success: false, error: 'No member profile linked to this account' },
+        { status: 403, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
+    }
+    // SECURITY: never trust body.memberId — always use token-derived memberId
+    const memberId = member.id;
 
     let result: { success: boolean; error?: string; updatedPoints?: number } & Record<string, unknown> = { success: false, error: "Invalid action" };
 
@@ -63,6 +77,27 @@ export async function POST(request: Request) {
     } else if (action === 'deposit-savings-wallet') {
       const { amount, description } = body;
       result = await depositSavingsFromWallet(memberId, amount, description);
+    } else if (action === 'list-marketplace-item') {
+      const { name, description, priceInPoints, stock, imageUrl } = body;
+      result = await listMarketplaceItem({
+        sellerId: memberId,
+        name: name || '',
+        description: description || '',
+        priceInPoints: Number(priceInPoints) || 0,
+        stock: Number(stock) || 1,
+        imageUrl: imageUrl || undefined,
+      });
+    } else if (action === 'buy-marketplace-item') {
+      const { itemId } = body;
+      result = await buyMarketplaceItem(memberId, Number(itemId));
+    } else if (action === 'join-event') {
+      const { eventId } = body;
+      result = await joinEvent(memberId, Number(eventId));
+    } else if (action === 'create-event') {
+      const { name, description, startDate, endDate } = body;
+      result = await createEvent(memberId, name || '', description || '', new Date(startDate), new Date(endDate));
+    } else if (action === 'matchmake-battle') {
+      result = await matchmakeWeeklyBattle(memberId);
     }
 
     return NextResponse.json(result, {

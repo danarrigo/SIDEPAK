@@ -2,16 +2,19 @@ name: Desktop CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "mobile" ]
     paths:
       - 'desktop/**'
+      - '.github/workflows/desktop-ci.yml'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "mobile" ]
     paths:
       - 'desktop/**'
+      - '.github/workflows/desktop-ci.yml'
 
 jobs:
   test:
+    name: Lint, Type-check & Test
     runs-on: ubuntu-latest
     
     defaults:
@@ -31,6 +34,12 @@ jobs:
 
     - name: Install dependencies
       run: npm install
+
+    - name: Lint
+      run: npm run lint
+
+    - name: TypeScript type-check
+      run: npx tsc --noEmit
 
     - name: Run Tests
       run: npm run test

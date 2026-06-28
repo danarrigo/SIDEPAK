@@ -7,6 +7,9 @@ import 'views/battle_view.dart';
 import 'views/koperasi_view.dart';
 import 'views/profile_view.dart';
 import 'views/login_view.dart';
+import 'views/marketplace_view.dart';
+import 'views/events_view.dart';
+import 'views/widgets/prank_overlay.dart';
 
 void main() {
   runApp(const MyApp());
@@ -51,17 +54,6 @@ class MainNavigationWrapper extends StatefulWidget {
 class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
   int _currentIndex = 0;
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: const TextStyle(fontWeight: FontWeight.bold)),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   Widget _buildBody() {
     switch (_currentIndex) {
       case 0:
@@ -77,8 +69,12 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       case 2:
         return const BattleView();
       case 3:
-        return const KoperasiView();
+        return const MarketplaceView();
       case 4:
+        return const EventsView();
+      case 5:
+        return const KoperasiView();
+      case 6:
         return ProfileView(
           onLogout: () {
             Provider.of<KoperasiProvider>(context, listen: false).logout();
@@ -95,9 +91,15 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
-      body: provider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _buildBody(),
+      body: Stack(
+        children: [
+          provider.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _buildBody(),
+          // Phase 4b: PrankEffect overlay
+          const PrankOverlay(),
+        ],
+      ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Color(0xFF0B1120),
@@ -106,16 +108,18 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
             BoxShadow(color: Colors.black45, blurRadius: 20, offset: Offset(0, -4))
           ],
         ),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
         child: SafeArea(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildNavItem(0, Icons.home, 'Beranda'),
-              _buildNavItem(1, Icons.assignment, 'Misi'),
-              _buildNavItem(2, Icons.bolt, 'Bertanding'),
-              _buildNavItem(3, Icons.account_balance, 'Koperasi'),
-              _buildNavItem(4, Icons.person, 'Profil'),
+              _buildNavItem(0, Icons.home_rounded, 'Beranda'),
+              _buildNavItem(1, Icons.assignment_rounded, 'Misi'),
+              _buildNavItem(2, Icons.bolt_rounded, 'Arena'),
+              _buildNavItem(3, Icons.storefront_rounded, 'Pasar'),
+              _buildNavItem(4, Icons.event_rounded, 'Event'),
+              _buildNavItem(5, Icons.account_balance_rounded, 'Koperasi'),
+              _buildNavItem(6, Icons.person_rounded, 'Profil'),
             ],
           ),
         ),
@@ -136,13 +140,13 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
-          padding: EdgeInsets.symmetric(vertical: isActive ? 8 : 6, horizontal: 2),
+          padding: EdgeInsets.symmetric(vertical: isActive ? 6 : 4, horizontal: 1),
           decoration: isActive
               ? BoxDecoration(
                   color: const Color(0xFF1E293B),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(12),
                   boxShadow: [
-                    BoxShadow(color: const Color(0xFFFACC15).withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 4)),
+                    BoxShadow(color: const Color(0xFFFACC15).withOpacity(0.18), blurRadius: 8, offset: const Offset(0, 3)),
                   ],
                 )
               : const BoxDecoration(color: Colors.transparent),
@@ -154,18 +158,18 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                 child: Icon(
                   icon,
                   color: isActive ? const Color(0xFFFACC15) : const Color(0xFF64748B),
-                  size: isActive ? 28 : 24,
+                  size: isActive ? 22 : 20,
                   shadows: isActive
-                      ? [Shadow(color: const Color(0xFFFACC15).withOpacity(0.5), blurRadius: 12)]
+                      ? [Shadow(color: const Color(0xFFFACC15).withOpacity(0.5), blurRadius: 8)]
                       : null,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 250),
                 style: TextStyle(
                   color: isActive ? const Color(0xFFFACC15) : const Color(0xFF64748B),
-                  fontSize: isActive ? 10.5 : 9,
+                  fontSize: isActive ? 9 : 8,
                   fontWeight: isActive ? FontWeight.w900 : FontWeight.w600,
                   fontFamily: 'Inter',
                 ),

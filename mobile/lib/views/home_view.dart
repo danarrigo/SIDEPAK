@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/koperasi_provider.dart';
 import '../models/mission.dart';
 import 'simpanan_view.dart';
+import 'widgets/leaderboard_section.dart';
 
 class HomeView extends StatelessWidget {
   final Function(int) onNavigate;
@@ -445,63 +446,8 @@ class HomeView extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // Leaderboard — DB-backed
-                        const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Papan Peringkat',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        provider.leaderboard.isEmpty
-                            ? const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                child: Text('Belum ada data peringkat.', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                              )
-                            : ListView.separated(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: provider.leaderboard.length > 3 ? 3 : provider.leaderboard.length,
-                                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                                itemBuilder: (context, i) {
-                                  final m = provider.leaderboard[i];
-                                  final medal = i == 0 ? '🥇' : i == 1 ? '🥈' : '🥉';
-                                  return Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: Colors.grey.shade200),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                    child: Row(
-                                      children: [
-                                        Text(medal, style: const TextStyle(fontSize: 18)),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                m['namaLengkap'] ?? 'Anggota',
-                                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
-                                              ),
-                                              Text(
-                                                'Level ${m['level'] ?? 1}',
-                                                style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Text(
-                                          '${m['xp'] ?? 0} XP',
-                                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFFF59E0B)),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
+                        // Leaderboard — DB-backed (Phase 3: multi-scope)
+                        LeaderboardSection(provider: provider),
                         const SizedBox(height: 20),
                       ],
                     ),

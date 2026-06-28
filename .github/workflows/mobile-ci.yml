@@ -1,0 +1,60 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [ "main", "mobile" ]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+  pull_request:
+    branches: [ "main", "mobile" ]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+
+jobs:
+  test:
+    name: Flutter analyze & test
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./mobile
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Java (required for Flutter Android builds)
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version: '3.27.0'
+        cache: true
+
+    - name: Show Flutter version
+      run: flutter --version
+
+    - name: Get pub dependencies
+      run: flutter pub get
+
+    - name: Verify formatting
+      run: dart format --output=none --set-exit-if-changed lib test
+
+    - name: Analyze (no-fatal-warnings)
+      run: flutter analyze
+
+    - name: Run unit + widget tests
+      run: flutter test --reporter expanded
+
+    - name: Upload coverage (if configured)
+      if: always()
+      run: |
+        echo "Coverage artifact collection can be added here if lcov is enabled."
+        # flutter test --coverage produces coverage/lcov.info

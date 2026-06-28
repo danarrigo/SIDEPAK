@@ -4,7 +4,11 @@ import { getFinancialsData } from "@/actions/financials";
 import { getActiveQuests } from "@/actions/quests";
 import { getGovernanceData, getKoperasiStats } from "@/actions/governance";
 import { getArenaData, getBattleHistory } from "@/actions/arena";
-import { getMemberBadges, getWinRate, getStoreItems, getLeaderboard, getMemberInventory } from "@/actions/gamification";
+import { getMemberBadges, getWinRate, getStoreItems, getLeaderboard, getLeaderboardProvincial, getLeaderboardNational, getMemberInventory } from "@/actions/gamification";
+import { getMarketplaceItems } from "@/actions/shop";
+import { getEventsByCooperative, getMemberEventParticipations } from "@/actions/events";
+import { getActiveMembers } from "@/actions/members";
+import { getActiveLoan } from "@/actions/financials";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
 import { members } from '@/db/schema';
@@ -13,26 +17,40 @@ import { headers } from 'next/headers';
 
 export async function GET() {
   try {
-    let memberId = 1; // Fallback default
-    let cooperativeId = 1; // Fallback default
+    let memberId = -1;
+    let cooperativeId = -1;
+    let currentProvinsi: string | null = null;
 
     const headerList = await headers();
     const authHeader = headerList.get('authorization');
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      const supabase = createSupabaseClient();
-      const { data: { user } } = await supabase.auth.getUser(token);
-      if (user) {
-        const [member] = await db.select().from(members).where(eq(members.userId, user.id));
-        if (member) {
-          memberId = member.id;
-          if (member.cooperativeId) cooperativeId = member.cooperativeId;
-        }
-      }
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required: missing Bearer token' },
+        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
     }
+    const token = authHeader.substring(7);
+    const supabase = createSupabaseClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or expired session token' },
+        { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
+    }
+    const [member] = await db.select().from(members).where(eq(members.userId, user.id));
+    if (!member) {
+      return NextResponse.json(
+        { success: false, error: 'No member profile linked to this account' },
+        { status: 403, headers: { 'Access-Control-Allow-Origin': '*' } }
+      );
+    }
+    memberId = member.id;
+    if (member.cooperativeId) cooperativeId = member.cooperativeId;
+    currentProvinsi = member.provinsi || null;
     
     // Fetch all data concurrently
-    const [dashboardData, financialsData, questsData, governanceData, arenaData, koperasiStats, battleHistoryData, badgesData, winRateData, storeItemsData, leaderboardData, inventoryData] = await Promise.all([
+    const [dashboardData, financialsData, questsData, governanceData, arenaData, koperasiStats, battleHistoryData, badgesData, winRateData, storeItemsData, leaderboardData, inventoryData, marketplaceData, eventsData, eventParticipationsData, leaderboardByProvinsi, leaderboardByNasional, activeMembersData, activeLoanData] = await Promise.all([
       getDashboardData(memberId),
       getFinancialsData(memberId),
       getActiveQuests(memberId),
@@ -45,6 +63,13 @@ export async function GET() {
       getStoreItems(),
       getLeaderboard(cooperativeId),
       getMemberInventory(memberId),
+      getMarketplaceItems(),
+      getEventsByCooperative(cooperativeId),
+      getMemberEventParticipations(memberId),
+      currentProvinsi ? getLeaderboardProvincial(currentProvinsi).catch(() => []) : Promise.resolve([]),
+      getLeaderboardNational().catch(() => []),
+      cooperativeId ? getActiveMembers(cooperativeId).catch(() => []) : Promise.resolve([]),
+      getActiveLoan(memberId).catch(() => null),
     ]);
 
     return NextResponse.json({
@@ -67,6 +92,14 @@ export async function GET() {
         storeItems: storeItemsData,
         leaderboard: leaderboardData,
         inventory: inventoryData,
+        marketplaceItems: marketplaceData,
+        events: (eventsData as any)?.events || [],
+        joinedEventIds: ((eventParticipationsData as any)?.participations || []).map((p: any) => p?.event?.id).filter((id: any) => id != null),
+        leaderboardByProvinsi,
+        leaderboardByNasional: leaderboardByNasional,
+        activeMembers: activeMembersData,
+        activeLoan: activeLoanData,
+        activeEffect: dashboardData?.progress?.activeEffect ?? null,
       }
     }, {
       headers: {

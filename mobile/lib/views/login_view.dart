@@ -15,6 +15,25 @@ class _LoginViewState extends State<LoginView> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
+  String? _sessionExpiredMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    // After routing to LoginView from a session-expired event, show a one-time
+    // snackbar-style banner explaining why the user was signed out.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final provider = context.read<KoperasiProvider>();
+      if (provider.sessionExpired) {
+        setState(() {
+          _sessionExpiredMessage = provider.lastFetchError ??
+              'Sesi Anda telah berakhir. Silakan login ulang.';
+        });
+        provider.clearSessionExpired();
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -40,7 +59,7 @@ class _LoginViewState extends State<LoginView> {
     });
 
     final provider = context.read<KoperasiProvider>();
-    final success = await provider.login(email, password);
+    final errorMessage = await provider.login(email, password);
 
     if (!mounted) return;
 
@@ -48,9 +67,9 @@ class _LoginViewState extends State<LoginView> {
       _isLoading = false;
     });
 
-    if (!success) {
+    if (errorMessage != null) {
       setState(() {
-        _errorMessage = 'Login gagal. Silakan periksa email/password Anda.';
+        _errorMessage = errorMessage;
       });
     }
   }
@@ -80,6 +99,32 @@ class _LoginViewState extends State<LoginView> {
                 style: TextStyle(color: Colors.white60, fontSize: 12),
               ),
               const SizedBox(height: 32),
+              if (_sessionExpiredMessage != null)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.amber.withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.lock_clock, color: Colors.amber, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _sessionExpiredMessage!,
+                          style: const TextStyle(
+                            color: Colors.amberAccent,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               if (_errorMessage != null)
                 Container(
                   padding: const EdgeInsets.all(12),

@@ -1,30 +1,41 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:mobile/main.dart';
+import 'package:mobile/providers/koperasi_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('App boots and shows LoginView when not logged in', (tester) async {
     await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
+    expect(find.text('Koperasi Sukamaju'), findsOneWidget);
+    expect(find.text('Masuk'), findsOneWidget);
+    // 'Daftar Sekarang' is part of the longer string 'Belum memiliki akun? Daftar Sekarang'
+    expect(find.textContaining('Daftar Sekarang'), findsOneWidget);
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('MainNavigationWrapper renders 7 bottom nav items when logged in', (tester) async {
+    final fake = ChangeNotifierProvider<KoperasiProvider>(
+      create: (_) {
+        // Bypass real loadSavedSession to keep test deterministic
+        final p = KoperasiProvider();
+        p.isLoggedIn = true;
+        p.memberId = 1;
+        p.fullName = 'Tester';
+        return p;
+      },
+      child: const MaterialApp(home: MainNavigationWrapper()),
+    );
+    await tester.pumpWidget(fake);
+    // Render initial loading spinner
+    await tester.pump();
+    // All 7 nav labels should be present
+    expect(find.text('Beranda'), findsOneWidget);
+    expect(find.text('Misi'), findsOneWidget);
+    expect(find.text('Arena'), findsOneWidget);
+    expect(find.text('Pasar'), findsOneWidget);
+    expect(find.text('Event'), findsOneWidget);
+    expect(find.text('Koperasi'), findsOneWidget);
+    expect(find.text('Profil'), findsOneWidget);
   });
 }

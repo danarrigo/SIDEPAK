@@ -38,6 +38,7 @@ export default async function Page() {
 
   const handleCreateProposal = async (formData: FormData) => {
     "use server";
+    if (!currentMember) return;
     const title = formData.get("title") as string;
     const desc = formData.get("description") as string;
     await submitProposal(currentMember.id, title, desc);
@@ -54,6 +55,7 @@ export default async function Page() {
 
   async function voteAction(formData: FormData) {
     "use server";
+    if (!currentMember) return;
     const voteType = formData.get("voteType") as string;
     await castVote(currentMember.id, mainProposal?.id || 1, voteType);
     revalidatePath("/governance");

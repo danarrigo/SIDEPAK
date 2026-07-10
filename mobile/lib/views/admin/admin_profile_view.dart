@@ -21,7 +21,8 @@ class AdminProfileView extends StatelessWidget {
             pinned: true,
             expandedHeight: 80,
             flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              titlePadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               title: const Text(
                 'Profil Pengurus',
                 style: TextStyle(
@@ -87,7 +88,8 @@ class AdminProfileView extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
                             color: const Color(0xFF0F172A),
                             borderRadius: BorderRadius.circular(12),
@@ -106,7 +108,6 @@ class AdminProfileView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
                   const Text(
                     'Informasi Koperasi',
                     style: TextStyle(
@@ -127,19 +128,22 @@ class AdminProfileView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow('Nama Koperasi', provider.koperasiName ?? 'Koperasi belum terhubung'),
+                        _buildInfoRow(
+                            'Nama Koperasi',
+                            provider.koperasiName ??
+                                'Koperasi belum terhubung'),
                       ],
                     ),
                   ),
-                  
                   const SizedBox(height: 24),
-                  
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Fitur ubah sandi & profil akan segera hadir untuk aplikasi mobile!')),
+                          const SnackBar(
+                              content: Text(
+                                  'Fitur ubah sandi & profil akan segera hadir untuk aplikasi mobile!')),
                         );
                       },
                       style: ElevatedButton.styleFrom(
@@ -159,15 +163,14 @@ class AdminProfileView extends StatelessWidget {
                           SizedBox(width: 8),
                           Text(
                             'Edit Profil (Segera)',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  
                   const SizedBox(height: 12),
-
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -188,13 +191,13 @@ class AdminProfileView extends StatelessWidget {
                           SizedBox(width: 8),
                           Text(
                             'Keluar (Logout)',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  
                   const SizedBox(height: 40),
                 ],
               ),

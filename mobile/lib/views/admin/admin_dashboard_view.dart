@@ -37,7 +37,8 @@ class AdminDashboardView extends StatelessWidget {
             pinned: true,
             expandedHeight: 80,
             flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              titlePadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               title: Text(
                 'Dashboard Pengurus',
                 style: const TextStyle(
@@ -120,7 +121,6 @@ class AdminDashboardView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
                   _buildMetricCard(
                     title: 'Total Anggota',
                     value: totalMembers.toString(),
@@ -128,7 +128,6 @@ class AdminDashboardView extends StatelessWidget {
                     color: const Color(0xFFFACC15),
                   ),
                   const SizedBox(height: 12),
-                  
                   _buildMetricCard(
                     title: 'Anggota Aktif',
                     subtitle: 'Lunas Simpanan Pokok',
@@ -137,7 +136,6 @@ class AdminDashboardView extends StatelessWidget {
                     color: Colors.teal,
                   ),
                   const SizedBox(height: 12),
-
                   _buildMetricCard(
                     title: 'Pinjaman Aktif',
                     value: _formatRupiah(totalActiveLoans),
@@ -145,7 +143,6 @@ class AdminDashboardView extends StatelessWidget {
                     color: Colors.amber,
                   ),
                   const SizedBox(height: 12),
-
                   _buildMetricCard(
                     title: 'Total Aset Koperasi',
                     value: _formatRupiah(totalAssets),
@@ -153,7 +150,6 @@ class AdminDashboardView extends StatelessWidget {
                     color: Colors.blue,
                   ),
                   const SizedBox(height: 24),
-
                   const Text(
                     'Menunggu Persetujuan',
                     style: TextStyle(
@@ -165,15 +161,19 @@ class AdminDashboardView extends StatelessWidget {
                   const SizedBox(height: 16),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 40, horizontal: 20),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+                      border: Border.all(
+                          color: Colors.grey.shade300,
+                          style: BorderStyle.solid),
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.task_rounded, size: 48, color: Colors.grey.shade300),
+                        Icon(Icons.task_rounded,
+                            size: 48, color: Colors.grey.shade300),
                         const SizedBox(height: 12),
                         const Text(
                           'Belum ada pengajuan baru yang perlu diproses hari ini.',

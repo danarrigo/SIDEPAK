@@ -123,7 +123,8 @@ class _AdminNavigationWrapperState extends State<AdminNavigationWrapper> {
                   fontWeight: isActive ? FontWeight.w900 : FontWeight.w600,
                   fontFamily: 'Inter',
                 ),
-                child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+                child:
+                    Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
             ],
           ),

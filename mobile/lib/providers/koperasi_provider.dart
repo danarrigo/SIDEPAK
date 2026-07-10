@@ -443,7 +443,7 @@ class KoperasiProvider extends ChangeNotifier {
         // Sync notifications and profile data
         listNotifications = data['notifications'] ?? [];
         phoneNumber = data['profile']?['nomorHp'] ?? phoneNumber;
-        
+
         if (data['profile']?['role'] != null) {
           role = data['profile']?['role'];
         }

@@ -78,7 +78,8 @@ export default async function Page() {
         <ArenaClient 
           memberId={currentMember.id} 
           initialBattles={activeBattles} 
-          myKoperasiName={myKoperasiScore?.koperasiName || "Koperasi Anda"} 
+          myName={currentMember.namaLengkap}
+          myKoperasiName={currentMember.koperasi || myKoperasiScore?.koperasiName || "Koperasi Anda"} 
           rivalKoperasiName={rivalCooperative?.name || "Koperasi Rival"} 
         />
 
@@ -165,7 +166,13 @@ export default async function Page() {
         )}
 
         {/* 1v1 Arena Client for Battles */}
-        <ArenaClient memberId={currentMember.id} initialBattles={activeBattles} />
+        <ArenaClient 
+          memberId={currentMember.id} 
+          initialBattles={activeBattles}
+          myName={currentMember.namaLengkap}
+          myKoperasiName={currentMember.koperasi || myKoperasiScore?.koperasiName || "Koperasi Anda"} 
+          rivalKoperasiName={rivalCooperative?.name || "Koperasi Rival"}
+        />
 
         <div className="bg-surface-container rounded-2xl overflow-hidden shadow-sm border border-outline-variant mt-8">
           <div className="p-4 border-b border-outline-variant bg-surface-container-low">

@@ -3,7 +3,7 @@ import { getMemberInventory } from "@/actions/gamification";
 import UseItemClient from "@/components/UseItemClient";
 import AutoMatchmake from "@/components/AutoMatchmake";
 
-export default async function ArenaClient({ memberId, initialBattles, myKoperasiName, rivalKoperasiName }: { memberId: number, initialBattles: any[], myKoperasiName?: string, rivalKoperasiName?: string }) {
+export default async function ArenaClient({ memberId, initialBattles, myName = "Anda", myKoperasiName, rivalKoperasiName }: { memberId: number, initialBattles: any[], myName?: string, myKoperasiName?: string, rivalKoperasiName?: string }) {
   const { pastBattles } = await getBattleHistory(memberId);
   const battle = initialBattles[0];
   
@@ -17,9 +17,7 @@ export default async function ArenaClient({ memberId, initialBattles, myKoperasi
   const opponent = battle?.opponent;
   const opponentName = opponent?.namaLengkap ? opponent.namaLengkap.split(' ')[0] : "Menunggu Lawan";
   
-  // We need current member's name. We can fetch it or just use "Anda"
-  const myName = "Anda"; // Or we could pass it as a prop, but "Anda" is fine for the UI.
-  
+  const displayMyName = myName.split(' ')[0];
   const p1Pct = Math.min(100, Math.floor((p1 / 10000) * 100));
   const p2Pct = Math.min(100, Math.floor((p2 / 10000) * 100));
 
@@ -41,11 +39,11 @@ export default async function ArenaClient({ memberId, initialBattles, myKoperasi
           <div className="relative mb-6">
             <div className="w-40 h-40 rounded-full border-4 border-primary p-1">
               <div className="w-full h-full rounded-full overflow-hidden bg-surface-container-highest flex items-center justify-center text-4xl font-bold text-primary">
-                A
+                {displayMyName.charAt(0).toUpperCase()}
               </div>
             </div>
           </div>
-          <h3 className="font-headline-md text-headline-md text-on-surface mb-1">{myName}</h3>
+          <h3 className="font-headline-md text-headline-md text-on-surface mb-1">{displayMyName}</h3>
           {myKoperasiName && <span className="font-label-caps text-label-caps text-primary mb-1 block text-[10px]">{myKoperasiName}</span>}
           <span className="font-label-caps text-label-caps text-on-surface-variant mb-6">Anda</span>
           <UseItemClient currentMemberId={memberId} targetMemberId={battle?.opponent?.id} inventory={inventory} />

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/koperasi_provider.dart';
+import '../models/history_item.dart';
 
 class BattleView extends StatelessWidget {
   const BattleView({super.key});
@@ -9,13 +10,50 @@ class BattleView extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<KoperasiProvider>();
 
-    // Mock data based on new Guild War design
-    final myCoopName = "Koperasi Suka Maju";
-    final rivalCoopName = "Koperasi Jaya Abadi";
-    final myCoopScore = 12; // Wins
-    final rivalCoopScore = 9; // Wins
-    final myCoopRank = 1;
-    final totalXp = 1500;
+    final activeBattle = provider.activeBattle;
+    final myStats = provider.myStats ?? {
+      'missionsCompleted': 0, 'totalSavings': 0, 'savingsPts': 0, 'activeStreak': 0,
+      'eventsJoined': 0, 'shopPurchases': 0, 'marketplaceActivity': 0, 'loansCount': 0, 'battlesWon': 0
+    };
+    final opStats = provider.opStats ?? {
+      'missionsCompleted': 0, 'totalSavings': 0, 'savingsPts': 0, 'activeStreak': 0,
+      'eventsJoined': 0, 'shopPurchases': 0, 'marketplaceActivity': 0, 'loansCount': 0, 'battlesWon': 0
+    };
+    final historyList = provider.historyList;
+    final memberId = provider.memberId;
+    final myName = provider.fullName?.split(' ')[0] ?? "Anda";
+
+    int p1 = 0;
+    int p2 = 0;
+    String opponentName = 'Menunggu Lawan';
+    if (activeBattle != null) {
+      final challengerId = activeBattle['challengerId'];
+      if (challengerId == memberId) {
+        p1 = (activeBattle['challengerPoints'] as num?)?.toInt() ?? 0;
+        p2 = (activeBattle['opponentPoints'] as num?)?.toInt() ?? 0;
+      } else {
+        p1 = (activeBattle['opponentPoints'] as num?)?.toInt() ?? 0;
+        p2 = (activeBattle['challengerPoints'] as num?)?.toInt() ?? 0;
+      }
+      final op = activeBattle['opponent'];
+      if (op != null && op['namaLengkap'] != null) {
+        opponentName = (op['namaLengkap'] as String).split(' ')[0];
+      }
+    }
+    double p1Pct = (p1 / 10000).clamp(0.0, 1.0);
+    double p2Pct = (p2 / 10000).clamp(0.0, 1.0);
+
+    final statRows = [
+      {'label': 'Misi Harian', 'p1': myStats['missionsCompleted'] ?? 0, 'p2': opStats['missionsCompleted'] ?? 0},
+      {'label': 'Penyetoran Tabungan', 'p1': myStats['savingsPts'] ?? 0, 'p2': opStats['savingsPts'] ?? 0},
+      {'label': 'Konsistensi Login (Streak)', 'p1': myStats['activeStreak'] ?? 0, 'p2': opStats['activeStreak'] ?? 0},
+      {'label': 'Belanja di Koperasi', 'p1': myStats['shopPurchases'] ?? 0, 'p2': opStats['shopPurchases'] ?? 0},
+      {'label': 'Aktivitas Marketplace', 'p1': myStats['marketplaceActivity'] ?? 0, 'p2': opStats['marketplaceActivity'] ?? 0},
+      {'label': 'Partisipasi Acara', 'p1': myStats['eventsJoined'] ?? 0, 'p2': opStats['eventsJoined'] ?? 0},
+      {'label': 'Peminjaman Dana', 'p1': myStats['loansCount'] ?? 0, 'p2': opStats['loansCount'] ?? 0},
+      {'label': 'Kemenangan Battle', 'p1': myStats['battlesWon'] ?? 0, 'p2': opStats['battlesWon'] ?? 0},
+    ];
+    final filteredStats = statRows.where((row) => (row['p1'] as int) > 0 || (row['p2'] as int) > 0).toList();
 
     return RefreshIndicator(
       onRefresh: () => provider.fetchData(),
@@ -36,17 +74,17 @@ class BattleView extends StatelessWidget {
                   top: 60, left: 24, right: 24, bottom: 30),
               child: const Row(
                 children: [
-                  Icon(Icons.emoji_events, color: Colors.white, size: 28),
+                  Icon(Icons.sports_kabaddi, color: Colors.white, size: 28),
                   SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Guild Wars',
+                      Text('Arena 1v1',
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 24,
                               fontWeight: FontWeight.bold)),
-                      Text('Musim Tanam Raya',
+                      Text('Pertandingan Minggu Ini',
                           style: TextStyle(color: Colors.white70, fontSize: 12))
                     ],
                   )
@@ -58,7 +96,7 @@ class BattleView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Guild War Match Card
+                  // Arena Match Card
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -75,178 +113,310 @@ class BattleView extends StatelessWidget {
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
-                        const Text('MINGGU INI VS RIVAL',
-                            style: TextStyle(
-                                color: Color(0xFF1E293B),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 2)),
-                        const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
                               child: Column(
                                 children: [
-                                  const Text('ANDA',
-                                      style: TextStyle(
-                                          color: Color(0xFF0D8ABC),
-                                          fontSize: 10,
+                                  CircleAvatar(
+                                    radius: 30,
+                                    backgroundColor: const Color(0xFF0D8ABC),
+                                    child: Text(
+                                      myName.isNotEmpty ? myName[0].toUpperCase() : 'A',
+                                      style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(myName,
+                                      style: const TextStyle(
+                                          color: Color(0xFF1E293B),
+                                          fontSize: 14,
                                           fontWeight: FontWeight.bold)),
-                                  Text('$myCoopScore',
+                                  const Text('Anda',
+                                      style: TextStyle(
+                                          color: Color(0xFF64748B),
+                                          fontSize: 10)),
+                                  const SizedBox(height: 12),
+                                  Text('$p1',
                                       style: const TextStyle(
                                           color: Color(0xFF0D8ABC),
-                                          fontSize: 36,
+                                          fontSize: 28,
                                           fontWeight: FontWeight.w900)),
                                 ],
                               ),
                             ),
-                            const Text('VS',
-                                style: TextStyle(
-                                    color: Color(0xFF94A3B8),
-                                    fontSize: 20,
-                                    fontStyle: FontStyle.italic,
-                                    fontWeight: FontWeight.w900)),
+                            const Column(
+                              children: [
+                                Text('VS',
+                                    style: TextStyle(
+                                        color: Color(0xFF94A3B8),
+                                        fontSize: 24,
+                                        fontStyle: FontStyle.italic,
+                                        fontWeight: FontWeight.w900)),
+                              ],
+                            ),
                             Expanded(
                               child: Column(
                                 children: [
-                                  const Text('RIVAL',
-                                      style: TextStyle(
-                                          color: Colors.redAccent,
-                                          fontSize: 10,
+                                  CircleAvatar(
+                                    radius: 30,
+                                    backgroundColor: Colors.redAccent,
+                                    child: Text(
+                                      opponentName != 'Menunggu Lawan' && opponentName.isNotEmpty ? opponentName[0].toUpperCase() : '?',
+                                      style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(opponentName,
+                                      style: const TextStyle(
+                                          color: Color(0xFF1E293B),
+                                          fontSize: 14,
                                           fontWeight: FontWeight.bold)),
-                                  Text('$rivalCoopScore',
+                                  const Text('Lawan',
+                                      style: TextStyle(
+                                          color: Color(0xFF64748B),
+                                          fontSize: 10)),
+                                  const SizedBox(height: 12),
+                                  Text('$p2',
                                       style: const TextStyle(
                                           color: Colors.redAccent,
-                                          fontSize: 36,
+                                          fontSize: 28,
                                           fontWeight: FontWeight.w900)),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        Text(rivalCoopName,
-                            style: const TextStyle(
-                                color: Color(0xFF64748B),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 16),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Stack(
+                            children: [
+                              Container(height: 8, color: const Color(0xFFF1F5F9)),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: (p1Pct * 100).toInt() == 0 ? 1 : (p1Pct * 100).toInt(),
+                                    child: Container(height: 8, color: const Color(0xFF0D8ABC)),
+                                  ),
+                                  Expanded(
+                                    flex: (p2Pct * 100).toInt() == 0 ? 1 : (p2Pct * 100).toInt(),
+                                    child: Container(height: 8, color: Colors.redAccent),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
 
                   const SizedBox(height: 24),
 
-                  // 1v1 Battle Button
-                  ElevatedButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Mencari lawan dari koperasi rival...')),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0D8ABC),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                  if (activeBattle == null) ...[
+                    ElevatedButton(
+                      onPressed: () async {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Mencari lawan...')),
+                        );
+                        final msg = await provider.matchmakeBattle();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(msg)),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0D8ABC),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.search, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text('Cari Lawan Otomatis',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold)),
+                        ],
                       ),
                     ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.sports_kabaddi, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text('Cari Lawan 1v1',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ),
+                    const SizedBox(height: 32),
+                  ],
 
-                  const SizedBox(height: 32),
-
-                  // Leaderboard
-                  const Text('Klasemen Liga (Top 50)',
+                  // Stats Details
+                  const Text('Detail Pertandingan 1v1',
                       style: TextStyle(
                           color: Color(0xFF1E293B),
                           fontSize: 18,
                           fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  const Text('Statistik pertandingan minggu ini.',
+                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12)),
                   const SizedBox(height: 12),
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: const Color(0xFFE2E8F0)),
                     ),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 5,
-                      separatorBuilder: (context, index) =>
-                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                      itemBuilder: (context, index) {
-                        final isMine = index == 0;
-                        return Container(
-                          color: isMine ? const Color(0xFF0D8ABC).withOpacity(0.05) : null,
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 24,
-                                child: Text(
-                                  index == 0 ? '🥇' : index == 1 ? '🥈' : index == 2 ? '🥉' : '${index + 1}',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                    child: filteredStats.isEmpty
+                        ? const Padding(
+                            padding: EdgeInsets.all(24.0),
+                            child: Center(
+                              child: Text('Belum ada poin yang dicetak.',
+                                  style: TextStyle(color: Color(0xFF94A3B8), fontStyle: FontStyle.italic)),
+                            ),
+                          )
+                        : ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: filteredStats.length,
+                            separatorBuilder: (context, index) =>
+                                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            itemBuilder: (context, index) {
+                              final row = filteredStats[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                child: Row(
                                   children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        row['label'] as String,
+                                        style: const TextStyle(
+                                          color: Color(0xFF1E293B),
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 1,
+                                      child: Text(
+                                        '${row['p1']} pts',
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: Color(0xFF0D8ABC),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 1,
+                                      child: Text(
+                                        '${row['p2']} pts',
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: Colors.redAccent,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Battle History
+                  const Text('Riwayat Pertandingan 1v1',
+                      style: TextStyle(
+                          color: Color(0xFF1E293B),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  const Text('Rekam jejak performa dalam arena terakhir.',
+                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12)),
+                  const SizedBox(height: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: historyList.isEmpty
+                        ? const Padding(
+                            padding: EdgeInsets.all(24.0),
+                            child: Center(
+                              child: Text('Belum ada riwayat pertandingan.',
+                                  style: TextStyle(color: Color(0xFF94A3B8), fontStyle: FontStyle.italic)),
+                            ),
+                          )
+                        : ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: historyList.length,
+                            separatorBuilder: (context, index) =>
+                                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            itemBuilder: (context, index) {
+                              final history = historyList[index];
+                              final isWinner = history.result.toLowerCase() == 'menang';
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            history.date ?? '-',
+                                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            history.opponent,
+                                            style: const TextStyle(
+                                              color: Color(0xFF1E293B),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: isWinner ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: isWinner ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2)),
+                                      ),
+                                      child: Text(
+                                        history.result.toUpperCase(),
+                                        style: TextStyle(
+                                          color: isWinner ? Colors.green : Colors.red,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
                                     Text(
-                                      index == 0 ? myCoopName : 'Koperasi Lain ${index + 1}',
-                                      style: TextStyle(
-                                        color: isMine ? const Color(0xFF0D8ABC) : const Color(0xFF1E293B),
+                                      '${history.points} pts',
+                                      style: const TextStyle(
+                                        color: Color(0xFF0D8ABC),
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14,
                                       ),
                                     ),
-                                    if (isMine)
-                                      const Text(
-                                        'Koperasi Anda',
-                                        style: TextStyle(color: Color(0xFF0D8ABC), fontSize: 10),
-                                      ),
                                   ],
                                 ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    '${12 - index} W',
-                                    style: const TextStyle(
-                                      color: Color(0xFF0D8ABC),
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${1500 - (index * 100)} XP',
-                                    style: const TextStyle(
-                                      color: Color(0xFF64748B),
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
                   ),
                 ],
               ),

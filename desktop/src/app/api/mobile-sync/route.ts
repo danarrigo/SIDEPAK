@@ -9,9 +9,11 @@ import { getMemberBadges, getWinRate, getStoreItems, getLeaderboard, getLeaderbo
 import { getMarketplaceItems } from "@/actions/shop";
 
 import { getActiveMembers } from "@/actions/members";
-import { getActiveLoan } from "@/actions/financials";
+import { getActiveLoan, getPendingLoans } from "@/actions/financials";
 import { updateStreakOnActivity } from "@/actions/dashboard";
 import { getMemberNotifications } from "@/actions/notifications";
+import { getPendingProposals } from "@/actions/governance";
+import { getPendingEvents } from "@/actions/events";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
 import { users, members, loans, savings, dues } from '@/db/schema';
@@ -120,12 +122,19 @@ export async function GET() {
       const totalDuesPaid = Number(dueStats?.totalDues) || 0;
       const totalAssetsAmount = netSavings + totalDuesPaid;
 
+      const pendingProposals = await getPendingProposals(coopId).catch(() => []);
+      const pendingEvents = await getPendingEvents(coopId).catch(() => []);
+      const pendingLoans = await getPendingLoans(coopId).catch(() => []);
+
       adminStats = {
         totalMembers: coopStats?.totalMembers || 0,
         activeMembers: coopStats?.activeMembers || 0,
         totalActiveLoans: activeLoansAmount,
         totalAssets: totalAssetsAmount,
         loansByStatus: loansByStatus,
+        pendingProposals,
+        pendingEvents,
+        pendingLoans,
       };
     }
 

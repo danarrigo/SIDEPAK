@@ -12,7 +12,6 @@ export default function AdminSidebar({ memberName }: { memberName?: string }) {
   const navLinks = [
     { href: "/admin", icon: "dashboard", label: "Dashboard" },
     { href: "/admin/members", icon: "groups", label: "Anggota" },
-    { href: "/admin/profile", icon: "person", label: "Profil" },
   ];
 
   return (

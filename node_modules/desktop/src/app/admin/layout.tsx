@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import AdminSidebar from "./AdminSidebar";
 import { getCurrentMember } from "@/actions/members";
 
+import AdminMobileNav from "./AdminMobileNav";
+
 export default async function AdminLayout({
   children,
 }: {
@@ -19,7 +21,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 text-slate-900 overflow-hidden">
+    <div className="flex h-screen w-full bg-slate-50 text-slate-900 overflow-hidden pb-14 md:pb-0">
       <AdminSidebar memberName={memberData.namaLengkap} />
       
       <main className="flex-1 relative w-full h-full overflow-y-auto">
@@ -27,6 +29,8 @@ export default async function AdminLayout({
           {children}
         </div>
       </main>
+
+      <AdminMobileNav />
     </div>
   );
 }

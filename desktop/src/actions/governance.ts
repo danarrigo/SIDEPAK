@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { proposals, votes } from "@/db/schema/governance";
 import { members } from "@/db/schema/members";
 import { eq, and, desc, count, sum, ne, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { savings, loans, dues } from "@/db/schema/financials";
 import { memberProgress } from "@/db/schema/gamification";
 import { events, eventParticipants } from "@/db/schema/activities";
@@ -15,14 +16,18 @@ export async function getGovernanceData(cooperativeId: number) {
       .where(and(ne(proposals.status, 'active'), eq(proposals.cooperativeId, cooperativeId)))
       .orderBy(desc(proposals.endDate)).limit(5);
 
+    const participantMembers = alias(members, "participantMembers");
+
     const activeEventsRaw = await db.select({
       event: events,
       creator: members,
-      participant: eventParticipants
+      participant: eventParticipants,
+      participantMember: participantMembers
     })
     .from(events)
     .leftJoin(members, eq(events.creatorId, members.id))
     .leftJoin(eventParticipants, eq(events.id, eventParticipants.eventId))
+    .leftJoin(participantMembers, eq(eventParticipants.memberId, participantMembers.id))
     .where(and(eq(events.status, 'active'), eq(events.cooperativeId, cooperativeId)));
 
     const activeEventsMap = new Map<number, any>();
@@ -35,7 +40,10 @@ export async function getGovernanceData(cooperativeId: number) {
         });
       }
       if (row.participant) {
-        activeEventsMap.get(row.event.id).participants.push(row.participant.memberId);
+        activeEventsMap.get(row.event.id).participants.push({
+          id: row.participant.memberId,
+          name: row.participantMember ? row.participantMember.namaLengkap : 'Anggota'
+        });
       }
     });
     const activeEvents = Array.from(activeEventsMap.values());
@@ -43,11 +51,13 @@ export async function getGovernanceData(cooperativeId: number) {
     const pastEventsRaw = await db.select({
       event: events,
       creator: members,
-      participant: eventParticipants
+      participant: eventParticipants,
+      participantMember: participantMembers
     })
     .from(events)
     .leftJoin(members, eq(events.creatorId, members.id))
     .leftJoin(eventParticipants, eq(events.id, eventParticipants.eventId))
+    .leftJoin(participantMembers, eq(eventParticipants.memberId, participantMembers.id))
     .where(and(ne(events.status, 'active'), eq(events.cooperativeId, cooperativeId)))
     .orderBy(desc(events.endDate))
     .limit(50); // increased limit to ensure grouping works well
@@ -62,7 +72,10 @@ export async function getGovernanceData(cooperativeId: number) {
         });
       }
       if (row.participant) {
-        pastEventsMap.get(row.event.id).participants.push(row.participant.memberId);
+        pastEventsMap.get(row.event.id).participants.push({
+          id: row.participant.memberId,
+          name: row.participantMember ? row.participantMember.namaLengkap : 'Anggota'
+        });
       }
     });
     const pastEvents = Array.from(pastEventsMap.values()).slice(0, 5);

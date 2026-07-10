@@ -5,7 +5,7 @@ import { joinEvent } from '@/actions/events';
 
 export default function EventCard({ event, currentMemberId }: { event: any, currentMemberId: number }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isJoined, setIsJoined] = useState(event.participants.includes(currentMemberId));
+  const [isJoined, setIsJoined] = useState(event.participants.some((p: any) => p.id === currentMemberId));
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -46,9 +46,24 @@ export default function EventCard({ event, currentMemberId }: { event: any, curr
             <div className="bg-surface-container p-4 rounded-xl mb-6">
                <div className="flex justify-between items-center text-sm">
                   <span className="text-on-surface-variant">Total Peserta:</span>
-                  <span className="font-bold text-on-surface">{event.participants.length + (isJoined && !event.participants.includes(currentMemberId) ? 1 : 0)} Orang</span>
+                  <span className="font-bold text-on-surface">{event.participants.length + (isJoined && !event.participants.some((p: any) => p.id === currentMemberId) ? 1 : 0)} Orang</span>
                </div>
-               <div className="flex justify-between items-center text-sm mt-2">
+               
+               {(event.participants.length > 0 || isJoined) && (
+                 <div className="mt-3">
+                   <span className="text-on-surface-variant text-xs">Peserta yang bergabung:</span>
+                   <div className="flex flex-wrap gap-1 mt-1">
+                     {event.participants.map((p: any) => (
+                       <span key={p.id} className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">{p.name}</span>
+                     ))}
+                     {isJoined && !event.participants.some((p: any) => p.id === currentMemberId) && (
+                       <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">Anda</span>
+                     )}
+                   </div>
+                 </div>
+               )}
+
+               <div className="flex justify-between items-center text-sm mt-3 pt-3 border-t border-outline-variant/30">
                   <span className="text-on-surface-variant">Status Anda:</span>
                   <span className={`font-bold ${isJoined ? 'text-primary' : 'text-on-surface-variant'}`}>{isJoined ? 'Terdaftar' : 'Belum Terdaftar'}</span>
                </div>

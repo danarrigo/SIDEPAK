@@ -5,7 +5,7 @@ import { joinEvent } from '@/actions/events';
 
 export default function MobileEventCard({ event, currentMemberId }: { event: any, currentMemberId: number }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isJoined, setIsJoined] = useState(event.participants.includes(currentMemberId));
+  const [isJoined, setIsJoined] = useState(event.participants.some((p: any) => p.id === currentMemberId));
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -46,9 +46,24 @@ export default function MobileEventCard({ event, currentMemberId }: { event: any
             <div className="bg-slate-50 p-3 rounded-xl mb-4 border border-slate-100">
                <div className="flex justify-between items-center text-xs">
                   <span className="text-slate-500">Total Peserta:</span>
-                  <span className="font-bold text-[#1E293B]">{event.participants.length + (isJoined && !event.participants.includes(currentMemberId) ? 1 : 0)} Orang</span>
+                  <span className="font-bold text-[#1E293B]">{event.participants.length + (isJoined && !event.participants.some((p: any) => p.id === currentMemberId) ? 1 : 0)} Orang</span>
                </div>
-               <div className="flex justify-between items-center text-xs mt-1.5">
+
+               {(event.participants.length > 0 || isJoined) && (
+                 <div className="mt-2.5">
+                   <span className="text-slate-400 text-[10px]">Peserta yang bergabung:</span>
+                   <div className="flex flex-wrap gap-1 mt-1">
+                     {event.participants.map((p: any) => (
+                       <span key={p.id} className="text-[9px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">{p.name}</span>
+                     ))}
+                     {isJoined && !event.participants.some((p: any) => p.id === currentMemberId) && (
+                       <span className="text-[9px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">Anda</span>
+                     )}
+                   </div>
+                 </div>
+               )}
+
+               <div className="flex justify-between items-center text-xs mt-2.5 pt-2.5 border-t border-slate-200">
                   <span className="text-slate-500">Status Anda:</span>
                   <span className={`font-bold ${isJoined ? 'text-[#3B82F6]' : 'text-slate-500'}`}>{isJoined ? 'Terdaftar' : 'Belum Terdaftar'}</span>
                </div>

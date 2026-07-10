@@ -159,9 +159,11 @@ describe('GET /api/mobile-sync', () => {
   it('returns 200 + success:true with all expected data fields', async () => {
     setupAuth();
 
-    // The route also does an inline db query for the current member (line 31)
-    // to populate currentProvinsi. Mock the first .where() call to return the member.
+    // The route queries users then members. Mock both where() calls.
     const mockDbChain = (globalThis as any).__mockDbChain;
+    mockDbChain.where.mockResolvedValueOnce([
+      { id: 'user-uuid', role: 'member' }
+    ]);
     mockDbChain.where.mockResolvedValueOnce([
       { id: 1, cooperativeId: 1, provinsi: 'Jawa Barat' },
     ]);
@@ -237,8 +239,13 @@ describe('GET /api/mobile-sync', () => {
   it('returns 403 when token is valid but no member profile exists', async () => {
     mockHeadersGet.mockReturnValue('Bearer valid-but-orphan-token');
     mockGetUser.mockResolvedValue({ data: { user: { id: 'orphan-uuid' } }, error: null });
-    // No need to mock .where — but to be safe, return empty array
-    ((globalThis as any).__mockDbChain as any).where.mockResolvedValueOnce([]);
+    
+    const mockDbChain = (globalThis as any).__mockDbChain;
+    // Mock the user query to return the user, but member query to return empty array
+    mockDbChain.where.mockResolvedValueOnce([
+      { id: 'orphan-uuid', role: 'member' }
+    ]);
+    mockDbChain.where.mockResolvedValueOnce([]);
     const response = await GET();
     expect(response.status).toBe(403);
     const json = await response.json();

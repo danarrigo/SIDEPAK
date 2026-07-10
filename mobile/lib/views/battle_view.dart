@@ -30,6 +30,17 @@ class BattleView extends StatelessWidget {
       return 0;
     }
 
+    final currentMatch = provider.currentMatch;
+    final rivalCooperative = provider.rivalCooperative;
+    final bool isCoopA = currentMatch?['isCoopA'] ?? true;
+    final int scoreA = safeParseInt(currentMatch?['scoreA']);
+    final int scoreB = safeParseInt(currentMatch?['scoreB']);
+    final int myCoopScore = isCoopA ? scoreA : scoreB;
+    final int rivalCoopScore = isCoopA ? scoreB : scoreA;
+    final String myCoopName = provider.koperasiName ?? "Koperasi Anda";
+    final String rivalCoopName = rivalCooperative?['name'] ?? "Koperasi Rival";
+    final String endDateStr = currentMatch?['endDate']?.toString().split('T')[0] ?? "";
+
     int p1 = 0;
     int p2 = 0;
     String opponentName = 'Menunggu Lawan';
@@ -72,7 +83,7 @@ class BattleView extends StatelessWidget {
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF0D8ABC), Color(0xFF22C55E)],
+                  colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -103,6 +114,131 @@ class BattleView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Guild Wars Card
+                  if (currentMatch != null) ...[
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: const Border(top: BorderSide(color: Color(0xFFFACC15), width: 4)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'MINGGU INI: PERTEMPURAN KOPERASI',
+                            style: TextStyle(
+                              color: Color(0xFF0F172A),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              // Koperasi Anda
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: const Border(bottom: BorderSide(color: Color(0xFF0F172A), width: 3)),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      const Text(
+                                        'KOPERASI ANDA',
+                                        style: TextStyle(color: Color(0xFF0F172A), fontSize: 10, fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        myCoopName,
+                                        style: const TextStyle(color: Color(0xFF1E293B), fontSize: 12, fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        '$myCoopScore',
+                                        style: const TextStyle(color: Color(0xFF0F172A), fontSize: 32, fontWeight: FontWeight.black),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      const Text(
+                                        'Kemenangan 1v1',
+                                        style: TextStyle(color: Color(0xFF64748B), fontSize: 9),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 12),
+                                child: Text(
+                                  'VS',
+                                  style: TextStyle(color: Color(0xFF94A3B8), fontSize: 18, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic),
+                                ),
+                              ),
+                              // Koperasi Rival
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: const Border(bottom: BorderSide(color: Color(0xFFF43F5E), width: 3)),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      const Text(
+                                        'KOPERASI RIVAL',
+                                        style: TextStyle(color: Color(0xFFF43F5E), fontSize: 10, fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        rivalCoopName,
+                                        style: const TextStyle(color: Color(0xFF1E293B), fontSize: 12, fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        '$rivalCoopScore',
+                                        style: const TextStyle(color: Color(0xFFF43F5E), fontSize: 32, fontWeight: FontWeight.black),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      const Text(
+                                        'Kemenangan 1v1',
+                                        style: TextStyle(color: Color(0xFF64748B), fontSize: 9),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (endDateStr.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              'Tenggat Waktu: $endDateStr',
+                              style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                   // Anda Card
                   Container(
                     decoration: BoxDecoration(

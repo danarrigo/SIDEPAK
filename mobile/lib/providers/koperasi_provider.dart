@@ -57,6 +57,8 @@ class KoperasiProvider extends ChangeNotifier {
   String? phoneNumber;
   Map<String, dynamic>? activeBattle;
   String? activeBattleEndDate;
+  Map<String, dynamic>? currentMatch;
+  Map<String, dynamic>? rivalCooperative;
   Map<String, dynamic>? activeLoan;
   Map<String, dynamic>? myStats;
   Map<String, dynamic>? opStats;
@@ -347,6 +349,8 @@ class KoperasiProvider extends ChangeNotifier {
     activeEffect = null;
     activeLoan = null;
     adminStats = null;
+    currentMatch = null;
+    rivalCooperative = null;
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
@@ -444,6 +448,7 @@ class KoperasiProvider extends ChangeNotifier {
         // Sync notifications and profile data
         listNotifications = data['notifications'] ?? [];
         phoneNumber = data['profile']?['nomorHp'] ?? phoneNumber;
+        koperasiName = data['profile']?['koperasi'] ?? koperasiName;
 
         if (data['profile']?['role'] != null) {
           role = data['profile']?['role'];
@@ -507,6 +512,8 @@ class KoperasiProvider extends ChangeNotifier {
 
         final arena = data['arena'];
         if (arena != null) {
+          currentMatch = arena['currentMatch'] as Map<String, dynamic>?;
+          rivalCooperative = arena['rivalCooperative'] as Map<String, dynamic>?;
           if (arena['activeBattles'] != null &&
               (arena['activeBattles'] as List).isNotEmpty) {
             activeBattle = arena['activeBattles'][0];
@@ -526,7 +533,7 @@ class KoperasiProvider extends ChangeNotifier {
               return HistoryItem(
                 opponent: opName,
                 result: isWinner ? 'Menang' : 'Kalah',
-                points: (myScore as num?)?.toInt() ?? 0,
+                points: _toInt(myScore),
                 date: b['endDate']?.toString().split('T')[0],
               );
             }).toList();
@@ -1164,5 +1171,12 @@ class KoperasiProvider extends ChangeNotifier {
       }
     } catch (_) {}
     return null;
+  }
+
+  int _toInt(dynamic val, {int defaultValue = 0}) {
+    if (val == null) return defaultValue;
+    if (val is num) return val.toInt();
+    if (val is String) return int.tryParse(val) ?? defaultValue;
+    return defaultValue;
   }
 }

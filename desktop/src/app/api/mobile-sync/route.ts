@@ -16,7 +16,7 @@ import { getPendingProposals } from "@/actions/governance";
 import { getPendingEvents } from "@/actions/events";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
-import { users, members, loans, savings, dues } from '@/db/schema';
+import { users, members, loans, savings, dues, cooperatives } from '@/db/schema';
 import { votes } from '@/db/schema/governance';
 import { eq, sql, and, ne, and as dbAnd } from 'drizzle-orm';
 import { headers } from 'next/headers';
@@ -51,7 +51,22 @@ export async function GET() {
     const [userRecord] = await db.select().from(users).where(eq(users.id, user.id));
     if (userRecord) userRole = userRecord.role || 'member';
 
-    const [member] = await db.select().from(members).where(eq(members.userId, user.id));
+    const [member] = await db.select({
+      id: members.id,
+      userId: members.userId,
+      cooperativeId: members.cooperativeId,
+      namaLengkap: members.namaLengkap,
+      nomorHp: members.nomorHp,
+      provinsi: members.provinsi,
+      kabupaten: members.kabupaten,
+      kecamatan: members.kecamatan,
+      desa: members.desa,
+      pekerjaan: members.pekerjaan,
+      koperasi: cooperatives.name,
+    })
+    .from(members)
+    .leftJoin(cooperatives, eq(members.cooperativeId, cooperatives.id))
+    .where(eq(members.userId, user.id));
     if (!member) {
       return NextResponse.json(
         { success: false, error: 'No member profile linked to this account' },
@@ -223,6 +238,7 @@ export async function GET() {
           pekerjaan: member.pekerjaan,
           cooperativeId: member.cooperativeId,
           role: userRole,
+          koperasi: member.koperasi,
         },
       }
     }, {

@@ -5,7 +5,7 @@ import { claimQuestReward } from "@/actions/quests";
 import { buyShopItem, listMarketplaceItem, buyMarketplaceItem } from "@/actions/shop";
 import { useItem as applyItem, claimWeeklyChest } from "@/actions/gamification";
 import { createTopUpInvoice, verifyInvoicePayment, verifyAndPaySimpananPokok } from "@/actions/wallet";
-import { payDuesFromWallet, depositSavingsFromWallet, addLoan } from "@/actions/financials";
+import { payDuesFromWallet, depositSavingsFromWallet, addLoan, repayLoanFromWallet } from "@/actions/financials";
 
 import { matchmakeWeeklyBattle } from "@/actions/arena";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
@@ -193,6 +193,9 @@ export async function POST(request: Request) {
     } else if (action === 'apply-loan') {
       const { amount } = body;
       result = await addLoan(memberId, Number(amount));
+    } else if (action === 'pay-loan') {
+      const { loanId } = body;
+      result = await repayLoanFromWallet(memberId, Number(loanId));
     }
 
     return NextResponse.json(result, {

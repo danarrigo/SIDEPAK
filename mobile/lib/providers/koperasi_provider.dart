@@ -1005,6 +1005,23 @@ class KoperasiProvider extends ChangeNotifier {
     }
   }
 
+  Future<String> payLoan(int loanId) async {
+    try {
+      final body = await _postAction({
+        'action': 'pay-loan',
+        'loanId': loanId,
+      });
+      if (body['success'] == true) {
+        await fetchData();
+        return 'success';
+      }
+      return body['error']?.toString() ?? 'Gagal membayar pinjaman.';
+    } catch (e) {
+      print('Pay loan error: $e');
+      return 'Gagal menghubungi server.';
+    }
+  }
+
   // ============ PHASE 1: MARKETPLACE P2P ============
 
   Future<String> listMarketplaceItem({

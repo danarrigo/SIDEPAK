@@ -422,3 +422,45 @@ export async function rejectLoan(loanId: number) {
     return { success: false, error: "Terjadi kesalahan saat menolak pinjaman." };
   }
 }
+
+export async function repayLoanFromWallet(memberId: number, loanId: number) {
+  try {
+    const [loan] = await db.select().from(loans).where(eq(loans.id, loanId));
+    if (!loan || loan.status !== 'approved' || loan.memberId !== memberId) {
+      return { success: false, error: "Pinjaman tidak ditemukan atau belum aktif." };
+    }
+
+    const totalToPay = loan.amount + (loan.amount * loan.interestRate / 100);
+
+    let [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
+    if (!progress || progress.walletBalance < totalToPay) {
+      return { success: false, error: `Saldo dompet tidak mencukupi (Butuh Rp ${totalToPay.toLocaleString("id-ID")}).` };
+    }
+
+    // Deduct wallet balance
+    await db.update(memberProgress)
+      .set({
+        walletBalance: progress.walletBalance - totalToPay,
+        updatedAt: new Date(),
+      })
+      .where(eq(memberProgress.memberId, memberId));
+
+    // Update loan status to paid
+    await db.update(loans)
+      .set({ status: 'paid', updatedAt: new Date() })
+      .where(eq(loans.id, loanId));
+
+    // Send notification
+    const { createNotification } = await import("./notifications");
+    await createNotification(
+      memberId, 
+      "Pinjaman Lunas! ✅", 
+      `Terima kasih! Pembayaran pinjaman sebesar Rp ${totalToPay.toLocaleString("id-ID")} telah berhasil dipotong dari dompet Anda.`
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("repayLoanFromWallet Error:", error);
+    return { success: false, error: "Terjadi kesalahan saat membayar pinjaman." };
+  }
+}

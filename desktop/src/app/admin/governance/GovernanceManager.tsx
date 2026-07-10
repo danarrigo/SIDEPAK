@@ -44,9 +44,9 @@ export default function GovernanceManager({
       }
     } else {
       if (editId) {
-        await editProposal(editId, title, desc);
+        await editProposal(editId, title, desc, endDate ? new Date(endDate) : undefined);
       } else {
-        await createProposalByAdmin(coopId, title, desc);
+        await createProposalByAdmin(coopId, title, desc, endDate ? new Date(endDate) : undefined);
       }
     }
 
@@ -177,6 +177,9 @@ export default function GovernanceManager({
                         setEditId(prop.id);
                         setTitle(prop.title);
                         setDesc(prop.description || "");
+                        const eDate = new Date(prop.endDate || prop.createdAt);
+                        eDate.setMinutes(eDate.getMinutes() - eDate.getTimezoneOffset());
+                        setEndDate(eDate.toISOString().slice(0, 16));
                         setShowModal(true);
                       }}
                       className="text-slate-400 hover:text-tertiary transition-colors"
@@ -250,34 +253,34 @@ export default function GovernanceManager({
                 />
               </div>
 
-              {tab === "events" && (
-                <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                {tab === "events" && (
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
                       Tanggal Mulai
                     </label>
                     <input
-                      required
+                      required={tab === "events"}
                       type="datetime-local"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-tertiary"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Tanggal Selesai
-                    </label>
-                    <input
-                      required
-                      type="datetime-local"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-tertiary"
-                    />
-                  </div>
+                )}
+                <div className={tab === "proposals" ? "col-span-2" : ""}>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Batas Akhir (Tenggat Waktu)
+                  </label>
+                  <input
+                    required
+                    type="datetime-local"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-tertiary"
+                  />
                 </div>
-              )}
+              </div>
 
               <div className="pt-4 flex justify-end gap-3">
                 <button

@@ -284,14 +284,14 @@ export async function rejectProposal(proposalId: number) {
   }
 }
 
-export async function createProposalByAdmin(cooperativeId: number, title: string, description: string) {
+export async function createProposalByAdmin(cooperativeId: number, title: string, description: string, endDate?: Date) {
   try {
     await db.insert(proposals).values({
       title,
       description,
       status: 'active',
       targetQuorumPercentage: 50,
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      endDate: endDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now if not provided
       cooperativeId,
     });
     return { success: true };
@@ -301,9 +301,13 @@ export async function createProposalByAdmin(cooperativeId: number, title: string
   }
 }
 
-export async function editProposal(proposalId: number, title: string, description: string) {
+export async function editProposal(proposalId: number, title: string, description: string, endDate?: Date) {
   try {
-    await db.update(proposals).set({ title, description }).where(eq(proposals.id, proposalId));
+    const updateData: any = { title, description };
+    if (endDate) {
+      updateData.endDate = endDate;
+    }
+    await db.update(proposals).set(updateData).where(eq(proposals.id, proposalId));
     return { success: true };
   } catch (error) {
     console.error("Edit Proposal Error:", error);

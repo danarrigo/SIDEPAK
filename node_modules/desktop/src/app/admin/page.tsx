@@ -4,6 +4,9 @@ import { db } from "@/db";
 import { members, cooperatives, loans, savings, dues, users } from "@/db/schema";
 import { eq, sql, and, ne } from "drizzle-orm";
 import AdminCharts from "./AdminCharts";
+import PendingApprovals from "./PendingApprovals";
+import { getPendingProposals } from "@/actions/governance";
+import { getPendingEvents } from "@/actions/events";
 
 export const metadata = {
   title: "Admin Dashboard",
@@ -85,6 +88,9 @@ export default async function AdminDashboard() {
       maximumFractionDigits: 0
     }).format(amount);
   };
+
+  const pendingProposals = await getPendingProposals(coopId);
+  const pendingEvents = await getPendingEvents(coopId);
 
   return (
     <div className="w-full min-h-screen px-4 md:px-8 py-8 animate-fade-in text-slate-900">
@@ -186,10 +192,10 @@ export default async function AdminDashboard() {
           Menunggu Persetujuan
         </h2>
         
-        <div className="text-center py-12 text-slate-500 border border-dashed border-slate-300 rounded-2xl">
-          <span className="material-symbols-outlined text-4xl mb-2 opacity-50">task</span>
-          <p>Belum ada pengajuan baru yang perlu diproses hari ini.</p>
-        </div>
+        <PendingApprovals 
+          pendingProposals={JSON.parse(JSON.stringify(pendingProposals))}
+          pendingEvents={JSON.parse(JSON.stringify(pendingEvents))}
+        />
       </div>
     </div>
   );

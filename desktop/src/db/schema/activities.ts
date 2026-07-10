@@ -10,6 +10,7 @@ export const events = pgTable("events", {
   description: varchar("description", { length: 1000 }),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
+  status: varchar("status", { length: 50 }).default('pending_approval').notNull(), // 'pending_approval', 'active', 'completed'
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

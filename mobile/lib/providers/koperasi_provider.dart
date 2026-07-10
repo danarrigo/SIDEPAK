@@ -82,6 +82,7 @@ class KoperasiProvider extends ChangeNotifier {
   int asetPinjaman = 0;
   int asetInvestasi = 0;
   bool canSubmitProposal = false;
+  bool canSubmitEvent = false;
 
   // Badges
   List<dynamic> earnedBadges = [];
@@ -542,6 +543,7 @@ class KoperasiProvider extends ChangeNotifier {
           asetPinjaman = (governance['asetPinjaman'] as num?)?.toInt() ?? 0;
           asetInvestasi = (governance['asetInvestasi'] as num?)?.toInt() ?? 0;
           canSubmitProposal = level >= 20;
+          canSubmitEvent = level >= 20;
           voteSelection = governance['userVote'] as String?;
         }
 
@@ -798,12 +800,33 @@ class KoperasiProvider extends ChangeNotifier {
       });
       if (body['success'] == true) {
         await fetchData();
-        return 'Proposal berhasil diajukan!';
+        return 'Proposal berhasil diajukan untuk persetujuan admin.';
       }
-      return body['error']?.toString() ?? 'Gagal mengajukan proposal.';
+      return body['error']?.toString() ?? 'Gagal membuat proposal.';
     } catch (e) {
       print('Submit proposal error: $e');
-      return 'Gagal mengajukan proposal.';
+      return 'Gagal menghubungi server.';
+    }
+  }
+
+  Future<String> submitEvent(String name, String description, DateTime startDate, DateTime endDate) async {
+    try {
+      final body = await _postAction({
+        'action': 'submit-event',
+        'memberId': memberId,
+        'name': name,
+        'description': description,
+        'startDate': startDate.toIso8601String(),
+        'endDate': endDate.toIso8601String(),
+      });
+      if (body['success'] == true) {
+        await fetchData();
+        return 'Event berhasil diajukan untuk persetujuan admin.';
+      }
+      return body['error']?.toString() ?? 'Gagal membuat event.';
+    } catch (e) {
+      print('Submit event error: $e');
+      return 'Gagal menghubungi server.';
     }
   }
 

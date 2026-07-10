@@ -61,7 +61,7 @@ class _EventsViewState extends State<EventsView> {
     final weekDays = _getWeekDays();
     final selectedDayEvents =
         provider.events.where((e) => e.occursOn(_selectedDate)).toList();
-    final canCreate = provider.level >= 20;
+    final canCreate = provider.canSubmitEvent;
 
     return RefreshIndicator(
       onRefresh: () => provider.fetchData(),

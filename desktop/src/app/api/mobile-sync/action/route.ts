@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { castVote, submitProposal } from "@/actions/governance";
+import { submitEvent } from "@/actions/events";
 import { claimQuestReward } from "@/actions/quests";
 import { buyShopItem, listMarketplaceItem, buyMarketplaceItem } from "@/actions/shop";
 import { useItem as applyItem, claimWeeklyChest } from "@/actions/gamification";
@@ -70,6 +71,9 @@ export async function POST(request: Request) {
     } else if (action === 'submit-proposal') {
       const { title, description } = body;
       result = await submitProposal(memberId, title, description);
+    } else if (action === 'submit-event') {
+      const { name, description, startDate, endDate } = body;
+      result = await submitEvent(memberId, name, description, new Date(startDate), new Date(endDate));
     } else if (action === 'create-topup') {
       const { amount } = body;
       result = await createTopUpInvoice(memberId, amount);

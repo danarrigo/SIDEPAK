@@ -96,7 +96,7 @@ export default function AdminCharts({ loansByStatus, totalAssets, totalLoans }: 
                     outerRadius={80}
                     paddingAngle={5}
                     dataKey="value"
-                    label={(props: any) => `${props.name} ${(props.percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     labelLine={false}
                   >
                     {pieData.map((entry, index) => (
@@ -140,7 +140,7 @@ export default function AdminCharts({ loansByStatus, totalAssets, totalLoans }: 
               />
               <Tooltip 
                 cursor={{ fill: "#f8fafc" }}
-                formatter={(value: any) => [formatRupiah(Number(value) || 0), "Total"]}
+                formatter={(value: any) => [formatRupiah(value as number), "Total"]}
               />
               <Bar dataKey="amount" radius={[8, 8, 8, 8]} barSize={50}>
                 {barData.map((entry, index) => (

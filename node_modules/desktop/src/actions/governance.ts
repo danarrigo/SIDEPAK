@@ -4,6 +4,7 @@ import { proposals, votes } from "@/db/schema/governance";
 import { members } from "@/db/schema/members";
 import { eq, and, desc, count, sum, ne, sql } from "drizzle-orm";
 import { savings, loans, dues } from "@/db/schema/financials";
+import { memberProgress } from "@/db/schema/gamification";
 
 export async function getGovernanceData(cooperativeId: number) {
   try {
@@ -117,10 +118,16 @@ export async function submitProposal(memberId: number, title: string, descriptio
       return { success: false, error: "Anggota tidak terikat ke koperasi." };
     }
 
+    const [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
+    if (!progress || progress.level < 20) {
+      return { success: false, error: "Level tidak mencukupi. Anda harus minimal Level 20 untuk membuat proposal." };
+    }
+
     const [proposal] = await db.insert(proposals).values({
       title,
       description,
-      status: 'active',
+      status: 'pending_approval',
+      creatorId: memberId,
       targetQuorumPercentage: 50,
       endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
       cooperativeId: member.cooperativeId,
@@ -129,8 +136,8 @@ export async function submitProposal(memberId: number, title: string, descriptio
     const { createNotification } = await import("./notifications");
     await createNotification(
       memberId,
-      "Proposal Berhasil Dibuat",
-      `Proposal "${title}" telah berhasil disubmit untuk voting.`
+      "Proposal Berhasil Diajukan",
+      `Proposal "${title}" telah diajukan dan sedang menunggu persetujuan admin.`
     );
 
     return { success: true, proposal };
@@ -165,5 +172,61 @@ export async function castVote(memberId: number, proposalId: number, voteType: s
   } catch (error) {
     console.error("Cast Vote DB Error:", error);
     return { success: false, error: "Failed to record vote" };
+  }
+}
+
+export async function getPendingProposals(cooperativeId: number) {
+  try {
+    return await db.select().from(proposals).where(and(eq(proposals.status, 'pending_approval'), eq(proposals.cooperativeId, cooperativeId)));
+  } catch (error) {
+    console.error("Get Pending Proposals Error:", error);
+    return [];
+  }
+}
+
+export async function approveProposal(proposalId: number) {
+  try {
+    await db.update(proposals).set({ status: 'active', startDate: new Date(), endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }).where(eq(proposals.id, proposalId));
+    return { success: true };
+  } catch (error) {
+    console.error("Approve Proposal Error:", error);
+    return { success: false, error: "Failed to approve proposal" };
+  }
+}
+
+export async function rejectProposal(proposalId: number) {
+  try {
+    await db.update(proposals).set({ status: 'rejected' }).where(eq(proposals.id, proposalId));
+    return { success: true };
+  } catch (error) {
+    console.error("Reject Proposal Error:", error);
+    return { success: false, error: "Failed to reject proposal" };
+  }
+}
+
+export async function createProposalByAdmin(cooperativeId: number, title: string, description: string) {
+  try {
+    await db.insert(proposals).values({
+      title,
+      description,
+      status: 'active',
+      targetQuorumPercentage: 50,
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      cooperativeId,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Admin Create Proposal Error:", error);
+    return { success: false, error: "Gagal membuat proposal." };
+  }
+}
+
+export async function editProposal(proposalId: number, title: string, description: string) {
+  try {
+    await db.update(proposals).set({ title, description }).where(eq(proposals.id, proposalId));
+    return { success: true };
+  } catch (error) {
+    console.error("Edit Proposal Error:", error);
+    return { success: false, error: "Gagal mengedit proposal." };
   }
 }

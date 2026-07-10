@@ -7,7 +7,8 @@ export const proposals = pgTable("proposals", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   description: varchar("description", { length: 2000 }),
-  status: varchar("status", { length: 50 }).default('active').notNull(), // 'active', 'passed', 'rejected'
+  status: varchar("status", { length: 50 }).default('pending_approval').notNull(), // 'pending_approval', 'active', 'passed', 'rejected'
+  creatorId: integer("creator_id").references(() => members.id, { onDelete: 'set null' }),
   targetQuorumPercentage: integer("target_quorum_percentage").default(50).notNull(),
   startDate: timestamp("start_date").defaultNow().notNull(),
   endDate: timestamp("end_date").notNull(),

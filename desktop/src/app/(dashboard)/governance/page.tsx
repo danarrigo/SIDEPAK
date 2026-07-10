@@ -426,17 +426,9 @@ export default async function Page() {
                 </div>
               </details>
             ) : (
-              <div className="bg-surface-container-highest p-6 rounded-xl border border-outline-variant/30 text-center relative z-10">
-                <span className="material-symbols-outlined text-4xl text-outline mb-2">
-                  lock
-                </span>
-                <p className="font-body-md text-body-md">
-                  Fitur pengajuan proposal hanya tersedia untuk anggota{" "}
-                  <strong>Level 20 (GOLD)</strong> ke atas.
-                </p>
-                <p className="font-body-sm text-body-sm text-on-surface-variant mt-2">
-                  Terus tingkatkan partisipasi Anda!
-                </p>
+              <div className="w-full py-3 bg-surface-container-highest text-on-surface-variant font-label-caps text-label-caps rounded-lg text-center select-none flex items-center justify-center gap-2 border border-outline-variant/30 relative z-10">
+                <span className="material-symbols-outlined text-lg">lock</span>
+                AJUKAN PROPOSAL (LVL 20+)
               </div>
             )}
             <div className="absolute -bottom-10 -right-10 opacity-5 pointer-events-none">

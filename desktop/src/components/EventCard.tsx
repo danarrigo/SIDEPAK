@@ -1,11 +1,17 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { joinEvent } from '@/actions/events';
 
 export default function EventCard({ event, currentMemberId }: { event: any, currentMemberId: number }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isJoined, setIsJoined] = useState(event.participants.includes(currentMemberId));
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const handleJoin = async () => {
     setLoading(true);
@@ -25,8 +31,8 @@ export default function EventCard({ event, currentMemberId }: { event: any, curr
         </div>
       </div>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
+      {isOpen && mounted && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
           <div className="bg-surface rounded-2xl p-6 w-full max-w-md shadow-2xl relative" onClick={e => e.stopPropagation()}>
             <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface">
               <span className="material-symbols-outlined">close</span>
@@ -56,7 +62,8 @@ export default function EventCard({ event, currentMemberId }: { event: any, curr
               {loading ? 'Memproses...' : isJoined ? 'Sudah Terdaftar' : 'Daftar Event'}
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

@@ -1,11 +1,17 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { joinEvent } from '@/actions/events';
 
 export default function MobileEventCard({ event, currentMemberId }: { event: any, currentMemberId: number }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isJoined, setIsJoined] = useState(event.participants.includes(currentMemberId));
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const handleJoin = async () => {
     setLoading(true);
@@ -25,8 +31,8 @@ export default function MobileEventCard({ event, currentMemberId }: { event: any
         </div>
       </div>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
+      {isOpen && mounted && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
           <div className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl relative" onClick={e => e.stopPropagation()}>
             <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
               <span className="material-symbols-outlined text-xl">close</span>
@@ -56,7 +62,8 @@ export default function MobileEventCard({ event, currentMemberId }: { event: any
               {loading ? 'Memproses...' : isJoined ? 'Terdaftar' : 'Daftar Event'}
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

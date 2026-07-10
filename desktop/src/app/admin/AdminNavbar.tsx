@@ -10,9 +10,6 @@ export default function AdminNavbar({ memberName }: { memberName?: string }) {
   const navLinks = [
     { href: "/admin", icon: "dashboard", label: "Dashboard" },
     { href: "/admin/members", icon: "groups", label: "Anggota" },
-    { href: "/admin/loans", icon: "credit_score", label: "Pinjaman" },
-    { href: "/admin/marketplace", icon: "storefront", label: "Marketplace" },
-    { href: "/admin/settings", icon: "settings", label: "Pengaturan" },
   ];
 
   return (

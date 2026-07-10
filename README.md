@@ -47,7 +47,7 @@ See per-app guides for setup details:
 
 - **Digital financial services** — Savings (*Simpanan Pokok, Wajib, Sukarela*) and Loans (*Pinjaman*) tracked with full audit trail.
 - **SIDEPAK Arena — gamification layer**
-  - Complete **Daily Quests** to earn points.
+  - Complete **Daily Quests** to earn points (fully integrated with real app actions like savings, logins, and events).
   - Maintain a **Login Streak** for bonus rewards.
   - Compete in **Weekly Arena Battles** against other members (auto-matched).
 - **Member-to-member marketplace** — Spend points to list and buy items in a P2P marketplace with optional item effects (e.g. `freeze_streak`, `prank`).
@@ -67,7 +67,7 @@ See per-app guides for setup details:
 | ORM | Drizzle ORM |
 | Auth | Supabase Auth (email/password, JWT) |
 | API style | Next.js Server Actions (web) + REST Route Handlers (mobile) |
-| Deployment | Vercel (Next.js + Flutter web) |
+| Deployment | Google Cloud Run (Next.js) + Vercel (Flutter web) |
 | Mobile packaging | Gradle / Android SDK (APK), Xcode (iOS) |
 | CI | GitHub Actions |
 
@@ -479,7 +479,7 @@ Two GitHub Actions workflows run on every push to `main`:
 | `desktop-ci.yml` | Push to `main`, PRs touching `desktop/` | `npm ci` → `npm run lint` → `tsc --noEmit` → `jest` |
 | `mobile-ci.yml` | Push to `main`, PRs touching `mobile/` | `flutter pub get` → `dart format --set-exit-if-changed` → `flutter analyze` → `flutter test` |
 
-Vercel auto-deploys `desktop/` on every push to `main`. The Flutter web build is also deployed to Vercel at `https://hackathon-SIDEPAK.vercel.app`.
+The `desktop/` app is deployed to **Google Cloud Run** using the provided `Dockerfile`. The Flutter web build is deployed to Vercel at `https://hackathon-SIDEPAK.vercel.app`.
 
 ---
 

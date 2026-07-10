@@ -432,7 +432,7 @@ export async function repayLoanFromWallet(memberId: number, loanId: number) {
 
     const totalToPay = loan.amount + (loan.amount * loan.interestRate / 100);
 
-    let [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
+    const [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
     if (!progress || progress.walletBalance < totalToPay) {
       return { success: false, error: `Saldo dompet tidak mencukupi (Butuh Rp ${totalToPay.toLocaleString("id-ID")}).` };
     }

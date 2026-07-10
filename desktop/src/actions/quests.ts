@@ -114,7 +114,10 @@ export async function getActiveQuests(memberId: number = 1) {
       );
     }
     
-    // 5. Format return data
+    // 5. Auto-increment daily login if they fetch active quests
+    await incrementQuestProgress(memberId, 'daily_login', 1);
+
+    // 6. Format return data
     return activeMemberQuests.map(row => ({
       ...row.quest,
       progress: row.memberQuest
@@ -154,5 +157,45 @@ export async function claimQuestReward(memberId: number, questId: number) {
   } catch(error) {
     console.error("Claim Quest Error:", error);
     return { success: false, error: "Gagal klaim hadiah." };
+  }
+}
+
+export async function incrementQuestProgress(memberId: number, actionType: string, amount: number = 1) {
+  try {
+    const now = new Date();
+    
+    // Find active quests for this user with matching actionType
+    const activeQuests = await db.select({
+      memberQuest: memberQuests,
+      quest: quests
+    })
+    .from(memberQuests)
+    .innerJoin(quests, eq(memberQuests.questId, quests.id))
+    .where(
+      and(
+        eq(memberQuests.memberId, memberId),
+        eq(quests.actionType, actionType),
+        eq(memberQuests.isCompleted, false),
+        gt(memberQuests.expiresAt, now)
+      )
+    );
+    
+    if (activeQuests.length === 0) return;
+    
+    // Update progress for all matching active quests
+    for (const q of activeQuests) {
+      const newProgress = Math.min(q.memberQuest.progress + amount, q.quest.targetCount ?? 1);
+      
+      if (newProgress > q.memberQuest.progress) {
+        await db.update(memberQuests)
+          .set({ 
+            progress: newProgress,
+            updatedAt: new Date()
+          })
+          .where(eq(memberQuests.id, q.memberQuest.id));
+      }
+    }
+  } catch (error) {
+    console.error("Increment Quest Progress Error:", error);
   }
 }

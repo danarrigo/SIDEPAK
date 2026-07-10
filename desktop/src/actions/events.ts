@@ -5,6 +5,8 @@ import { members } from "@/db/schema/members";
 import { memberProgress } from "@/db/schema/gamification";
 import { eq, and } from "drizzle-orm";
 
+import { incrementQuestProgress } from "@/actions/quests";
+
 export async function joinEvent(memberId: number, eventId: number) {
   try {
     const existing = await db.select().from(eventParticipants).where(and(eq(eventParticipants.eventId, eventId), eq(eventParticipants.memberId, memberId)));
@@ -15,6 +17,9 @@ export async function joinEvent(memberId: number, eventId: number) {
       memberId,
       status: 'registered'
     });
+    
+    await incrementQuestProgress(memberId, 'join_event', 1);
+    
     return { success: true };
   } catch (err) {
     console.error("Join Event Error:", err);

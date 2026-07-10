@@ -6,6 +6,7 @@ import { members } from "@/db/schema/members";
 import { eq, and, or, desc } from "drizzle-orm";
 import { awardPoints, getMemberProgress } from "@/actions/gamification";
 import { memberProgress } from "@/db/schema/gamification";
+import { incrementQuestProgress } from "@/actions/quests";
 
 export async function getFinancialsData(memberId: number) {
   try {
@@ -97,6 +98,7 @@ export async function addSaving(memberId: number, amount: number, description?: 
     
     // Award 100 points for saving
     await awardPoints(memberId, 100, 'saving', 'Menabung');
+    await incrementQuestProgress(memberId, 'saving', 1);
     
     return { success: true, saving };
   } catch(error) {
@@ -267,6 +269,7 @@ export async function depositSavingsFromWallet(memberId: number, amount: number,
 
     // Award points
     await awardPoints(memberId, 100, 'saving', 'Simpanan Sukarela');
+    await incrementQuestProgress(memberId, 'saving', 1);
 
     const { createNotification } = await import("./notifications");
     await createNotification(
@@ -457,6 +460,7 @@ export async function repayLoanFromWallet(memberId: number, loanId: number) {
       "Pinjaman Lunas! ✅", 
       `Terima kasih! Pembayaran pinjaman sebesar Rp ${totalToPay.toLocaleString("id-ID")} telah berhasil dipotong dari dompet Anda.`
     );
+    await incrementQuestProgress(memberId, 'pay_loan', 1);
 
     return { success: true };
   } catch (error) {

@@ -211,10 +211,134 @@ class MisiView extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   _buildMissionSectionCard(context, false),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('Peti Harta Mingguan',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF334155))),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  _buildChestMilestoneCard(context),
                   const SizedBox(height: 20),
                 ],
               ),
             )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChestMilestoneCard(BuildContext context) {
+    final provider = context.watch<KoperasiProvider>();
+    final completedMissions =
+        provider.missions.where((m) => m.isCompleted).length;
+    final chestMilestones = [6, 12, 18, 24, 30];
+    final progress = (completedMissions / 30).clamp(0.0, 1.0);
+
+    return Card(
+      color: Colors.white,
+      surfaceTintColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Text(
+              'Selesaikan misi untuk membuka hingga 5 peti harta!\n($completedMissions misi selesai)',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 24),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                // Progress Bar Background
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  top: 14,
+                  child: Container(
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                // Progress Bar Fill
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  top: 14,
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: progress,
+                    child: Container(
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF59E0B),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ),
+                // Chests
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: chestMilestones.map((target) {
+                    final isUnlocked = completedMissions >= target;
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: isUnlocked
+                                ? const Color(0xFFFEF3C7)
+                                : Colors.white,
+                            border: Border.all(
+                              color: isUnlocked
+                                  ? const Color(0xFFF59E0B)
+                                  : const Color(0xFFE2E8F0),
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            isUnlocked ? Icons.redeem : Icons.lock,
+                            size: 18,
+                            color: isUnlocked
+                                ? const Color(0xFFF59E0B)
+                                : const Color(0xFFCBD5E1),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '$target',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: isUnlocked
+                                ? const Color(0xFFD97706)
+                                : const Color(0xFF94A3B8),
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ],
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'providers/koperasi_provider.dart';
 import 'views/home_view.dart';
 import 'views/misi_view.dart';
@@ -9,6 +10,8 @@ import 'views/profile_view.dart';
 import 'views/login_view.dart';
 import 'views/marketplace_view.dart';
 import 'views/widgets/prank_overlay.dart';
+import 'views/widgets/onboarding_paywall.dart';
+import 'views/simpanan_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -55,6 +58,11 @@ class MainNavigationWrapper extends StatefulWidget {
 class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
   int _currentIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+  }
+
   Widget _buildBody() {
     switch (_currentIndex) {
       case 0:
@@ -87,6 +95,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<KoperasiProvider>();
+    final showPaywall =
+        !provider.isPokokPaid && _currentIndex != 4 && provider.isLoggedIn;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
@@ -97,6 +107,35 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
               : _buildBody(),
           // Phase 4b: PrankEffect overlay
           const PrankOverlay(),
+
+          if (showPaywall && !provider.isLoading)
+            OnboardingPaywall(
+              onPay: () async {
+                final urlString = await provider.createTopUpInvoice(100000);
+                if (urlString != null) {
+                  final url = Uri.parse(urlString);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Gagal membuat invoice Xendit')),
+                  );
+                }
+              },
+              onSuccess: () {
+                setState(() {
+                  _currentIndex = 4;
+                });
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SimpananView()),
+                ).then((_) {
+                  provider.fetchData();
+                });
+              },
+            ),
         ],
       ),
       bottomNavigationBar: Container(
@@ -118,7 +157,6 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
               _buildNavItem(2, Icons.bolt_rounded, 'Arena'),
               _buildNavItem(3, Icons.storefront_rounded, 'Pasar'),
               _buildNavItem(4, Icons.account_balance_rounded, 'Koperasi'),
-              _buildNavItem(5, Icons.person_rounded, 'Profil'),
             ],
           ),
         ),

@@ -46,7 +46,9 @@ class _StubProvider extends ChangeNotifier implements KoperasiProvider {
           String kabupaten = '',
           String kecamatan = '',
           String desa = '',
-          required String koperasi}) async =>
+          required String koperasi,
+          required String pekerjaan,
+          required String nomorHp}) async =>
       true;
   @override
   Future<void> logout() async {}

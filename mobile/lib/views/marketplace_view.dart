@@ -42,7 +42,7 @@ class MarketplaceView extends StatelessWidget {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Pasar Anggota & Power-Ups',
+                            'Pasar Anggota & Pasar Poin',
                             style:
                                 TextStyle(color: Colors.white60, fontSize: 11),
                           ),
@@ -80,7 +80,7 @@ class MarketplaceView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Power-Ups / Toko Item (moved from MisiView)
+                      // Pasar Poin / Toko Item (moved from MisiView)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -91,7 +91,7 @@ class MarketplaceView extends StatelessWidget {
                                   color: Color(0xFFFACC15), size: 18),
                               SizedBox(width: 4),
                               Text(
-                                'Toko Item (Power-Ups)',
+                                'Pasar Poin',
                                 style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -125,7 +125,7 @@ class MarketplaceView extends StatelessWidget {
                                   color: Colors.grey, size: 36),
                               SizedBox(height: 8),
                               Text(
-                                'Belum ada power-up di toko.',
+                                'Belum ada item di Pasar Poin.',
                                 style: TextStyle(
                                     color: Colors.grey,
                                     fontSize: 12,

@@ -15,7 +15,7 @@ void main() {
     expect(find.textContaining('Daftar Sekarang'), findsOneWidget);
   });
 
-  testWidgets('MainNavigationWrapper renders 6 bottom nav items when logged in',
+  testWidgets('MainNavigationWrapper renders 5 bottom nav items when logged in',
       (tester) async {
     final fake = ChangeNotifierProvider<KoperasiProvider>(
       create: (_) {
@@ -31,14 +31,15 @@ void main() {
     await tester.pumpWidget(fake);
     // Render initial loading spinner
     await tester.pump();
-    // All 6 nav labels should be present (Event was merged into Beranda)
+    // All 5 nav labels should be present (Event and Profil were moved out)
     expect(find.text('Beranda'), findsOneWidget);
     expect(find.text('Misi'), findsOneWidget);
     expect(find.text('Arena'), findsOneWidget);
     expect(find.text('Pasar'), findsOneWidget);
     expect(find.text('Koperasi'), findsOneWidget);
-    expect(find.text('Profil'), findsOneWidget);
-    // Event tab no longer exists in the bottom nav
+
+    // Event tab and Profil tab no longer exist in the bottom nav
     expect(find.text('Event'), findsNothing);
+    expect(find.text('Profil'), findsNothing);
   });
 }

@@ -30,6 +30,10 @@ class _StubProvider extends ChangeNotifier implements KoperasiProvider {
   @override
   List<InventoryItem> get inventory => _inventory;
   @override
+  Map<String, dynamic>? get myStats => null;
+  @override
+  Map<String, dynamic>? get opStats => null;
+  @override
   int? get memberId => 1;
   @override
   String? get fullName => 'Budi Test';
@@ -53,7 +57,9 @@ class _StubProvider extends ChangeNotifier implements KoperasiProvider {
           String kabupaten = '',
           String kecamatan = '',
           String desa = '',
-          required String koperasi}) async =>
+          required String koperasi,
+          required String pekerjaan,
+          required String nomorHp}) async =>
       true;
   @override
   Future<void> logout() async {}
@@ -118,21 +124,15 @@ Widget _wrap(Widget child, KoperasiProvider p) =>
 
 void main() {
   testWidgets(
-      'BattleView shows empty state with Cari Lawan button when no active battle',
+      'BattleView shows empty state and automatically matchmakes when no active battle',
       (tester) async {
     final p = _StubProvider();
     await tester.pumpWidget(_wrap(const BattleView(), p));
-    await tester.pump();
-    expect(find.text('Belum Ada Pertandingan'), findsOneWidget);
-    expect(find.text('CARI LAWAN SEKARANG'), findsOneWidget);
-  });
+    await tester.pump(); // trigger initState
+    expect(find.text('Mulai Pertandingan'), findsOneWidget);
+    expect(find.text('Mencari Lawan...'), findsOneWidget);
 
-  testWidgets('Tapping Cari Lawan triggers matchmakeBattle', (tester) async {
-    final p = _StubProvider(matchmakeReturnMessage: 'Lawan ditemukan!');
-    await tester.pumpWidget(_wrap(const BattleView(), p));
-    await tester.pump();
-    await tester.tap(find.text('CARI LAWAN SEKARANG'));
-    // Let the async matchmake + refetchData + setState complete
+    // Let the async matchmake complete without timing out on the spinner
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pump(const Duration(milliseconds: 50));

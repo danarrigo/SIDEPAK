@@ -43,56 +43,176 @@ class HomeView extends StatelessWidget {
       showModalBottomSheet(
         context: context,
         backgroundColor: Colors.white,
+        isScrollControlled: true,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        builder: (sheetContext) => SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Notifikasi',
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F172A)),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        // Visual only — no notifications backend yet (mirrors webapp placeholder)
-                        Navigator.pop(sheetContext);
-                      },
-                      child: const Text(
-                        'Tandai sudah dibaca',
-                        style: TextStyle(
-                            fontSize: 10,
-                            color: Color(0xFFFACC15),
-                            fontWeight: FontWeight.bold),
+        builder: (sheetContext) {
+          return StatefulBuilder(
+            builder: (sheetContext, setSheetState) {
+              final notifs = provider.listNotifications;
+              return DraggableScrollableSheet(
+                initialChildSize: 0.6,
+                minChildSize: 0.4,
+                maxChildSize: 0.9,
+                expand: false,
+                builder: (context, scrollController) {
+                  return SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Notifikasi',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0F172A)),
+                              ),
+                              Row(
+                                children: [
+                                  TextButton.icon(
+                                    onPressed: () async {
+                                      final res = await provider
+                                          .createTestNotification();
+                                      if (res == 'success') {
+                                        showSnackBar(
+                                            'Notifikasi tes berhasil dikirim!');
+                                        setSheetState(() {});
+                                      } else {
+                                        showSnackBar(res);
+                                      }
+                                    },
+                                    icon: const Icon(Icons.add_alert,
+                                        size: 14, color: Color(0xFF3B82F6)),
+                                    label: const Text(
+                                      'Kirim Tes',
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          color: Color(0xFF3B82F6),
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    style: TextButton.styleFrom(
+                                      minimumSize: Size.zero,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pop(sheetContext);
+                                    },
+                                    child: const Text(
+                                      'Tutup',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Divider(height: 24),
+                          Expanded(
+                            child: notifs.isEmpty
+                                ? const Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.notifications_paused,
+                                          size: 56, color: Color(0xFFCBD5E1)),
+                                      SizedBox(height: 12),
+                                      Text(
+                                        'Belum ada notifikasi baru.',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  )
+                                : ListView.separated(
+                                    controller: scrollController,
+                                    itemCount: notifs.length,
+                                    separatorBuilder: (_, __) =>
+                                        const Divider(height: 1),
+                                    itemBuilder: (context, index) {
+                                      final notif = notifs[index];
+                                      return ListTile(
+                                        contentPadding: EdgeInsets.zero,
+                                        leading: const CircleAvatar(
+                                          backgroundColor: Color(0xFFEFF6FF),
+                                          child: Icon(Icons.notifications,
+                                              color: Color(0xFF3B82F6),
+                                              size: 20),
+                                        ),
+                                        title: Text(
+                                          notif['title'] ?? 'Notifikasi',
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF1E293B)),
+                                        ),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              notif['message'] ?? '',
+                                              style: const TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.grey),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              notif['createdAt'] != null
+                                                  ? notif['createdAt']
+                                                      .toString()
+                                                      .split('T')[0]
+                                                  : '',
+                                              style: const TextStyle(
+                                                  fontSize: 9,
+                                                  color: Colors.black26),
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: IconButton(
+                                          icon: const Icon(Icons.delete_outline,
+                                              color: Colors.redAccent,
+                                              size: 18),
+                                          onPressed: () async {
+                                            final res = await provider
+                                                .deleteNotification(
+                                                    notif['id']);
+                                            if (res == 'success') {
+                                              showSnackBar(
+                                                  'Notifikasi dihapus.');
+                                              setSheetState(() {});
+                                            } else {
+                                              showSnackBar(res);
+                                            }
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                const Icon(Icons.notifications_paused,
-                    size: 56, color: Color(0xFFCBD5E1)),
-                const SizedBox(height: 12),
-                const Text(
-                  'Belum ada notifikasi baru.',
-                  style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ),
+                  );
+                },
+              );
+            },
+          );
+        },
       );
     }
 
@@ -148,32 +268,53 @@ class HomeView extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // Notification icon — tappable (Issue 1)
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: openNotifications,
-                          borderRadius: BorderRadius.circular(24),
-                          child: Container(
-                            decoration: const BoxDecoration(
-                                color: Color(0x1AFFFFFF),
-                                shape: BoxShape.circle),
-                            padding: const EdgeInsets.all(12),
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: const [
-                                Icon(Icons.notifications,
-                                    color: Colors.white, size: 24),
-                                Positioned(
-                                    top: 0,
-                                    right: 0,
-                                    child: CircleAvatar(
-                                        radius: 4,
-                                        backgroundColor: Colors.red)),
-                              ],
+                      Row(
+                        children: [
+                          // Notification icon
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: openNotifications,
+                              borderRadius: BorderRadius.circular(24),
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                    color: Color(0x1AFFFFFF),
+                                    shape: BoxShape.circle),
+                                padding: const EdgeInsets.all(10),
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: const [
+                                    Icon(Icons.notifications,
+                                        color: Colors.white, size: 22),
+                                    Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: CircleAvatar(
+                                            radius: 4,
+                                            backgroundColor: Colors.red)),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          // Profile icon
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => onNavigate(5),
+                              borderRadius: BorderRadius.circular(24),
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                    color: Color(0x1AFFFFFF),
+                                    shape: BoxShape.circle),
+                                padding: const EdgeInsets.all(10),
+                                child: const Icon(Icons.person,
+                                    color: Colors.white, size: 22),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

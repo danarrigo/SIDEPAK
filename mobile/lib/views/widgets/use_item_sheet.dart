@@ -113,7 +113,7 @@ class _UseItemSheetState extends State<UseItemSheet> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'Beli power-up di tab Pasar.',
+                      'Beli item di tab Pasar Poin.',
                       style: TextStyle(color: Colors.grey, fontSize: 10),
                     ),
                   ],

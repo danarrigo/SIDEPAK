@@ -40,7 +40,9 @@ void main() {
                   'pointsBalance': 0,
                   'xp': 0,
                   'currentStreak': 0,
-                  'level': 5,
+                  'level': 5, // level 5 * 50 = 250
+                  'creditScore':
+                      200, // 200 * 5 = 1000 => total 1250 (< 2500, Perunggu)
                   'lastActivityDate': null,
                 },
                 'transactions': [],
@@ -57,7 +59,7 @@ void main() {
       expect(p.level, 5);
       expect(p.rankName, 'Perunggu');
       expect(p.nextRankName, 'Perak');
-      expect(p.nextLevelPoints, 5 * 1000);
+      expect(p.nextLevelPoints, 2500);
     });
 
     test('level 25 -> Emas / next Platinum', () async {
@@ -71,7 +73,8 @@ void main() {
                   'pointsBalance': 0,
                   'xp': 0,
                   'currentStreak': 0,
-                  'level': 25,
+                  'level': 25, // 1250
+                  'creditScore': 750, // 3750 => total 5000 (Emas)
                   'lastActivityDate': null
                 },
                 'transactions': [],
@@ -100,7 +103,8 @@ void main() {
                   'pointsBalance': 0,
                   'xp': 0,
                   'currentStreak': 0,
-                  'level': 45,
+                  'level': 45, // 2250
+                  'creditScore': 4600, // 23000 => total 25250 (Legenda)
                   'lastActivityDate': null
                 },
                 'transactions': [],
@@ -134,6 +138,7 @@ void main() {
                   'xp': 2500,
                   'currentStreak': 3,
                   'level': 12,
+                  'creditScore': 700,
                   'lastActivityDate': DateTime.now().toIso8601String(),
                 },
                 'transactions': [],

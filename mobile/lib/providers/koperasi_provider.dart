@@ -31,7 +31,9 @@ class KoperasiProvider extends ChangeNotifier {
   int level = 1;
   String rankName = 'Perunggu';
   String nextRankName = 'Perak';
-  int nextLevelPoints = 1000;
+  int nextLevelPoints = 2500;
+  int membershipScore = 0;
+  int creditScore = 700;
   String? voteSelection;
   bool isLoading = true;
   int walletBalance = 0;
@@ -48,9 +50,14 @@ class KoperasiProvider extends ChangeNotifier {
   List<dynamic> listLoans = [];
   List<dynamic> listDues = [];
   List<dynamic> listWalletTxs = [];
+  List<dynamic> listDisbursements = [];
+  List<dynamic> listNotifications = [];
+  String? phoneNumber;
   Map<String, dynamic>? activeBattle;
   String? activeBattleEndDate;
   Map<String, dynamic>? activeLoan;
+  Map<String, dynamic>? myStats;
+  Map<String, dynamic>? opStats;
 
   // Membership status states
   bool isMemberActive = true;
@@ -146,6 +153,28 @@ class KoperasiProvider extends ChangeNotifier {
       h['Content-Type'] = 'application/json';
     }
     return h;
+  }
+
+  Future<String?> createTopUpInvoice(int amount) async {
+    final response = await _postAction({
+      'action': 'create-topup',
+      'amount': amount,
+    });
+    if (response['success'] == true) {
+      return response['invoiceUrl'];
+    }
+    return null;
+  }
+
+  Future<String?> verifyAndPaySimpananPokok() async {
+    final response = await _postAction({
+      'action': 'verify-and-pay-simpanan-pokok',
+    });
+    if (response['success'] == true) {
+      await fetchData();
+      return null;
+    }
+    return response['error'] as String? ?? 'Gagal memverifikasi pembayaran';
   }
 
   /// POSTs an action to /api/mobile-sync/action and centralizes 401 handling.
@@ -268,6 +297,8 @@ class KoperasiProvider extends ChangeNotifier {
     String kecamatan = '',
     String desa = '',
     required String koperasi,
+    required String pekerjaan,
+    required String nomorHp,
   }) async {
     try {
       final response = await _client.post(
@@ -283,6 +314,8 @@ class KoperasiProvider extends ChangeNotifier {
           'kecamatan': kecamatan,
           'desa': desa,
           'koperasi': koperasi,
+          'pekerjaan': pekerjaan,
+          'nomorHp': nomorHp,
         }),
       );
       if (response.statusCode == 200) {
@@ -381,6 +414,8 @@ class KoperasiProvider extends ChangeNotifier {
           level = (progress['level'] as num?)?.toInt() ?? level;
           walletBalance =
               (progress['walletBalance'] as num?)?.toInt() ?? walletBalance;
+          creditScore =
+              (progress['creditScore'] as num?)?.toInt() ?? creditScore;
           _recomputeRank();
           _computeWeeklyStreak(progress['lastActivityDate']);
         }
@@ -390,6 +425,10 @@ class KoperasiProvider extends ChangeNotifier {
 
         // Phase 4b: active prank effect
         activeEffect = data['activeEffect'] as String?;
+
+        // Sync notifications and profile data
+        listNotifications = data['notifications'] ?? [];
+        phoneNumber = data['profile']?['nomorHp'] ?? phoneNumber;
 
         // Phase 4c: active loan
         activeLoan = data['activeLoan'] as Map<String, dynamic>?;
@@ -405,6 +444,7 @@ class KoperasiProvider extends ChangeNotifier {
           listLoans = financials['loans'] ?? [];
           listDues = financials['dues'] ?? [];
           listWalletTxs = financials['walletTransactions'] ?? [];
+          listDisbursements = financials['disbursements'] ?? [];
 
           isMemberActive = financials['isMemberActive'] ?? true;
           isPokokPaid = financials['isPokokPaid'] ?? true;
@@ -445,6 +485,8 @@ class KoperasiProvider extends ChangeNotifier {
             activeBattle = arena['activeBattles'][0];
             activeBattleEndDate =
                 activeBattle?['endDate']?.toString().split('T')[0];
+            myStats = arena['myStats'] as Map<String, dynamic>?;
+            opStats = arena['opStats'] as Map<String, dynamic>?;
           }
           final past = arena['pastBattles'];
           if (past != null && past is List) {
@@ -474,6 +516,7 @@ class KoperasiProvider extends ChangeNotifier {
           asetPinjaman = (governance['asetPinjaman'] as num?)?.toInt() ?? 0;
           asetInvestasi = (governance['asetInvestasi'] as num?)?.toInt() ?? 0;
           canSubmitProposal = level >= 20;
+          voteSelection = governance['userVote'] as String?;
         }
 
         final badgesList = data['badges'];
@@ -557,22 +600,31 @@ class KoperasiProvider extends ChangeNotifier {
   }
 
   void _recomputeRank() {
-    nextLevelPoints = level * 1000;
-    if (level >= 40) {
-      rankName = 'Legenda';
-      nextRankName = 'Legenda';
-    } else if (level >= 30) {
-      rankName = 'Platinum';
-      nextRankName = 'Legenda';
-    } else if (level >= 20) {
-      rankName = 'Emas';
-      nextRankName = 'Platinum';
-    } else if (level >= 10) {
-      rankName = 'Perak';
-      nextRankName = 'Emas';
-    } else {
+    final int levelScore = level * 50;
+    final int balanceScore = walletBalance ~/ 10000;
+    final int creditScorePoints = creditScore * 5;
+    membershipScore = levelScore + balanceScore + creditScorePoints;
+
+    if (membershipScore < 2500) {
       rankName = 'Perunggu';
       nextRankName = 'Perak';
+      nextLevelPoints = 2500;
+    } else if (membershipScore < 5000) {
+      rankName = 'Perak';
+      nextRankName = 'Emas';
+      nextLevelPoints = 5000;
+    } else if (membershipScore < 10000) {
+      rankName = 'Emas';
+      nextRankName = 'Platinum';
+      nextLevelPoints = 10000;
+    } else if (membershipScore < 25000) {
+      rankName = 'Platinum';
+      nextRankName = 'Legenda';
+      nextLevelPoints = 25000;
+    } else {
+      rankName = 'Legenda';
+      nextRankName = 'Legenda';
+      nextLevelPoints = membershipScore; // capped
     }
   }
 
@@ -789,6 +841,98 @@ class KoperasiProvider extends ChangeNotifier {
       return body['error']?.toString() ?? 'Gagal menabung.';
     } catch (e) {
       print('Deposit savings wallet error: $e');
+      return 'Gagal menghubungi server.';
+    }
+  }
+
+  Future<String> withdrawWallet({
+    required int amount,
+    required String bankCode,
+    required String accountNumber,
+    required String accountName,
+  }) async {
+    try {
+      final body = await _postAction({
+        'action': 'withdraw-wallet',
+        'amount': amount,
+        'bankCode': bankCode,
+        'accountNumber': accountNumber,
+        'accountName': accountName,
+      });
+      if (body['success'] == true) {
+        await fetchData();
+        return 'success';
+      }
+      return body['error']?.toString() ?? 'Gagal memproses penarikan.';
+    } catch (e) {
+      print('Withdraw wallet error: $e');
+      return 'Gagal menghubungi server.';
+    }
+  }
+
+  Future<String> deleteNotification(int notifId) async {
+    try {
+      final body = await _postAction({
+        'action': 'delete-notification',
+        'notificationId': notifId,
+      });
+      if (body['success'] == true) {
+        await fetchData();
+        return 'success';
+      }
+      return body['error']?.toString() ?? 'Gagal menghapus notifikasi.';
+    } catch (e) {
+      print('Delete notification error: $e');
+      return 'Gagal menghubungi server.';
+    }
+  }
+
+  Future<String> createTestNotification() async {
+    try {
+      final body = await _postAction({
+        'action': 'create-test-notification',
+      });
+      if (body['success'] == true) {
+        await fetchData();
+        return 'success';
+      }
+      return body['error']?.toString() ?? 'Gagal membuat notifikasi tes.';
+    } catch (e) {
+      print('Create test notification error: $e');
+      return 'Gagal menghubungi server.';
+    }
+  }
+
+  Future<String> updatePhone(String newPhone) async {
+    try {
+      final body = await _postAction({
+        'action': 'update-phone',
+        'newPhone': newPhone,
+      });
+      if (body['success'] == true) {
+        await fetchData();
+        return 'success';
+      }
+      return body['error']?.toString() ?? 'Gagal memperbarui nomor telepon.';
+    } catch (e) {
+      print('Update phone error: $e');
+      return 'Gagal menghubungi server.';
+    }
+  }
+
+  Future<String> applyLoan(int amount) async {
+    try {
+      final body = await _postAction({
+        'action': 'apply-loan',
+        'amount': amount,
+      });
+      if (body['success'] == true) {
+        await fetchData();
+        return 'success';
+      }
+      return body['error']?.toString() ?? 'Gagal mengajukan pinjaman.';
+    } catch (e) {
+      print('Apply loan error: $e');
       return 'Gagal menghubungi server.';
     }
   }

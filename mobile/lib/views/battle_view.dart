@@ -245,7 +245,13 @@ class BattleView extends StatelessWidget {
                         ),
                       ),
                     ),
-                  if (provider.activeBattle != null) const SizedBox(height: 24),
+                  if (provider.activeBattle != null) ...[
+                    const SizedBox(height: 24),
+                    _buildDetailPertandinganCard(context, provider),
+                    const SizedBox(height: 24),
+                    _buildCaraMendapatkanPoinGrid(context),
+                    const SizedBox(height: 24),
+                  ],
                   const Text('Riwayat Bertanding',
                       style: TextStyle(
                           fontSize: 18,
@@ -417,6 +423,216 @@ class BattleView extends StatelessWidget {
   Widget _buildEmptyBattleCard(KoperasiProvider provider) {
     return _EmptyBattleCard(provider: provider);
   }
+
+  Widget _buildDetailPertandinganCard(
+      BuildContext context, KoperasiProvider provider) {
+    final my = provider.myStats ?? {};
+    final op = provider.opStats ?? {};
+
+    Widget buildRow(String label, dynamic val1, dynamic val2) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                '$val1 pts',
+                textAlign: TextAlign.left,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Color(0xFF0F172A)),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                '$val2 pts',
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Color(0xFF0F172A)),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'Detail Pertandingan',
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF475569)),
+        ),
+        const SizedBox(height: 8),
+        Card(
+          color: Colors.white,
+          surfaceTintColor: Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          elevation: 1,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                buildRow('Misi Harian', my['missionsCompleted'] ?? 0,
+                    op['missionsCompleted'] ?? 0),
+                const Divider(color: Color(0xFFF1F5F9)),
+                buildRow('Penyetoran Tabungan', my['savingsPts'] ?? 0,
+                    op['savingsPts'] ?? 0),
+                const Divider(color: Color(0xFFF1F5F9)),
+                buildRow('Konsistensi Login (Streak)', my['activeStreak'] ?? 0,
+                    op['activeStreak'] ?? 0),
+                const Divider(color: Color(0xFFF1F5F9)),
+                buildRow('Belanja di Koperasi', my['shopPurchases'] ?? 0,
+                    op['shopPurchases'] ?? 0),
+                const Divider(color: Color(0xFFF1F5F9)),
+                buildRow(
+                    'Aktivitas Marketplace',
+                    my['marketplaceActivity'] ?? 0,
+                    op['marketplaceActivity'] ?? 0),
+                const Divider(color: Color(0xFFF1F5F9)),
+                buildRow('Partisipasi Acara', my['eventsJoined'] ?? 0,
+                    op['eventsJoined'] ?? 0),
+                const Divider(color: Color(0xFFF1F5F9)),
+                buildRow('Peminjaman Dana', my['loansCount'] ?? 0,
+                    op['loansCount'] ?? 0),
+                const Divider(color: Color(0xFFF1F5F9)),
+                buildRow('Kemenangan Battle', my['battlesWon'] ?? 0,
+                    op['battlesWon'] ?? 0),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCaraMendapatkanPoinGrid(BuildContext context) {
+    final items = [
+      {'title': 'Menabung', 'desc': 'Setor tabungan', 'icon': Icons.savings},
+      {
+        'title': 'Belanja',
+        'desc': 'Belanja koperasi',
+        'icon': Icons.shopping_cart
+      },
+      {'title': 'Acara', 'desc': 'Ikuti kegiatan', 'icon': Icons.event},
+      {
+        'title': 'Marketplace',
+        'desc': 'Jual/beli produk',
+        'icon': Icons.storefront
+      },
+      {
+        'title': 'Misi Harian',
+        'desc': 'Selesaikan tugas',
+        'icon': Icons.task_alt
+      },
+      {
+        'title': 'Konsistensi',
+        'desc': 'Jaga streak login',
+        'icon': Icons.local_fire_department
+      },
+      {
+        'title': 'Pinjaman',
+        'desc': 'Gunakan pinjaman',
+        'icon': Icons.account_balance
+      },
+      {
+        'title': 'Kemenangan',
+        'desc': 'Menangkan battle',
+        'icon': Icons.emoji_events
+      },
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'Cara Mendapatkan Poin',
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF475569)),
+        ),
+        const SizedBox(height: 8),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 2.2,
+          ),
+          itemCount: items.length,
+          itemBuilder: (context, i) {
+            final item = items[i];
+            return Card(
+              color: Colors.white,
+              surfaceTintColor: Colors.white,
+              elevation: 1,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: const Color(0xFFF1F5F9),
+                      child: Icon(item['icon'] as IconData,
+                          size: 16, color: const Color(0xFF334155)),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            item['title'] as String,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                                color: Color(0xFF1E293B)),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            item['desc'] as String,
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 9),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
 }
 
 class _EmptyBattleCard extends StatefulWidget {
@@ -428,82 +644,108 @@ class _EmptyBattleCard extends StatefulWidget {
 }
 
 class _EmptyBattleCardState extends State<_EmptyBattleCard> {
-  bool _busy = false;
+  bool _attempted = false;
+  String? _errorMsg;
 
-  void _showSnack(String msg, {bool isError = false}) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg, style: const TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_attempted) {
+        _attempted = true;
+        _autoMatchmake();
+      }
+    });
+  }
+
+  Future<void> _autoMatchmake() async {
+    final msg = await widget.provider.matchmakeBattle();
+    if (!mounted) return;
+
+    final isErr = !msg.toLowerCase().contains('ditemukan') &&
+        !msg.toLowerCase().contains('berhasil');
+
+    if (isErr) {
+      setState(() {
+        _errorMsg = msg;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_errorMsg != null) {
+      return Container(
+        margin: const EdgeInsets.only(top: 16),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.red.shade100),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.group_off, color: Colors.red, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              _errorMsg!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Card(
-      color: const Color(0xFF6D7D91),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
-      elevation: 4,
+      color: Colors.white,
+      surfaceTintColor: Colors.white,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Color(0xFFF1F5F9))),
+      elevation: 0,
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            const Icon(Icons.sports_kabaddi,
+                color: Color(0xFFCBD5E1), size: 64),
+            const SizedBox(height: 16),
             const Text(
-              'Belum Ada Pertandingan',
+              'Mulai Pertandingan',
               style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
+                  color: Color(0xFF334155),
+                  fontSize: 18,
                   fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),
             const Text(
-              'Tantang anggota koperasi lain dan buktikan kehebatanmu!',
-              style: TextStyle(color: Colors.white70, fontSize: 11),
+              'Dapatkan poin tambahan dengan memenangkan pertandingan mingguan.',
+              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
-            const Icon(Icons.bolt, color: Color(0xFFFACC15), size: 64),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: _busy
-                  ? null
-                  : () async {
-                      setState(() => _busy = true);
-                      final msg = await widget.provider.matchmakeBattle();
-                      if (!mounted) return;
-                      setState(() => _busy = false);
-                      final isErr = !msg.toLowerCase().contains('ditemukan') &&
-                          !msg.toLowerCase().contains('berhasil');
-                      _showSnack(msg, isError: isErr);
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFACC15),
-                foregroundColor: const Color(0xFF0F172A),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-              icon: _busy
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                          color: Color(0xFF0F172A), strokeWidth: 2),
-                    )
-                  : const Icon(Icons.flash_on, size: 18),
-              label: const Text(
-                'CARI LAWAN SEKARANG',
-                style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1,
-                    fontSize: 12),
-              ),
-            ),
+            const SizedBox(height: 24),
+            Column(
+              children: [
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                      color: Color(0xFFFACC15), strokeWidth: 3),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Mencari Lawan...',
+                  style: TextStyle(
+                      color: const Color(0xFFFACC15).withOpacity(0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            )
           ],
         ),
       ),

@@ -130,6 +130,172 @@ class _SimpananViewState extends State<SimpananView> {
     );
   }
 
+  void _showWithdrawDialog(KoperasiProvider provider) {
+    final TextEditingController amountCtrl = TextEditingController();
+    final TextEditingController accountNumCtrl = TextEditingController();
+    final TextEditingController accountNameCtrl = TextEditingController();
+    String selectedBank = 'ID_BCA';
+
+    final banks = {
+      'ID_BCA': 'BCA (Bank Central Asia)',
+      'ID_MANDIRI': 'Bank Mandiri',
+      'ID_BNI': 'BNI (Bank Negara Indonesia)',
+      'ID_BRI': 'BRI (Bank Rakyat Indonesia)',
+      'ID_OVO': 'OVO E-Wallet',
+      'ID_DANA': 'DANA E-Wallet',
+      'ID_GOPAY': 'GoPay',
+    };
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              title: const Text('Tarik Saldo Dompet',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Saldo Tersedia: ${fmtMoney(provider.walletBalance)}',
+                      style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: amountCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Jumlah Penarikan (Rp)',
+                        labelStyle: const TextStyle(fontSize: 13),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        prefixText: 'Rp ',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: selectedBank,
+                      decoration: InputDecoration(
+                        labelText: 'Bank / E-Wallet Tujuan',
+                        labelStyle: const TextStyle(fontSize: 13),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      items: banks.entries.map((e) {
+                        return DropdownMenuItem<String>(
+                          value: e.key,
+                          child: Text(e.value,
+                              style: const TextStyle(fontSize: 12)),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setDialogState(() {
+                            selectedBank = val;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: accountNumCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Nomor Rekening / No. HP',
+                        labelStyle: const TextStyle(fontSize: 13),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: accountNameCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Nama Pemilik Rekening',
+                        labelStyle: const TextStyle(fontSize: 13),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child:
+                      const Text('Batal', style: TextStyle(color: Colors.grey)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final amt = int.tryParse(amountCtrl.text) ?? 0;
+                    final accNum = accountNumCtrl.text.trim();
+                    final accName = accountNameCtrl.text.trim();
+
+                    if (amt < 10000) {
+                      _showSnackBar('Minimal penarikan adalah Rp 10.000',
+                          isError: true);
+                      return;
+                    }
+                    if (provider.walletBalance < amt) {
+                      _showSnackBar('Saldo dompet digital tidak mencukupi.',
+                          isError: true);
+                      return;
+                    }
+                    if (accNum.isEmpty || accName.isEmpty) {
+                      _showSnackBar(
+                          'Harap lengkapi nomor rekening dan nama pemilik.',
+                          isError: true);
+                      return;
+                    }
+
+                    Navigator.pop(context); // Close dialog
+                    setState(() {
+                      _isLoading = true;
+                    });
+
+                    final res = await provider.withdrawWallet(
+                      amount: amt,
+                      bankCode: selectedBank,
+                      accountNumber: accNum,
+                      accountName: accName,
+                    );
+
+                    setState(() {
+                      _isLoading = false;
+                    });
+
+                    if (res == 'success') {
+                      _showSnackBar('Penarikan dana berhasil diajukan!');
+                    } else {
+                      _showSnackBar(res, isError: true);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F172A),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Text('Tarik',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<KoperasiProvider>();
@@ -164,6 +330,16 @@ class _SimpananViewState extends State<SimpananView> {
                   DateTime.now(),
         });
       }
+    }
+    for (var w in provider.listDisbursements) {
+      combinedTxs.add({
+        'type': 'disbursement',
+        'label': 'Penarikan Dana (${w['bankCode']}) - ${w['status']}',
+        'amount': (w['amount'] as num?)?.toInt() ?? 0,
+        'isPositive': false,
+        'date': w['createdAt'] ?? '',
+        'rawDate': DateTime.tryParse(w['createdAt'] ?? '') ?? DateTime.now(),
+      });
     }
     combinedTxs.sort((a, b) => b['rawDate'].compareTo(a['rawDate']));
 
@@ -201,26 +377,54 @@ class _SimpananViewState extends State<SimpananView> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Row(
-                              children: [
-                                Icon(Icons.account_balance_wallet,
-                                    color: Colors.blueAccent, size: 20),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Saldo Dompet Digital:',
-                                  style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              ],
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.account_balance_wallet,
+                                      color: Colors.blueAccent, size: 20),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text(
+                                          'Saldo Dompet Digital:',
+                                          style: TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                        Text(
+                                          fmtMoney(provider.walletBalance),
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w900),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            Text(
-                              fmtMoney(provider.walletBalance),
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w900),
+                            ElevatedButton(
+                              onPressed: () => _showWithdrawDialog(provider),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blueAccent,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text('Tarik',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11)),
                             ),
                           ],
                         ),
@@ -443,7 +647,7 @@ class _SimpananViewState extends State<SimpananView> {
                                                           color: Color(
                                                               0xFF1E293B))),
                                                   Text(
-                                                      '$date • ${tx['type'] == 'dues' ? 'Iuran' : 'Simpanan'}',
+                                                      '$date • ${tx['type'] == 'dues' ? 'Iuran' : tx['type'] == 'disbursement' ? 'Penarikan' : 'Simpanan'}',
                                                       style: const TextStyle(
                                                           fontSize: 9,
                                                           color: Colors.grey)),

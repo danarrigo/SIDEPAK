@@ -199,6 +199,79 @@ class KoperasiView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    Card(
+                      color: Colors.white,
+                      surfaceTintColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                      elevation: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(Icons.account_balance,
+                                    color: Color(0xFF1E293B), size: 20),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Pinjaman Kas Koperasi',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF475569)),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Pinjam dana langsung dari Kas Koperasi Daerah Anda. Ketentuan persentase dan limit disesuaikan dengan Rank keanggotaan Anda.',
+                              style:
+                                  TextStyle(fontSize: 11, color: Colors.grey),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Rank Anda: ${provider.rankName}',
+                                    style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF1E293B))),
+                                Text(
+                                  'Maks: Rp ${_maxBorrowableStr(provider)}',
+                                  style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF10B981)),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () =>
+                                  _showApplyLoanDialog(context, provider),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF1E293B),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                              child: const Text(
+                                'Ajukan Pinjaman',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
 
                     // Voting E-RAT (DB-backed, real proposal title)
                     const Row(
@@ -768,6 +841,164 @@ class KoperasiView extends StatelessWidget {
               child: const Text('Ya, Konfirmasi',
                   style: TextStyle(
                       color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Map<String, dynamic> _getRankLoanLimits(String rank) {
+    switch (rank) {
+      case 'Legenda':
+        return {'maxPercent': 50, 'maxAmount': 100000000};
+      case 'Platinum':
+        return {'maxPercent': 40, 'maxAmount': 50000000};
+      case 'Emas':
+        return {'maxPercent': 30, 'maxAmount': 25000000};
+      case 'Perak':
+        return {'maxPercent': 20, 'maxAmount': 10000000};
+      case 'Perunggu':
+      default:
+        return {'maxPercent': 10, 'maxAmount': 5000000};
+    }
+  }
+
+  int _maxBorrowable(KoperasiProvider provider) {
+    final limits = _getRankLoanLimits(provider.rankName);
+    final int maxPercent = limits['maxPercent']!;
+    final int maxAmount = limits['maxAmount']!;
+    final int kasKoperasi = provider.asetKas;
+
+    final int maxPercentAmount = (kasKoperasi * (maxPercent / 100)).floor();
+    return maxPercentAmount < maxAmount ? maxPercentAmount : maxAmount;
+  }
+
+  String _maxBorrowableStr(KoperasiProvider provider) {
+    final int val = _maxBorrowable(provider);
+    return val.toString().replaceAllMapped(
+        RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.");
+  }
+
+  void _showApplyLoanDialog(BuildContext context, KoperasiProvider provider) {
+    final TextEditingController amountCtrl = TextEditingController();
+    final limits = _getRankLoanLimits(provider.rankName);
+    final maxBorrowVal = _maxBorrowable(provider);
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Ajukan Pinjaman',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Rank Keanggotaan:',
+                            style: TextStyle(fontSize: 11, color: Colors.grey)),
+                        Text(provider.rankName,
+                            style: const TextStyle(
+                                fontSize: 11, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Ketentuan Rank:',
+                            style: TextStyle(fontSize: 11, color: Colors.grey)),
+                        Text(
+                            '${limits['maxPercent']}% Kas / Max Rp ${limits['maxAmount'].toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}',
+                            style: const TextStyle(
+                                fontSize: 11, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Maks. Pinjaman:',
+                            style: TextStyle(fontSize: 11, color: Colors.grey)),
+                        Text(
+                            'Rp ${maxBorrowVal.toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}',
+                            style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF10B981))),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: amountCtrl,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Jumlah Pinjaman (Rp)',
+                  labelStyle: const TextStyle(fontSize: 13),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final amt = int.tryParse(amountCtrl.text.trim()) ?? 0;
+                if (amt <= 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content:
+                            Text('Harap masukkan jumlah pinjaman yang valid.')),
+                  );
+                  return;
+                }
+                if (amt > maxBorrowVal) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(
+                            'Jumlah pinjaman melebihi batas maksimum Rp ${maxBorrowVal.toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}')),
+                  );
+                  return;
+                }
+                Navigator.pop(ctx);
+                final res = await provider.applyLoan(amt);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text(res == 'success'
+                          ? 'Pengajuan pinjaman berhasil diajukan!'
+                          : res)),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E293B),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Ajukan',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         );

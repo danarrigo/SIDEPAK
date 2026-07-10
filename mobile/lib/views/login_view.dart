@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/koperasi_provider.dart';
-import 'signup_view.dart';
+import 'onboarding_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -203,7 +203,7 @@ class _LoginViewState extends State<LoginView> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const SignupView()));
+                          builder: (context) => const OnboardingView()));
                 },
                 child: const Text(
                   'Belum memiliki akun? Daftar Sekarang',

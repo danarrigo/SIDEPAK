@@ -170,7 +170,7 @@ class BattleView extends StatelessWidget {
                                       const SizedBox(height: 8),
                                       Text(
                                         '$myCoopScore',
-                                        style: const TextStyle(color: Color(0xFF0F172A), fontSize: 32, fontWeight: FontWeight.black),
+                                        style: const TextStyle(color: Color(0xFF0F172A), fontSize: 32, fontWeight: FontWeight.w900),
                                       ),
                                       const SizedBox(height: 4),
                                       const Text(
@@ -214,7 +214,7 @@ class BattleView extends StatelessWidget {
                                       const SizedBox(height: 8),
                                       Text(
                                         '$rivalCoopScore',
-                                        style: const TextStyle(color: Color(0xFFF43F5E), fontSize: 32, fontWeight: FontWeight.black),
+                                        style: const TextStyle(color: Color(0xFFF43F5E), fontSize: 32, fontWeight: FontWeight.w900),
                                       ),
                                       const SizedBox(height: 4),
                                       const Text(

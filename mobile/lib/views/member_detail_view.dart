@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/koperasi_provider.dart';
+import 'widgets/use_item_sheet.dart';
 
 class MemberDetailView extends StatelessWidget {
   final Map<String, dynamic> member;
@@ -218,6 +219,28 @@ class MemberDetailView extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: isMe
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
+                    ),
+                  ),
+                  builder: (ctx) => UseItemSheet(targetMemberId: member['id']),
+                );
+              },
+              backgroundColor: const Color(0xFF0F172A),
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.auto_fix_high, color: Color(0xFFFACC15)),
+              label: const Text('Gunakan Item',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
     );
   }
 }

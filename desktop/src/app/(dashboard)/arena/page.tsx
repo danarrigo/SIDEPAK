@@ -196,7 +196,7 @@ export default async function Page() {
                 ) : (
                   pastBattles.map((b: any) => {
                     const isWinner = b.winnerId === currentMember.id;
-                    const opponent = b.challengerId === currentMember.id ? b.opponent : b.challenger;
+                    const opponent = b.opponent;
                     const myScore = b.challengerId === currentMember.id ? b.challengerPoints : b.opponentPoints;
                     const opScore = b.challengerId === currentMember.id ? b.opponentPoints : b.challengerPoints;
                     return (
@@ -350,7 +350,7 @@ export default async function Page() {
               <div className="border border-slate-200 rounded-[24px] p-4 bg-white shadow-sm space-y-4">
                 {pastBattles.map((b: any, index: number) => {
                   const isWin = b.winnerId === currentMember.id;
-                  const opponent = b.challengerId === currentMember.id ? b.opponent : b.challenger;
+                  const opponent = b.opponent;
                   const score = b.challengerId === currentMember.id ? b.challengerPoints : b.opponentPoints;
                   return (
                     <div key={b.id}>

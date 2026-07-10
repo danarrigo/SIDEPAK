@@ -3,6 +3,7 @@ import { getCurrentMember } from "@/actions/members";
 import { db } from "@/db";
 import { members, cooperatives, loans, savings, dues, users } from "@/db/schema";
 import { eq, sql, and, ne } from "drizzle-orm";
+import AdminCharts from "./AdminCharts";
 
 export const metadata = {
   title: "Admin Dashboard",
@@ -54,6 +55,23 @@ export default async function AdminDashboard() {
   .from(dues)
   .innerJoin(members, eq(dues.memberId, members.id))
   .where(eq(members.cooperativeId, coopId));
+
+  const loansByStatusRaw = await db.select({
+    status: loans.status,
+    count: sql<number>`count(${loans.id})`,
+    totalAmount: sql<number>`sum(${loans.amount})`,
+  })
+  .from(loans)
+  .innerJoin(members, eq(loans.memberId, members.id))
+  .where(eq(members.cooperativeId, coopId))
+  .groupBy(loans.status);
+
+  // Convert raw status counts into an array of objects
+  const loansByStatus = loansByStatusRaw.map(row => ({
+    status: row.status,
+    count: Number(row.count) || 0,
+    totalAmount: Number(row.totalAmount) || 0,
+  }));
 
   const activeLoans = Number(loanStats?.totalActiveLoans) || 0;
   const netSavings = (Number(savingStats?.totalDeposits) || 0) - (Number(savingStats?.totalWithdrawals) || 0);
@@ -153,6 +171,13 @@ export default async function AdminDashboard() {
         </div>
 
       </div>
+
+      {/* Charts Section */}
+      <AdminCharts
+        loansByStatus={loansByStatus}
+        totalAssets={totalAssets}
+        totalLoans={activeLoans}
+      />
 
       {/* Recent Activity / Actions */}
       <div className="bg-white shadow-sm rounded-3xl border border-slate-200 p-6">

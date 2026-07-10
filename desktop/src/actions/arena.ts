@@ -227,11 +227,21 @@ export async function getBattleHistory(memberId: number = 1) {
   }
 }
 
-export async function getMemberStats(memberId: number) {
+export async function getMemberStats(memberId: number, startDate?: Date, endDate?: Date) {
   try {
     const [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
-    const pts = await db.select().from(pointTransactions).where(eq(pointTransactions.memberId, memberId));
-    const quests = await db.select().from(memberQuests).where(and(eq(memberQuests.memberId, memberId), eq(memberQuests.isCompleted, true)));
+    
+    let ptsQuery = db.select().from(pointTransactions).where(eq(pointTransactions.memberId, memberId));
+    if (startDate && endDate) {
+      ptsQuery = db.select().from(pointTransactions).where(
+        and(
+          eq(pointTransactions.memberId, memberId),
+          gte(pointTransactions.createdAt, startDate),
+          lte(pointTransactions.createdAt, endDate)
+        )
+      );
+    }
+    const pts = await ptsQuery;
     
     const winPts = pts.filter(p => p.source === 'battle').reduce((a, c) => a + c.amount, 0);
     const savingsPts = pts.filter(p => p.source === 'savings' || p.source === 'saving' || p.source === 'deposit').reduce((a, c) => a + c.amount, 0);
@@ -239,20 +249,24 @@ export async function getMemberStats(memberId: number) {
     const shopPurchases = pts.filter(p => p.source === 'shop' || p.source === 'purchase').reduce((a, c) => a + c.amount, 0);
     const marketplaceActivity = pts.filter(p => p.source === 'marketplace').reduce((a, c) => a + c.amount, 0);
     const loansCount = pts.filter(p => p.source === 'loan').reduce((a, c) => a + c.amount, 0);
+    const questPts = pts.filter(p => p.source === 'quest').reduce((a, c) => a + c.amount, 0);
+    const streakPts = pts.filter(p => p.source === 'streak').reduce((a, c) => a + c.amount, 0);
+    const duesPts = pts.filter(p => p.source === 'dues').reduce((a, c) => a + c.amount, 0);
 
     return {
-      missionsCompleted: quests.length,
+      missionsCompleted: questPts, // points instead of count
       totalSavings: progress ? progress.walletBalance : 0,
       savingsPts: savingsPts,
-      activeStreak: progress ? progress.currentStreak : 0,
+      activeStreak: streakPts, // points instead of count
       eventsJoined: eventsJoined,
       shopPurchases: shopPurchases,
       marketplaceActivity: marketplaceActivity,
       loansCount: loansCount,
       battlesWon: winPts,
+      duesPts: duesPts,
     };
   } catch (error) {
     console.error("Stats DB Error:", error);
-    return { missionsCompleted: 0, totalSavings: 0, savingsPts: 0, activeStreak: 0, eventsJoined: 0, shopPurchases: 0, marketplaceActivity: 0, loansCount: 0, battlesWon: 0 };
+    return { missionsCompleted: 0, totalSavings: 0, savingsPts: 0, activeStreak: 0, eventsJoined: 0, shopPurchases: 0, marketplaceActivity: 0, loansCount: 0, battlesWon: 0, duesPts: 0 };
   }
 }

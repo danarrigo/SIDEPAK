@@ -172,9 +172,14 @@ export async function GET() {
       }
     }
     const arenaData = await getArenaData(memberId);
-    const opponentId = arenaData?.activeBattles?.[0]?.opponent?.id;
-    const myStats = await getMemberStats(memberId).catch(() => null);
-    const opStats = opponentId ? await getMemberStats(opponentId).catch(() => null) : null;
+    const activeBattle = arenaData?.activeBattles?.[0];
+    const opponentId = activeBattle?.opponent?.id;
+    const myStats = activeBattle 
+      ? await getMemberStats(memberId, activeBattle.startDate, activeBattle.endDate).catch(() => null)
+      : await getMemberStats(memberId).catch(() => null);
+    const opStats = (activeBattle && opponentId)
+      ? await getMemberStats(opponentId, activeBattle.startDate, activeBattle.endDate).catch(() => null)
+      : null;
     const koperasiStats = await getKoperasiStats(cooperativeId);
     const battleHistoryData = await getBattleHistory(memberId);
     const badgesData = await getMemberBadges(memberId);

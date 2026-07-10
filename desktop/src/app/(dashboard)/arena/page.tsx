@@ -24,7 +24,7 @@ export default async function Page() {
           <p className="font-label-caps text-label-caps text-tertiary mb-2 uppercase tracking-widest">
             {activeSeason ? activeSeason.name : "Tidak ada musim aktif"}
           </p>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface">Guild Wars (Koperasi vs Koperasi)</h2>
+          <h2 className="font-headline-lg text-headline-lg text-on-surface">Liga Koperasi</h2>
           <p className="text-on-surface-variant mt-2 max-w-2xl mx-auto">
             Bantu Koperasi Anda memenangkan pertempuran mingguan dengan mengalahkan anggota koperasi rival di pertandingan 1v1!
           </p>
@@ -70,7 +70,7 @@ export default async function Page() {
         ) : activeSeason && !currentMatch ? (
           <section className="glass-card rounded-xl p-8 mb-8 text-center bg-surface-container border-outline-variant">
             <h3 className="font-headline-md text-headline-md text-on-surface mb-2">Belum Ada Jadwal</h3>
-            <p className="text-on-surface-variant">Koperasi Anda belum mendapatkan jadwal Guild War untuk minggu ini.</p>
+            <p className="text-on-surface-variant">Koperasi Anda belum mendapatkan jadwal Liga Koperasi untuk minggu ini.</p>
           </section>
         ) : null}
 
@@ -143,7 +143,7 @@ export default async function Page() {
           <p className="text-xs text-tertiary uppercase font-bold tracking-wider mb-1">
             {activeSeason ? activeSeason.name : "Tidak ada musim aktif"}
           </p>
-          <h2 className="text-2xl font-bold text-on-surface mb-2">Guild Wars</h2>
+          <h2 className="text-2xl font-bold text-on-surface mb-2">Liga Koperasi</h2>
         </div>
         
         {activeSeason && currentMatch && rivalCooperative && (
@@ -189,11 +189,12 @@ export default async function Page() {
                 return (
                   <div key={item.id} className={`flex items-center p-4 ${isMine ? 'bg-primary/10' : ''}`}>
                     <div className="w-6 text-center font-bold text-on-surface-variant text-sm">
-                      {idx + 1}
+                      {idx + 1 === 1 ? '🥇' : idx + 1 === 2 ? '🥈' : idx + 1 === 3 ? '🥉' : idx + 1}
                     </div>
                     <div className="flex-1 ml-3">
-                      <p className={`font-bold text-sm ${isMine ? 'text-primary' : 'text-on-surface'} line-clamp-1`}>
+                      <p className={`font-bold text-sm ${isMine ? 'text-primary' : 'text-on-surface'} line-clamp-1 flex items-center gap-2`}>
                         {item.koperasiName}
+                        {isMine && <span className="text-[8px] bg-primary text-on-primary px-1.5 py-0.5 rounded-full uppercase tracking-wider">Anda</span>}
                       </p>
                       <div className="flex gap-2 text-[10px] mt-1">
                         <span className="text-primary font-bold">{item.totalWins} W</span>

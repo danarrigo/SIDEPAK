@@ -7,8 +7,8 @@ export default async function ArenaClient({ memberId, initialBattles, myName = "
   const { pastBattles } = await getBattleHistory(memberId);
   const battle = initialBattles[0];
   
-  const myStats = await getMemberStats(memberId);
-  const opStats = battle?.opponent?.id ? await getMemberStats(battle.opponent.id) : { missionsCompleted: 0, totalSavings: 0, savingsPts: 0, activeStreak: 0, eventsJoined: 0, shopPurchases: 0, marketplaceActivity: 0, loansCount: 0, battlesWon: 0 };
+  const myStats = battle ? await getMemberStats(memberId, battle.startDate, battle.endDate) : await getMemberStats(memberId);
+  const opStats = battle?.opponent?.id ? await getMemberStats(battle.opponent.id, battle.startDate, battle.endDate) : { missionsCompleted: 0, totalSavings: 0, savingsPts: 0, activeStreak: 0, eventsJoined: 0, shopPurchases: 0, marketplaceActivity: 0, loansCount: 0, battlesWon: 0 };
   const inventory = await getMemberInventory(memberId);
   
   const p1 = battle ? (battle.challengerId === memberId ? battle.challengerPoints : battle.opponentPoints) : 0;

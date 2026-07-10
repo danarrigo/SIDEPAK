@@ -231,18 +231,24 @@ export async function getMemberStats(memberId: number) {
   try {
     const [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
     const pts = await db.select().from(pointTransactions).where(eq(pointTransactions.memberId, memberId));
+    const quests = await db.select().from(memberQuests).where(and(eq(memberQuests.memberId, memberId), eq(memberQuests.isCompleted, true)));
     
     const winPts = pts.filter(p => p.source === 'battle').reduce((a, c) => a + c.amount, 0);
+    const savingsPts = pts.filter(p => p.source === 'savings' || p.source === 'saving' || p.source === 'deposit').reduce((a, c) => a + c.amount, 0);
+    const eventsJoined = pts.filter(p => p.source === 'event').reduce((a, c) => a + c.amount, 0);
+    const shopPurchases = pts.filter(p => p.source === 'shop' || p.source === 'purchase').reduce((a, c) => a + c.amount, 0);
+    const marketplaceActivity = pts.filter(p => p.source === 'marketplace').reduce((a, c) => a + c.amount, 0);
+    const loansCount = pts.filter(p => p.source === 'loan').reduce((a, c) => a + c.amount, 0);
 
     return {
-      missionsCompleted: 0,
+      missionsCompleted: quests.length,
       totalSavings: progress ? progress.walletBalance : 0,
-      savingsPts: 0,
-      activeStreak: 0,
-      eventsJoined: 0,
-      shopPurchases: 0,
-      marketplaceActivity: 0,
-      loansCount: 0,
+      savingsPts: savingsPts,
+      activeStreak: progress ? progress.currentStreak : 0,
+      eventsJoined: eventsJoined,
+      shopPurchases: shopPurchases,
+      marketplaceActivity: marketplaceActivity,
+      loansCount: loansCount,
       battlesWon: winPts,
     };
   } catch (error) {

@@ -176,6 +176,59 @@ export default async function ArenaClient({ memberId, initialBattles, myName = "
           </table>
         </div>
       </section>
+
+      {/* Points Guide */}
+      <section className="mb-10 animate-fade-in animation-delay-300">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+            <span className="material-symbols-outlined">help</span>
+          </div>
+          <div>
+            <h2 className="font-headline-sm text-on-surface">Cara Mendapatkan Poin</h2>
+            <p className="text-sm text-on-surface-variant">Kumpulkan poin sebanyak-banyaknya untuk memenangkan arena dan tukarkan di Toko Poin!</p>
+          </div>
+        </div>
+        <div className="bg-surface-container-low rounded-3xl p-6 border border-outline-variant/30">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex gap-4">
+              <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
+                <span className="material-symbols-outlined">payments</span>
+              </div>
+              <div>
+                <h3 className="font-bold text-on-surface mb-1">Membayar Iuran</h3>
+                <p className="text-sm text-on-surface-variant">Dapatkan poin setiap kali Anda membayar iuran wajib atau pokok tepat waktu.</p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
+                <span className="material-symbols-outlined">savings</span>
+              </div>
+              <div>
+                <h3 className="font-bold text-on-surface mb-1">Menabung</h3>
+                <p className="text-sm text-on-surface-variant">Setor simpanan sukarela untuk mendapatkan bonus poin secara berkala.</p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
+                <span className="material-symbols-outlined">storefront</span>
+              </div>
+              <div>
+                <h3 className="font-bold text-on-surface mb-1">Transaksi Toko</h3>
+                <p className="text-sm text-on-surface-variant">Beli atau jual barang di Toko / Marketplace Koperasi.</p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 shrink-0">
+                <span className="material-symbols-outlined">task_alt</span>
+              </div>
+              <div>
+                <h3 className="font-bold text-on-surface mb-1">Misi Koperasi</h3>
+                <p className="text-sm text-on-surface-variant">Selesaikan misi dan dapatkan reward poin melimpah!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

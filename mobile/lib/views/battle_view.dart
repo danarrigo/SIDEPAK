@@ -418,12 +418,74 @@ class BattleView extends StatelessWidget {
                             },
                           ),
                   ),
+                  const SizedBox(height: 32),
+                  // Points Guide
+                  const Text('Cara Mendapatkan Poin',
+                      style: TextStyle(
+                          color: Color(0xFF1E293B),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  const Text('Kumpulkan poin sebanyak-banyaknya untuk memenangkan arena dan tukarkan di Toko Poin!',
+                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12)),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF0F172A).withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        )
+                      ]
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildPointGuideItem(Icons.payments_rounded, 'Membayar Iuran', 'Dapatkan poin setiap kali Anda membayar iuran tepat waktu.'),
+                        const SizedBox(height: 12),
+                        _buildPointGuideItem(Icons.savings_rounded, 'Menabung', 'Setor simpanan sukarela untuk mendapatkan bonus poin.'),
+                        const SizedBox(height: 12),
+                        _buildPointGuideItem(Icons.storefront_rounded, 'Transaksi Toko', 'Beli atau jual barang di Toko / Marketplace Koperasi.'),
+                        const SizedBox(height: 12),
+                        _buildPointGuideItem(Icons.task_alt_rounded, 'Misi Koperasi', 'Selesaikan misi dan dapatkan reward poin melimpah!'),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  Widget _buildPointGuideItem(IconData icon, String title, String description) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFACC15).withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: const Color(0xFFFACC15), size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+              const SizedBox(height: 2),
+              Text(description, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

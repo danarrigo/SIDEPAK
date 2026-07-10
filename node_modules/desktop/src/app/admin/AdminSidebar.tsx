@@ -12,6 +12,7 @@ export default function AdminSidebar({ memberName }: { memberName?: string }) {
   const navLinks = [
     { href: "/admin", icon: "dashboard", label: "Dashboard" },
     { href: "/admin/members", icon: "groups", label: "Anggota" },
+    { href: "/admin/profile", icon: "person", label: "Profil" },
   ];
 
   return (
@@ -62,7 +63,7 @@ export default function AdminSidebar({ memberName }: { memberName?: string }) {
       </nav>
 
       <div className="p-3 border-t border-white/5 mb-4 shrink-0 flex flex-col gap-2">
-        <div className={`flex items-center p-2 rounded-xl bg-slate-800/50 text-slate-300 transition-all duration-300 ${!isPinned ? "justify-center group-hover:justify-start" : "justify-start"}`}>
+        <Link href="/admin/profile" className={`flex items-center p-2 rounded-xl bg-slate-800/50 text-slate-300 hover:bg-slate-800 hover:text-white transition-all duration-300 ${!isPinned ? "justify-center group-hover:justify-start" : "justify-start"}`}>
           <div className="w-10 h-10 shrink-0 rounded-full bg-black/20 flex items-center justify-center border border-black/10">
             <span className="material-symbols-outlined text-slate-300" style={{ fontVariationSettings: "'FILL' 1" }}>shield_person</span>
           </div>
@@ -70,7 +71,7 @@ export default function AdminSidebar({ memberName }: { memberName?: string }) {
             <span className="text-sm font-black truncate max-w-[110px]">{memberName || "Pengurus"}</span>
             <span className="text-[10px] uppercase tracking-wider font-bold opacity-80 text-tertiary">Admin</span>
           </div>
-        </div>
+        </Link>
 
         <form action={logout} className="w-full">
           <button type="submit" className={`w-full flex items-center p-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all duration-300 ${!isPinned ? "justify-center group-hover:justify-start" : "justify-start"}`}>

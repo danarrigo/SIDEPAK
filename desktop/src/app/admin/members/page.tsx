@@ -19,23 +19,23 @@ export default async function AdminMembersPage() {
   const allMembers = await db.select().from(members).where(eq(members.cooperativeId, adminData.cooperativeId));
 
   return (
-    <div className="w-full min-h-screen px-4 md:px-8 py-8 animate-fade-in text-on-surface">
+    <div className="w-full min-h-screen px-4 md:px-8 py-8 animate-fade-in text-slate-900">
       
       {/* Header */}
       <div className="mb-8">
-        <h1 className="font-headline-lg text-headline-lg font-black text-rose-500 mb-1 flex items-center gap-2">
+        <h1 className="font-headline-lg text-headline-lg font-black text-slate-900 mb-1 flex items-center gap-2">
           <span className="material-symbols-outlined text-3xl">groups</span>
           Daftar Anggota Koperasi
         </h1>
-        <p className="font-body-lg text-on-surface-variant">
+        <p className="font-body-lg text-slate-500">
           Kelola data dan status anggota koperasi Anda
         </p>
       </div>
 
-      <div className="glass-card rounded-3xl border border-white/10 overflow-hidden">
+      <div className="bg-white shadow-sm rounded-3xl border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-surface-container-highest/50 text-on-surface-variant border-b border-white/10">
+            <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
               <tr>
                 <th className="px-6 py-4 font-bold">Nama Lengkap</th>
                 <th className="px-6 py-4 font-bold">NIK</th>
@@ -45,11 +45,11 @@ export default async function AdminMembersPage() {
                 <th className="px-6 py-4 font-bold text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-100">
               {allMembers.map((member) => (
-                <tr key={member.id} className="hover:bg-white/5 transition-colors">
-                  <td className="px-6 py-4 font-bold text-white">{member.namaLengkap}</td>
-                  <td className="px-6 py-4 font-mono text-on-surface-variant">{member.nik}</td>
+                <tr key={member.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4 font-bold text-slate-900">{member.namaLengkap}</td>
+                  <td className="px-6 py-4 font-mono text-slate-500">{member.nik}</td>
                   <td className="px-6 py-4">{member.nomorHp || '-'}</td>
                   <td className="px-6 py-4">{member.desa}</td>
                   <td className="px-6 py-4">
@@ -64,7 +64,7 @@ export default async function AdminMembersPage() {
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="text-rose-500 hover:bg-rose-500/20 p-2 rounded-xl transition-colors">
+                    <button className="text-tertiary hover:bg-tertiary/10 p-2 rounded-xl transition-colors">
                       <span className="material-symbols-outlined text-sm">edit</span>
                     </button>
                   </td>
@@ -73,7 +73,7 @@ export default async function AdminMembersPage() {
               
               {allMembers.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant">
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                     Belum ada anggota yang terdaftar di koperasi ini.
                   </td>
                 </tr>

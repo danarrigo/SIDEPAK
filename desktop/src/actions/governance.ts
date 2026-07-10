@@ -2,7 +2,7 @@
 import { db } from "@/db";
 import { proposals, votes } from "@/db/schema/governance";
 import { members } from "@/db/schema/members";
-import { eq, and, desc, count, sum, ne, sql } from "drizzle-orm";
+import { eq, and, desc, count, sum, ne, sql, inArray } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { savings, loans, dues } from "@/db/schema/financials";
 import { memberProgress } from "@/db/schema/gamification";
@@ -191,6 +191,16 @@ export async function submitProposal(memberId: number, title: string, descriptio
     const [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
     if (!progress || progress.level < 20) {
       return { success: false, error: "Level tidak mencukupi. Anda harus minimal Level 20 untuk membuat proposal." };
+    }
+
+    const activeProposalsCount = await db.select({ value: count() }).from(proposals).where(
+      and(
+        eq(proposals.creatorId, memberId),
+        inArray(proposals.status, ['pending_approval', 'active'])
+      )
+    );
+    if (activeProposalsCount[0].value >= 3) {
+      return { success: false, error: "Batas maksimal tercapai. Anda hanya dapat memiliki 3 proposal aktif atau tertunda secara bersamaan." };
     }
 
     const [proposal] = await db.insert(proposals).values({

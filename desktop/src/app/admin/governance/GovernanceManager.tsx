@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createProposalByAdmin } from "@/actions/governance";
-import { createEventByAdmin } from "@/actions/events";
+import { createProposalByAdmin, editProposal } from "@/actions/governance";
+import { createEventByAdmin, editEvent } from "@/actions/events";
 
 export default function GovernanceManager({
   proposals,
@@ -18,6 +18,7 @@ export default function GovernanceManager({
   const [tab, setTab] = useState<"events" | "proposals">("events");
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
 
   // Form states
   const [title, setTitle] = useState("");
@@ -30,18 +31,27 @@ export default function GovernanceManager({
     setLoading(true);
 
     if (tab === "events") {
-      await createEventByAdmin(
-        coopId,
-        title,
-        desc,
-        new Date(startDate),
-        new Date(endDate),
-      );
+      if (editId) {
+        await editEvent(editId, title, desc, new Date(startDate), new Date(endDate));
+      } else {
+        await createEventByAdmin(
+          coopId,
+          title,
+          desc,
+          new Date(startDate),
+          new Date(endDate),
+        );
+      }
     } else {
-      await createProposalByAdmin(coopId, title, desc);
+      if (editId) {
+        await editProposal(editId, title, desc);
+      } else {
+        await createProposalByAdmin(coopId, title, desc);
+      }
     }
 
     setShowModal(false);
+    setEditId(null);
     setTitle("");
     setDesc("");
     setStartDate("");
@@ -73,7 +83,14 @@ export default function GovernanceManager({
           {tab === "events" ? "Semua Event" : "Semua Proposal"}
         </h2>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setEditId(null);
+            setTitle("");
+            setDesc("");
+            setStartDate("");
+            setEndDate("");
+            setShowModal(true);
+          }}
           className="bg-tertiary hover:bg-tertiary/90 text-white font-bold py-2 px-4 rounded-xl transition-colors text-sm flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
@@ -89,6 +106,7 @@ export default function GovernanceManager({
               <th className="px-6 py-4">Judul / Nama</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4">Tanggal</th>
+              <th className="px-6 py-4 text-right">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -110,6 +128,26 @@ export default function GovernanceManager({
                   </td>
                   <td className="px-6 py-4 text-xs whitespace-nowrap">
                     {new Date(ev.startDate).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={() => {
+                        setEditId(ev.id);
+                        setTitle(ev.name);
+                        setDesc(ev.description || "");
+                        const sDate = new Date(ev.startDate);
+                        sDate.setMinutes(sDate.getMinutes() - sDate.getTimezoneOffset());
+                        setStartDate(sDate.toISOString().slice(0, 16));
+                        const eDate = new Date(ev.endDate);
+                        eDate.setMinutes(eDate.getMinutes() - eDate.getTimezoneOffset());
+                        setEndDate(eDate.toISOString().slice(0, 16));
+                        setShowModal(true);
+                      }}
+                      className="text-slate-400 hover:text-tertiary transition-colors"
+                      title="Edit Event"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -133,6 +171,20 @@ export default function GovernanceManager({
                   <td className="px-6 py-4 text-xs whitespace-nowrap">
                     {new Date(prop.createdAt).toLocaleDateString()}
                   </td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={() => {
+                        setEditId(prop.id);
+                        setTitle(prop.title);
+                        setDesc(prop.description || "");
+                        setShowModal(true);
+                      }}
+                      className="text-slate-400 hover:text-tertiary transition-colors"
+                      title="Edit Proposal"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
+                  </td>
                 </tr>
               ))}
 
@@ -140,7 +192,7 @@ export default function GovernanceManager({
             (tab === "proposals" && proposals.length === 0) ? (
               <tr>
                 <td
-                  colSpan={3}
+                  colSpan={4}
                   className="px-6 py-8 text-center text-slate-500"
                 >
                   Tidak ada data.
@@ -157,10 +209,13 @@ export default function GovernanceManager({
           <div className="bg-white rounded-3xl w-full max-w-lg shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <h3 className="font-bold text-slate-900">
-                Buat {tab === "events" ? "Event" : "Proposal"} Baru
+                {editId ? "Edit" : "Buat"} {tab === "events" ? "Event" : "Proposal"}
               </h3>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  setEditId(null);
+                }}
                 className="text-slate-400 hover:text-slate-700"
               >
                 <span className="material-symbols-outlined">close</span>
@@ -227,7 +282,10 @@ export default function GovernanceManager({
               <div className="pt-4 flex justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditId(null);
+                  }}
                   className="px-6 py-3 font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors text-sm"
                 >
                   Batal

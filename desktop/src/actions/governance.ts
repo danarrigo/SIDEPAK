@@ -5,6 +5,7 @@ import { members } from "@/db/schema/members";
 import { eq, and, desc, count, sum, ne, sql } from "drizzle-orm";
 import { savings, loans, dues } from "@/db/schema/financials";
 import { memberProgress } from "@/db/schema/gamification";
+import { events } from "@/db/schema/activities";
 
 export async function getGovernanceData(cooperativeId: number) {
   try {
@@ -13,6 +14,13 @@ export async function getGovernanceData(cooperativeId: number) {
     const pastProposals = await db.select().from(proposals)
       .where(and(ne(proposals.status, 'active'), eq(proposals.cooperativeId, cooperativeId)))
       .orderBy(desc(proposals.endDate)).limit(5);
+
+    const activeEvents = await db.select().from(events)
+      .where(and(eq(events.status, 'active'), eq(events.cooperativeId, cooperativeId)));
+      
+    const pastEvents = await db.select().from(events)
+      .where(and(ne(events.status, 'active'), eq(events.cooperativeId, cooperativeId)))
+      .orderBy(desc(events.endDate)).limit(5);
     
     const totalMembersRes = await db.select({ value: count() }).from(members)
       .where(and(eq(members.cooperativeId, cooperativeId), eq(members.statusAnggota, 'active')));
@@ -51,6 +59,8 @@ export async function getGovernanceData(cooperativeId: number) {
     return { 
       activeProposals, 
       pastProposals, 
+      activeEvents,
+      pastEvents,
       totalMembers, 
       totalAsetDesa,
       asetPinjaman,
@@ -62,6 +72,8 @@ export async function getGovernanceData(cooperativeId: number) {
     return { 
       activeProposals: [], 
       pastProposals: [], 
+      activeEvents: [],
+      pastEvents: [],
       totalMembers: 0, 
       totalAsetDesa: 0,
       asetPinjaman: 0,

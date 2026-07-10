@@ -14,6 +14,8 @@ export default async function Page() {
   const {
     activeProposals,
     pastProposals,
+    activeEvents,
+    pastEvents,
     totalMembers,
     totalAsetDesa,
     asetPinjaman,
@@ -359,50 +361,72 @@ export default async function Page() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Submit Proposal */}
-          <section className="glass-card rounded-xl p-6 relative overflow-hidden">
+          {/* Event Desa & Submit Proposal */}
+          <section className="glass-card rounded-xl p-6 relative overflow-hidden flex flex-col">
             <h3 className="font-headline-md text-headline-md mb-2">
-              Ajukan Proposal Desa
+              Event Desa
             </h3>
             <p className="font-body-md text-body-md text-on-surface-variant mb-6">
-              Suarakan ide Anda untuk kemajuan bersama.
+              Ikuti dan dukung kegiatan desa kita bersama.
             </p>
 
+            <div className="flex-1 space-y-4 mb-6 relative z-10">
+              {activeEvents.length === 0 ? (
+                <p className="text-on-surface-variant text-sm">Belum ada event aktif.</p>
+              ) : (
+                activeEvents.map(event => (
+                  <div key={event.id} className="p-4 bg-surface-container-highest rounded-lg border border-outline-variant/30">
+                    <h4 className="font-bold">{event.name}</h4>
+                    <p className="text-xs text-on-surface-variant mt-1">{event.description}</p>
+                    <p className="text-[10px] mt-2 font-bold text-primary">Berakhir: {new Date(event.endDate).toLocaleDateString("id-ID")}</p>
+                  </div>
+                ))
+              )}
+            </div>
+
             {canSubmit ? (
-              <form
-                action={handleCreateProposal}
-                className="space-y-4 relative z-10"
-              >
-                <div>
-                  <label className="font-label-caps text-label-caps text-on-surface-variant block mb-2">
-                    Judul Proposal
-                  </label>
-                  <input
-                    name="title"
-                    required
-                    placeholder="Contoh: Pembangunan Sumur Bor Baru"
-                    className="w-full bg-surface-container-highest border border-outline-variant rounded-lg p-3 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary"
-                  />
+              <details className="group relative z-10">
+                <summary className="list-none cursor-pointer w-full py-3 bg-primary text-on-primary font-label-caps text-label-caps rounded-lg text-center hover:bg-primary/90 transition-colors select-none flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined text-xl">add_circle</span>
+                  AJUKAN PROPOSAL
+                </summary>
+                <div className="pt-4">
+                  <form
+                    action={handleCreateProposal}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label className="font-label-caps text-label-caps text-on-surface-variant block mb-2">
+                        Judul Proposal
+                      </label>
+                      <input
+                        name="title"
+                        required
+                        placeholder="Contoh: Pembangunan Sumur Bor Baru"
+                        className="w-full bg-surface-container-highest border border-outline-variant rounded-lg p-3 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-label-caps text-label-caps text-on-surface-variant block mb-2">
+                        Deskripsi Detail
+                      </label>
+                      <textarea
+                        name="description"
+                        required
+                        rows={3}
+                        placeholder="Jelaskan tujuan dan manfaat usulan ini..."
+                        className="w-full bg-surface-container-highest border border-outline-variant rounded-lg p-3 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary resize-none"
+                      ></textarea>
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full py-3 bg-tertiary text-on-tertiary font-label-caps text-label-caps rounded-lg hover:bg-tertiary/90 transition-colors"
+                    >
+                      KIRIM PROPOSAL (GRATIS)
+                    </button>
+                  </form>
                 </div>
-                <div>
-                  <label className="font-label-caps text-label-caps text-on-surface-variant block mb-2">
-                    Deskripsi Detail
-                  </label>
-                  <textarea
-                    name="description"
-                    required
-                    rows={3}
-                    placeholder="Jelaskan tujuan dan manfaat usulan ini..."
-                    className="w-full bg-surface-container-highest border border-outline-variant rounded-lg p-3 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary resize-none"
-                  ></textarea>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full py-3 bg-primary text-on-primary font-label-caps text-label-caps rounded-lg hover:bg-primary/90 transition-colors"
-                >
-                  AJUKAN PROPOSAL (GRATIS)
-                </button>
-              </form>
+              </details>
             ) : (
               <div className="bg-surface-container-highest p-6 rounded-xl border border-outline-variant/30 text-center relative z-10">
                 <span className="material-symbols-outlined text-4xl text-outline mb-2">
@@ -419,7 +443,7 @@ export default async function Page() {
             )}
             <div className="absolute -bottom-10 -right-10 opacity-5 pointer-events-none">
               <span className="material-symbols-outlined text-[200px]">
-                campaign
+                event
               </span>
             </div>
           </section>
@@ -606,39 +630,61 @@ export default async function Page() {
             </div>
           </div>
 
-          {/* Ajukan Proposal Desa */}
+          {/* Event Desa & Ajukan Proposal Desa */}
           <div className="bg-white rounded-[20px] p-5 border border-slate-100 shadow-sm flex flex-col gap-4">
             <div>
-              <h3 className="text-[#1E293B] text-sm font-bold">Ajukan Proposal Desa</h3>
-              <p className="text-slate-400 text-[10px] mt-0.5">Suarakan ide Anda untuk kemajuan bersama.</p>
+              <h3 className="text-[#1E293B] text-sm font-bold">Event Desa</h3>
+              <p className="text-slate-400 text-[10px] mt-0.5">Ikuti dan dukung kegiatan desa kita bersama.</p>
+            </div>
+
+            <div className="space-y-3 mb-2">
+              {activeEvents.length === 0 ? (
+                <p className="text-slate-400 text-xs">Belum ada event aktif.</p>
+              ) : (
+                activeEvents.map(event => (
+                  <div key={event.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <h4 className="font-bold text-[#1E293B] text-xs">{event.name}</h4>
+                    <p className="text-[10px] text-slate-500 mt-1">{event.description}</p>
+                    <p className="text-[9px] mt-2 font-bold text-[#3B82F6]">Berakhir: {new Date(event.endDate).toLocaleDateString("id-ID")}</p>
+                  </div>
+                ))
+              )}
             </div>
 
             {canSubmit ? (
-              <form action={handleCreateProposal} className="space-y-3">
-                <div>
-                  <input
-                    name="title"
-                    required
-                    placeholder="Contoh: Pembangunan Sumur Bor Baru"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-[#1E293B] placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
-                  />
-                </div>
-                <div>
-                  <textarea
-                    name="description"
-                    required
-                    rows={3}
-                    placeholder="Jelaskan tujuan dan manfaat usulan ini..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-[#1E293B] placeholder:text-slate-400 focus:outline-none focus:border-slate-400 resize-none"
-                  ></textarea>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full py-2.5 bg-[#0F172A] text-white font-bold text-xs rounded-lg hover:bg-slate-800 transition-colors"
-                >
+              <details className="group">
+                <summary className="list-none cursor-pointer w-full py-2.5 bg-[#0F172A] text-white font-bold text-xs rounded-lg hover:bg-slate-800 transition-colors text-center select-none flex items-center justify-center gap-1">
+                  <span className="material-symbols-outlined text-sm">add_circle</span>
                   AJUKAN PROPOSAL
-                </button>
-              </form>
+                </summary>
+                <div className="pt-3">
+                  <form action={handleCreateProposal} className="space-y-3">
+                    <div>
+                      <input
+                        name="title"
+                        required
+                        placeholder="Contoh: Pembangunan Sumur Bor Baru"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-[#1E293B] placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
+                      />
+                    </div>
+                    <div>
+                      <textarea
+                        name="description"
+                        required
+                        rows={3}
+                        placeholder="Jelaskan tujuan dan manfaat usulan ini..."
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-[#1E293B] placeholder:text-slate-400 focus:outline-none focus:border-slate-400 resize-none"
+                      ></textarea>
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full py-2.5 bg-[#3B82F6] text-white font-bold text-xs rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      KIRIM PROPOSAL
+                    </button>
+                  </form>
+                </div>
+              </details>
             ) : (
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center flex flex-col items-center gap-2">
                 <span className="material-symbols-outlined text-slate-400 text-2xl">lock</span>

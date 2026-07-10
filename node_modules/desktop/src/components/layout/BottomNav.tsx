@@ -15,13 +15,13 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 w-full bg-[#0B1120] z-50 flex justify-around items-center pb-2 pt-1.5 px-1 border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.45)]">
+    <nav className="md:hidden fixed bottom-0 left-0 w-full bg-[#0B1120] z-[9999] flex justify-around items-center pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-1.5 px-1 border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.45)] pointer-events-auto">
       {navLinks.map((link) => {
         const isActive = pathname === link.href;
         return (
           <Link 
             key={link.href} 
-            className="flex-1 outline-none"
+            className="flex-1 flex flex-col justify-center outline-none h-full touch-manipulation cursor-pointer"
             href={link.href}
           >
             <div className={`flex flex-col items-center justify-center mx-1 py-1.5 rounded-xl transition-all duration-300 ${isActive ? "bg-[#1E293B] shadow-[0_3px_8px_rgba(250,204,21,0.18)]" : "bg-transparent"}`}>

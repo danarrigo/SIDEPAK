@@ -11,7 +11,6 @@ export default function BottomNav() {
     { href: "/quests", icon: "assignment", label: "Misi" },
     { href: "/arena", icon: "bolt", label: "Arena" },
     { href: "/marketplace", icon: "storefront", label: "Pasar" },
-    { href: "/events", icon: "event", label: "Event" },
     { href: "/governance", icon: "account_balance", label: "Koperasi" },
   ];
 

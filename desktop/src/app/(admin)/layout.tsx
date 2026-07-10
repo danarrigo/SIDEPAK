@@ -1,6 +1,6 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import AdminSidebar from "./AdminSidebar";
+import AdminNavbar from "./AdminNavbar";
 import { getCurrentMember } from "@/actions/members";
 
 export default async function AdminLayout({
@@ -19,11 +19,11 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen w-full bg-surface-container-lowest text-on-surface overflow-hidden">
-      <AdminSidebar memberName={memberData.namaLengkap} />
+    <div className="flex flex-col h-screen w-full bg-[#0B1120] text-on-surface overflow-hidden">
+      <AdminNavbar memberName={memberData.namaLengkap} />
       
-      <main className="flex-1 relative h-full flex flex-col bg-[#0B1120]">
-        <div className="absolute inset-0 overflow-y-auto overflow-x-hidden">
+      <main className="flex-1 relative w-full h-full overflow-y-auto">
+        <div className="max-w-7xl mx-auto w-full">
           {children}
         </div>
       </main>

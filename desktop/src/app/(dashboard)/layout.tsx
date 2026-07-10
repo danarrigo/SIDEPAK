@@ -27,7 +27,7 @@ export default async function DashboardLayout({
 
   return (
     <>
-      {currentMember && <OnboardingPaywall isActive={isPokokPaid} memberId={currentMember.id} />}
+      {currentMember && currentMember.user?.role !== 'admin' && <OnboardingPaywall isActive={isPokokPaid} memberId={currentMember.id} />}
       <Sidebar memberName={currentMember?.namaLengkap || "Pengguna"} />
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
         <Header memberId={currentMember?.id} />

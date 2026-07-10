@@ -22,7 +22,8 @@ export async function getFinancialsData(memberId: number) {
       .orderBy(desc(disbursements.createdAt));
     
     const totalSavingsAmount = memberSavings.reduce((acc, curr) => acc + (curr.type === 'deposit' ? curr.amount : -curr.amount), 0);
-    const simpananPokok = memberDues.filter(d => d.type === 'initial' && d.status === 'paid').reduce((acc, curr) => acc + curr.amount, 0);
+    const paidInitialDues = memberDues.filter(d => d.type === 'initial' && d.status === 'paid');
+    const simpananPokok = paidInitialDues.length > 0 ? paidInitialDues[0].amount : 0;
     const simpananWajib = memberDues.filter(d => d.type === 'monthly' && d.status === 'paid').reduce((acc, curr) => acc + curr.amount, 0);
     const simpananSukarela = totalSavingsAmount;
     const totalKonsolidasi = simpananPokok + simpananWajib + simpananSukarela;

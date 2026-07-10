@@ -23,17 +23,24 @@ class BattleView extends StatelessWidget {
     final memberId = provider.memberId;
     final myName = provider.fullName?.split(' ')[0] ?? "Anda";
 
+    int safeParseInt(dynamic val) {
+      if (val == null) return 0;
+      if (val is num) return val.toInt();
+      if (val is String) return int.tryParse(val) ?? 0;
+      return 0;
+    }
+
     int p1 = 0;
     int p2 = 0;
     String opponentName = 'Menunggu Lawan';
     if (activeBattle != null) {
       final challengerId = activeBattle['challengerId'];
       if (challengerId == memberId) {
-        p1 = (activeBattle['challengerPoints'] as num?)?.toInt() ?? 0;
-        p2 = (activeBattle['opponentPoints'] as num?)?.toInt() ?? 0;
+        p1 = safeParseInt(activeBattle['challengerPoints']);
+        p2 = safeParseInt(activeBattle['opponentPoints']);
       } else {
-        p1 = (activeBattle['opponentPoints'] as num?)?.toInt() ?? 0;
-        p2 = (activeBattle['challengerPoints'] as num?)?.toInt() ?? 0;
+        p1 = safeParseInt(activeBattle['opponentPoints']);
+        p2 = safeParseInt(activeBattle['challengerPoints']);
       }
       final op = activeBattle['opponent'];
       if (op != null && op['namaLengkap'] != null) {
@@ -533,6 +540,8 @@ class BattleView extends StatelessWidget {
         ),
       ),
     );
+  }
+
   Widget _buildPointGuideItem(IconData icon, String title, String description) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

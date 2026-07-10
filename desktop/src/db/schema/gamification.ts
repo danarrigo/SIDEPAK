@@ -1,5 +1,6 @@
 import { pgTable, serial, integer, timestamp, varchar, uuid, boolean } from "drizzle-orm/pg-core";
 import { members } from "./members";
+import { cooperatives } from "./cooperatives";
 
 export const memberProgress = pgTable("member_progress", {
   id: serial("id").primaryKey(),
@@ -65,4 +66,21 @@ export const marketplaceTransactions = pgTable("marketplace_transactions", {
   quantity: integer("quantity").default(1).notNull(),
   totalPrice: integer("total_price").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const seasons = pgTable("seasons", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  isActive: boolean("is_active").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const koperasiSeasonScores = pgTable("koperasi_season_scores", {
+  id: serial("id").primaryKey(),
+  koperasiId: integer("koperasi_id").notNull().references(() => cooperatives.id, { onDelete: 'cascade' }),
+  seasonId: integer("season_id").notNull().references(() => seasons.id, { onDelete: 'cascade' }),
+  totalXp: integer("total_xp").default(0).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

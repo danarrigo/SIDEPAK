@@ -121,3 +121,33 @@ export async function updateMemberAdmin(memberId: number, data: Partial<typeof m
     return { success: false, error: "Internal Server Error" };
   }
 }
+
+export async function updateCurrentAdminProfile(data: { namaLengkap?: string, nik?: string, nomorHp?: string }) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated" };
+
+    const [userRecord] = await db.select().from(users).where(eq(users.id, user.id));
+    if (userRecord?.role !== 'admin') {
+      return { success: false, error: "Unauthorized: Admin only" };
+    }
+
+    const [member] = await db.select().from(members).where(eq(members.userId, user.id));
+    if (!member) return { success: false, error: "Member not found" };
+
+    await db.update(members).set({
+      namaLengkap: data.namaLengkap !== undefined ? data.namaLengkap : member.namaLengkap,
+      nik: data.nik !== undefined ? data.nik : member.nik,
+      nomorHp: data.nomorHp !== undefined ? data.nomorHp : member.nomorHp,
+    }).where(eq(members.id, member.id));
+
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/admin/profile");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Update Admin Profile Error:", error);
+    return { success: false, error: "Internal Server Error" };
+  }
+}

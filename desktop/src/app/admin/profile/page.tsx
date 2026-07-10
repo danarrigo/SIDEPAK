@@ -3,6 +3,7 @@ import { getCurrentMember } from "@/actions/members";
 import { db } from "@/db";
 import { cooperatives } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import AdminProfileClient from "./AdminProfileClient";
 import Link from "next/link";
 
 export const metadata = {
@@ -35,43 +36,7 @@ export default async function AdminProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Personal Info */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white shadow-sm border border-slate-200 rounded-3xl p-6 relative overflow-hidden group">
-            <div className="absolute -right-12 -top-12 w-48 h-48 bg-tertiary/10 rounded-full blur-3xl transition-all" />
-            <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2 relative z-10">
-              <span className="material-symbols-outlined text-tertiary">badge</span>
-              Data Pribadi
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Nama Lengkap</label>
-                <div className="text-lg font-bold text-slate-900">{adminData.namaLengkap}</div>
-              </div>
-              
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">NIK (Nomor Induk Kependudukan)</label>
-                <div className="text-lg font-mono text-slate-900">{adminData.nik}</div>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Email</label>
-                <div className="text-lg font-bold text-slate-900">{adminData.user.email}</div>
-              </div>
-              
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Nomor HP / WhatsApp</label>
-                <div className="text-lg font-bold text-slate-900">{adminData.nomorHp || '-'}</div>
-              </div>
-            </div>
-
-            <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
-               {/* Later we can make this editable, for now just show a disabled state or soon to be implemented */}
-              <button disabled className="bg-slate-100 text-slate-400 font-bold py-2.5 px-6 rounded-xl flex items-center gap-2 cursor-not-allowed">
-                <span className="material-symbols-outlined text-sm">edit</span>
-                Edit Profil (Segera)
-              </button>
-            </div>
-          </div>
+          <AdminProfileClient adminData={adminData} />
           
           <div className="bg-white shadow-sm border border-slate-200 rounded-3xl p-6">
             <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">

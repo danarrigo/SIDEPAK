@@ -19,7 +19,7 @@ export default function AdminNavbar({ memberName }: { memberName?: string }) {
       
       {/* Brand */}
       <div className="flex items-center gap-8">
-        <h1 className="font-headline-lg text-2xl text-rose-500 tracking-tighter drop-shadow-[0_0_12px_rgba(244,63,94,0.4)]">
+        <h1 className="font-headline-lg text-2xl text-tertiary tracking-tighter drop-shadow-[0_0_12px_rgba(250,204,21,0.4)]">
           ADMIN SIDEPAK
         </h1>
 
@@ -31,7 +31,7 @@ export default function AdminNavbar({ memberName }: { memberName?: string }) {
               <Link 
                 key={link.href} 
                 href={link.href}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 ${isActive ? "bg-rose-500/10 text-rose-500 shadow-[0_3px_8px_rgba(244,63,94,0.18)]" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 ${isActive ? "bg-[#1E293B] text-tertiary shadow-[0_3px_8px_rgba(250,204,21,0.18)]" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
               >
                 <span className="material-symbols-outlined text-[18px]" style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}>
                   {link.icon}
@@ -49,7 +49,7 @@ export default function AdminNavbar({ memberName }: { memberName?: string }) {
       <div className="flex items-center gap-4">
         <div className="hidden md:flex flex-col text-right">
           <span className="text-sm font-black text-white">{memberName || "Pengurus"}</span>
-          <span className="text-[10px] uppercase tracking-wider font-bold text-rose-400">Super Admin</span>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-tertiary">Super Admin</span>
         </div>
         
         <Link href="/" className="flex items-center gap-2 p-2 px-4 rounded-xl bg-slate-800 text-white shadow-lg hover:bg-slate-700 transition-all duration-300">

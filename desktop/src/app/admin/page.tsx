@@ -29,7 +29,7 @@ export default async function AdminDashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="font-headline-lg text-headline-lg font-black text-rose-500 mb-1">
+          <h1 className="font-headline-lg text-headline-lg font-black text-tertiary mb-1">
             Dashboard Pengurus
           </h1>
           <p className="font-body-lg text-on-surface-variant">
@@ -38,7 +38,7 @@ export default async function AdminDashboard() {
         </div>
         
         <div className="bg-surface-container-highest border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-          <div className="w-12 h-12 bg-rose-500/20 text-rose-500 rounded-full flex items-center justify-center">
+          <div className="w-12 h-12 bg-tertiary/20 text-tertiary rounded-full flex items-center justify-center">
             <span className="material-symbols-outlined text-2xl">admin_panel_settings</span>
           </div>
           <div>
@@ -52,10 +52,10 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         
         {/* Total Members */}
-        <div className="glass-card p-6 rounded-3xl border border-white/10 relative overflow-hidden group hover:border-rose-500/50 transition-colors">
-          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition-all" />
+        <div className="glass-card p-6 rounded-3xl border border-white/10 relative overflow-hidden group hover:border-tertiary/50 transition-colors">
+          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-tertiary/10 rounded-full blur-2xl group-hover:bg-tertiary/20 transition-all" />
           <div className="flex justify-between items-start mb-4 relative z-10">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-500 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-tertiary/20 text-tertiary flex items-center justify-center">
               <span className="material-symbols-outlined">groups</span>
             </div>
           </div>
@@ -112,7 +112,7 @@ export default async function AdminDashboard() {
       {/* Recent Activity / Actions */}
       <div className="glass-card rounded-3xl border border-white/10 p-6">
         <h2 className="font-headline-sm text-xl font-bold mb-6 text-white flex items-center gap-2">
-          <span className="material-symbols-outlined text-rose-500">pending_actions</span>
+          <span className="material-symbols-outlined text-tertiary">pending_actions</span>
           Menunggu Persetujuan
         </h2>
         

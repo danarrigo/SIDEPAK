@@ -142,7 +142,15 @@ export default async function Page() {
                 <span>{effectiveStreak} Hari</span>
               </div>
             </div>
-            <p className="text-sm text-on-surface-variant mb-6">Pertahankan streak login Anda untuk mendapatkan bonus hadiah di akhir minggu!</p>
+            <p className="text-sm text-on-surface-variant mb-4">Pertahankan streak login Anda untuk mendapatkan bonus hadiah di akhir minggu!</p>
+            {effectiveStreak >= 3 && (
+              <div className="bg-tertiary/20 border border-tertiary/40 rounded-xl p-3 mb-6 flex justify-center items-center animate-pulse-subtle">
+                <p className="text-tertiary font-bold text-sm flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px]">stars</span>
+                  Status Aktif: Bonus Poin x{effectiveStreak >= 7 ? '1.5' : '1.2'}
+                </p>
+              </div>
+            )}
             <div className="flex justify-between items-center gap-2">
               {dayLabels.map((day) => {
                 const done = weeklyStreakDays[day];
@@ -376,6 +384,13 @@ export default async function Page() {
               })}
             </div>
             <p className="text-[#94A3B8] text-[10px]">Pertahankan Streak! Bonus +50 poin di akhir minggu</p>
+            {effectiveStreak >= 3 && (
+              <div className="bg-[#84CC16]/20 border border-[#84CC16]/30 rounded-lg p-2 text-center">
+                <span className="text-[#84CC16] font-bold text-[10px]">
+                  ✨ Aktif: Multiplier Poin x{effectiveStreak >= 7 ? '1.5' : '1.2'}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Daily Missions */}

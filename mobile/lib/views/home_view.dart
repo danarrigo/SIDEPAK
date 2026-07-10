@@ -334,8 +334,7 @@ class HomeView extends StatelessWidget {
                         children: [
                           const Text('🔥 ', style: TextStyle(fontSize: 12)),
                           Text(
-                            '${provider.streak} hari Streak ${provider.streak >= 7 ? '(x1.5)' : provider.streak >= 3 ? '(x1.2)' : ''}'
-                                .trim(),
+                            '${provider.streak} hari Streak',
                             style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,

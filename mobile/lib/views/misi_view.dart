@@ -179,7 +179,28 @@ class MisiView extends StatelessWidget {
                             'Pertahankan Streak! Bonus +50 poin di akhir minggu',
                             style: TextStyle(
                                 color: Color(0xFF94A3B8), fontSize: 10),
-                          )
+                          ),
+                          if (provider.streak >= 3)
+                            Container(
+                              margin: const EdgeInsets.only(top: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 6, horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF84CC16).withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                    color: const Color(0xFF84CC16)
+                                        .withOpacity(0.3)),
+                              ),
+                              child: Text(
+                                '✨ Aktif: Multiplier Poin x${provider.streak >= 7 ? '1.5' : '1.2'}',
+                                style: const TextStyle(
+                                  color: Color(0xFF84CC16),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),

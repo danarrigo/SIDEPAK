@@ -180,8 +180,7 @@ class ProfileView extends StatelessWidget {
                       children: [
                         _buildTopBadge(
                             Icons.local_fire_department,
-                            '${provider.streak} Hari Streak ${provider.streak >= 7 ? '(x1.5)' : provider.streak >= 3 ? '(x1.2)' : ''}'
-                                .trim(),
+                            '${provider.streak} Hari Streak',
                             Colors.white,
                             Colors.white12,
                             iconColor: Colors.orange),

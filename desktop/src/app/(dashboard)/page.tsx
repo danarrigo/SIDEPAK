@@ -255,9 +255,7 @@ export default async function DesktopDashboard() {
           <div className="flex justify-end">
             <div className="bg-white/10 border border-white/10 rounded-full px-3 py-1 flex items-center gap-1.5">
               <span className="text-xs">🔥</span>
-              <span className="text-white text-[10px] font-bold">
-                {streak} hari Streak {streak >= 7 ? '(x1.5)' : streak >= 3 ? '(x1.2)' : ''}
-              </span>
+              <span className="text-white text-[10px] font-bold">{streak} hari Streak</span>
             </div>
           </div>
         </div>

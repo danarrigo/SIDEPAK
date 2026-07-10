@@ -64,9 +64,9 @@ export async function awardPoints(memberId: number, amount: number, source: stri
 
     // Calculate streak multiplier
     let multiplier = 1.0;
-    if (progress.loginStreak >= 7) {
+    if (progress.currentStreak >= 7) {
       multiplier = 1.5;
-    } else if (progress.loginStreak >= 3) {
+    } else if (progress.currentStreak >= 3) {
       multiplier = 1.2;
     }
 

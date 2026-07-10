@@ -96,12 +96,12 @@ class BattleView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Arena Match Card
+                  // Anda Card
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF0D8ABC).withOpacity(0.3)),
+                      border: const Border(left: BorderSide(color: Color(0xFF0D8ABC), width: 4)),
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xFF0D8ABC).withOpacity(0.1),
@@ -110,101 +110,59 @@ class BattleView extends StatelessWidget {
                         ),
                       ],
                     ),
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(24),
                     child: Column(
                       children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(0xFF0D8ABC), width: 4),
+                          ),
+                          child: CircleAvatar(
+                            radius: 40,
+                            backgroundColor: const Color(0xFFF1F5F9),
+                            child: Text(
+                              myName.isNotEmpty ? myName[0].toUpperCase() : 'A',
+                              style: const TextStyle(color: Color(0xFF0D8ABC), fontSize: 32, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(myName,
+                            style: const TextStyle(
+                                color: Color(0xFF1E293B),
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold)),
+                        const Text('Anda',
+                            style: TextStyle(
+                                color: Color(0xFF64748B),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 24),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 30,
-                                    backgroundColor: const Color(0xFF0D8ABC),
-                                    child: Text(
-                                      myName.isNotEmpty ? myName[0].toUpperCase() : 'A',
-                                      style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(myName,
-                                      style: const TextStyle(
-                                          color: Color(0xFF1E293B),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold)),
-                                  const Text('Anda',
-                                      style: TextStyle(
-                                          color: Color(0xFF64748B),
-                                          fontSize: 10)),
-                                  const SizedBox(height: 12),
-                                  Text('$p1',
-                                      style: const TextStyle(
-                                          color: Color(0xFF0D8ABC),
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.w900)),
-                                ],
-                              ),
-                            ),
-                            const Column(
-                              children: [
-                                Text('VS',
-                                    style: TextStyle(
-                                        color: Color(0xFF94A3B8),
-                                        fontSize: 24,
-                                        fontStyle: FontStyle.italic,
-                                        fontWeight: FontWeight.w900)),
-                              ],
-                            ),
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 30,
-                                    backgroundColor: Colors.redAccent,
-                                    child: Text(
-                                      opponentName != 'Menunggu Lawan' && opponentName.isNotEmpty ? opponentName[0].toUpperCase() : '?',
-                                      style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(opponentName,
-                                      style: const TextStyle(
-                                          color: Color(0xFF1E293B),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold)),
-                                  const Text('Lawan',
-                                      style: TextStyle(
-                                          color: Color(0xFF64748B),
-                                          fontSize: 10)),
-                                  const SizedBox(height: 12),
-                                  Text('$p2',
-                                      style: const TextStyle(
-                                          color: Colors.redAccent,
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.w900)),
-                                ],
-                              ),
-                            ),
+                            const Text('Skor Saat Ini',
+                                style: TextStyle(
+                                    color: Color(0xFF64748B),
+                                    fontSize: 14)),
+                            Text('$p1',
+                                style: const TextStyle(
+                                    color: Color(0xFF0D8ABC),
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w900)),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 8),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Stack(
                             children: [
                               Container(height: 8, color: const Color(0xFFF1F5F9)),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: (p1Pct * 100).toInt() == 0 ? 1 : (p1Pct * 100).toInt(),
-                                    child: Container(height: 8, color: const Color(0xFF0D8ABC)),
-                                  ),
-                                  Expanded(
-                                    flex: (p2Pct * 100).toInt() == 0 ? 1 : (p2Pct * 100).toInt(),
-                                    child: Container(height: 8, color: Colors.redAccent),
-                                  ),
-                                ],
+                              FractionallySizedBox(
+                                widthFactor: p1Pct,
+                                child: Container(height: 8, color: const Color(0xFF0D8ABC)),
                               ),
                             ],
                           ),
@@ -215,41 +173,154 @@ class BattleView extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  if (activeBattle == null) ...[
-                    ElevatedButton(
-                      onPressed: () async {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Mencari lawan...')),
-                        );
-                        final msg = await provider.matchmakeBattle();
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(msg)),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0D8ABC),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                  // VS Badge
+                  Center(
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Text('VS',
+                                style: TextStyle(
+                                    color: Color(0xFF1E293B),
+                                    fontSize: 32,
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.w900)),
+                          ),
                         ),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.search, color: Colors.white),
-                          SizedBox(width: 8),
-                          Text('Cari Lawan Otomatis',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold)),
+                        if (activeBattle == null) ...[
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () async {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Mencari lawan...')),
+                              );
+                              final msg = await provider.matchmakeBattle();
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(msg)),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0D8ABC),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.search, color: Colors.white, size: 20),
+                                SizedBox(width: 8),
+                                Text('Cari Lawan Otomatis',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
                         ],
-                      ),
+                      ],
                     ),
-                    const SizedBox(height: 32),
-                  ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Lawan Card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: const Border(right: BorderSide(color: Color(0xFFF43F5E), width: 4)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFF43F5E).withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(0xFFF43F5E), width: 4),
+                          ),
+                          child: CircleAvatar(
+                            radius: 40,
+                            backgroundColor: const Color(0xFFF1F5F9),
+                            child: Text(
+                              opponentName != 'Menunggu Lawan' && opponentName.isNotEmpty ? opponentName[0].toUpperCase() : '?',
+                              style: const TextStyle(color: Color(0xFFF43F5E), fontSize: 32, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(opponentName,
+                            style: const TextStyle(
+                                color: Color(0xFF1E293B),
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold)),
+                        const Text('Lawan',
+                            style: TextStyle(
+                                color: Color(0xFF64748B),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('$p2',
+                                style: const TextStyle(
+                                    color: Color(0xFFF43F5E),
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w900)),
+                            const Text('Skor Saat Ini',
+                                style: TextStyle(
+                                    color: Color(0xFF64748B),
+                                    fontSize: 14)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Stack(
+                            children: [
+                              Container(height: 8, color: const Color(0xFFF1F5F9)),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: FractionallySizedBox(
+                                  widthFactor: p2Pct,
+                                  child: Container(height: 8, color: const Color(0xFFF43F5E)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
 
                   // Stats Details
                   const Text('Detail Pertandingan 1v1',

@@ -42,3 +42,13 @@ export const memberQuests = pgTable("member_quests", {
 }, (table) => ({
   unq: uniqueIndex("member_quest_unq").on(table.memberId, table.questId)
 }));
+
+export const memberWeeklyChests = pgTable("member_weekly_chests", {
+  id: serial("id").primaryKey(),
+  memberId: integer("member_id").notNull().references(() => members.id, { onDelete: 'cascade' }),
+  chestIndex: integer("chest_index").notNull(),
+  weekStartDate: timestamp("week_start_date").notNull(),
+  claimedAt: timestamp("claimed_at").defaultNow().notNull(),
+}, (table) => ({
+  unq: uniqueIndex("member_chest_week_unq").on(table.memberId, table.chestIndex, table.weekStartDate)
+}));

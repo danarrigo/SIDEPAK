@@ -7,6 +7,8 @@ import { items } from "@/db/schema/gamification";
 import { quests } from "@/db/schema/achievements";
 import MissionList from "@/components/MissionList";
 import { calculateMembershipScore, getRankBenefits } from "@/actions/rank";
+import { getClaimedChests } from "@/actions/gamification";
+import WeeklyChestsClient from "@/components/WeeklyChestsClient";
 
 export default async function Page() {
   const currentMember = await getCurrentMember();
@@ -85,6 +87,7 @@ export default async function Page() {
   const chestMilestones = [6, 12, 18, 24, 30];
   const maxMissions = 30;
   const chestPercent = Math.min(100, (completedMissionsCount / maxMissions) * 100);
+  const claimedChests = await getClaimedChests(currentMember.id);
 
   return (
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">
@@ -260,35 +263,12 @@ export default async function Page() {
               </p>
             </div>
             
-            <div className="relative pt-4 pb-2 px-2 z-10">
-              {/* Progress Bar Background */}
-              <div className="absolute left-6 right-6 top-9 h-2 bg-surface-container-highest rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(245,158,11,0.5)]" style={{ width: `${chestPercent}%` }}></div>
-              </div>
-              
-              {/* 5 Chests */}
-              <div className="relative flex justify-between">
-                {chestMilestones.map((target, index) => {
-                  const isUnlocked = completedMissionsCount >= target;
-                  return (
-                    <div key={target} className="flex flex-col items-center relative z-10 group cursor-pointer">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 ${isUnlocked ? 'bg-amber-100 border-amber-500 text-amber-500 gold-glow transform scale-110' : 'bg-surface-container-low border-outline-variant text-outline-variant'}`}>
-                        <span className="material-symbols-outlined text-[24px]" style={isUnlocked ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                          {isUnlocked ? 'redeem' : 'lock'}
-                        </span>
-                      </div>
-                      <span className={`text-[10px] font-bold mt-3 ${isUnlocked ? 'text-amber-600' : 'text-on-surface-variant'}`}>{target} Misi</span>
-                      
-                      {/* Tooltip */}
-                      <div className={`absolute bottom-full mb-2 w-32 p-2 bg-surface-container-highest border border-outline-variant/30 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-center left-1/2 -translate-x-1/2`}>
-                        <p className="text-xs font-bold text-on-surface mb-0.5">Peti Tier {index + 1}</p>
-                        <p className="text-[9px] text-on-surface-variant">{isUnlocked ? 'Telah Terbuka!' : `Selesaikan ${target - completedMissionsCount > 0 ? target - completedMissionsCount : 0} misi lagi`}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <WeeklyChestsClient 
+              completedMissionsCount={completedMissionsCount} 
+              initialClaimedChests={claimedChests} 
+              memberId={currentMember.id} 
+              isMobile={false} 
+            />
           </section>
         </div>
       </div>
@@ -382,29 +362,12 @@ export default async function Page() {
                 Selesaikan misi untuk membuka hingga 5 peti harta! ({completedMissionsCount} misi selesai)
               </p>
               
-              <div className="relative w-full px-2 pb-2">
-                {/* Progress Bar Background */}
-                <div className="absolute left-4 right-4 top-[14px] h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#F59E0B] rounded-full transition-all duration-1000" style={{ width: `${chestPercent}%` }}></div>
-                </div>
-                
-                {/* 5 Chests */}
-                <div className="relative flex justify-between">
-                  {chestMilestones.map((target, index) => {
-                    const isUnlocked = completedMissionsCount >= target;
-                    return (
-                      <div key={target} className="flex flex-col items-center relative z-10">
-                        <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center border-2 transition-all duration-500 ${isUnlocked ? 'bg-[#FEF3C7] border-[#F59E0B] text-[#F59E0B]' : 'bg-white border-slate-200 text-slate-300'}`}>
-                          <span className="material-symbols-outlined text-[16px]" style={isUnlocked ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                            {isUnlocked ? 'redeem' : 'lock'}
-                          </span>
-                        </div>
-                        <span className={`text-[8px] font-bold mt-1.5 ${isUnlocked ? 'text-[#D97706]' : 'text-slate-400'}`}>{target}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <WeeklyChestsClient 
+                completedMissionsCount={completedMissionsCount} 
+                initialClaimedChests={claimedChests} 
+                memberId={currentMember.id} 
+                isMobile={true} 
+              />
             </div>
           </div>
         </div>

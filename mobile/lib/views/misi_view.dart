@@ -294,46 +294,79 @@ class MisiView extends StatelessWidget {
                 // Chests
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: chestMilestones.map((target) {
+                  children: chestMilestones.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final target = entry.value;
                     final isUnlocked = completedMissions >= target;
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                            color: isUnlocked
-                                ? const Color(0xFFFEF3C7)
-                                : Colors.white,
-                            border: Border.all(
-                              color: isUnlocked
-                                  ? const Color(0xFFF59E0B)
-                                  : const Color(0xFFE2E8F0),
-                              width: 2,
+                    final isClaimed = provider.claimedChests.contains(index);
+
+                    return GestureDetector(
+                      onTap: () async {
+                        if (isUnlocked && !isClaimed) {
+                          final msg = await provider.claimWeeklyChest(index);
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(msg, style: const TextStyle(fontWeight: FontWeight.bold))),
+                          );
+                        } else if (isClaimed) {
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Peti harta ini sudah diklaim!', style: TextStyle(fontWeight: FontWeight.bold))),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Selesaikan lebih banyak misi untuk membuka peti ini.', style: TextStyle(fontWeight: FontWeight.bold))),
+                          );
+                        }
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: isClaimed
+                                  ? const Color(0xFFF1F5F9)
+                                  : isUnlocked
+                                      ? const Color(0xFFFEF3C7)
+                                      : Colors.white,
+                              border: Border.all(
+                                color: isClaimed
+                                    ? const Color(0xFF94A3B8)
+                                    : isUnlocked
+                                        ? const Color(0xFFF59E0B)
+                                        : const Color(0xFFE2E8F0),
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            borderRadius: BorderRadius.circular(10),
+                            child: Icon(
+                              isClaimed ? Icons.check : (isUnlocked ? Icons.redeem : Icons.lock),
+                              size: 18,
+                              color: isClaimed
+                                  ? const Color(0xFF94A3B8)
+                                  : isUnlocked
+                                      ? const Color(0xFFF59E0B)
+                                      : const Color(0xFFCBD5E1),
+                            ),
                           ),
-                          child: Icon(
-                            isUnlocked ? Icons.redeem : Icons.lock,
-                            size: 18,
-                            color: isUnlocked
-                                ? const Color(0xFFF59E0B)
-                                : const Color(0xFFCBD5E1),
+                          const SizedBox(height: 6),
+                          Text(
+                            '$target',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: isClaimed
+                                  ? const Color(0xFF94A3B8)
+                                  : isUnlocked
+                                      ? const Color(0xFFD97706)
+                                      : const Color(0xFF94A3B8),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '$target',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: isUnlocked
-                                ? const Color(0xFFD97706)
-                                : const Color(0xFF94A3B8),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     );
                   }).toList(),
                 ),

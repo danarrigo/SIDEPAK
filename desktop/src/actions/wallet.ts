@@ -2,7 +2,7 @@
 import { db } from "@/db";
 import { walletTransactions } from "@/db/schema/wallet";
 import { memberProgress } from "@/db/schema/gamification";
-import { eq } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 const XENDIT_SECRET_KEY = process.env.XENDIT_SECRET_KEY || "";
 
@@ -123,5 +123,29 @@ export async function verifyInvoicePayment(memberId: number, invoiceId: string) 
   } catch (error) {
     console.error("verifyInvoicePayment Error:", error);
     return { success: false, error: "Terjadi kesalahan saat memverifikasi pembayaran" };
+  }
+}
+
+export async function verifyAndPaySimpananPokok(memberId: number) {
+  try {
+    const { payDuesFromWallet } = await import("./financials");
+    const [latestTx] = await db.select().from(walletTransactions)
+      .where(eq(walletTransactions.memberId, memberId))
+      .orderBy(desc(walletTransactions.createdAt))
+      .limit(1);
+
+    if (latestTx) {
+      await verifyInvoicePayment(memberId, latestTx.invoiceId);
+    }
+
+    const payRes = await payDuesFromWallet(memberId, 'initial');
+    if (!payRes.success) {
+      return { success: false, error: "Pembayaran belum diselesaikan. Harap bayar di Xendit terlebih dahulu." };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("verifyAndPaySimpananPokok Error:", err);
+    return { success: false, error: "Terjadi kesalahan sistem saat memverifikasi pembayaran." };
   }
 }

@@ -7,10 +7,10 @@ export default function PrankEffect({ memberId, effect }: { memberId: number, ef
 
   useEffect(() => {
     if (effect && effect.toLowerCase().includes("jantung")) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       setActive(true);
       setTimeout(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         setActive(false);
         clearActiveEffect(memberId);
       }, 4000);

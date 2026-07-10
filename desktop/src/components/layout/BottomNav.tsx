@@ -9,9 +9,10 @@ export default function BottomNav() {
   const navLinks = [
     { href: "/", icon: "home", label: "Beranda" },
     { href: "/quests", icon: "assignment", label: "Misi" },
-    { href: "/arena", icon: "emoji_events", label: "Lomba" },
+    { href: "/arena", icon: "bolt", label: "Arena" },
+    { href: "/marketplace", icon: "storefront", label: "Pasar" },
+    { href: "/events", icon: "event", label: "Event" },
     { href: "/governance", icon: "account_balance", label: "Koperasi" },
-    { href: "/profile", icon: "person", label: "Profil" },
   ];
 
   return (
@@ -21,7 +22,7 @@ export default function BottomNav() {
         return (
           <Link 
             key={link.href} 
-            className="flex-1"
+            className="flex-1 outline-none"
             href={link.href}
           >
             <div className={`flex flex-col items-center justify-center mx-1 py-1.5 rounded-xl transition-all duration-300 ${isActive ? "bg-[#1E293B] shadow-[0_3px_8px_rgba(250,204,21,0.18)]" : "bg-transparent"}`}>

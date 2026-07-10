@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-require-imports */
+ 
+ 
 /**
  * Tests for GET /api/mobile-sync
  *
@@ -11,7 +11,7 @@
 // ---- Mocks: defined inline in jest.mock factories so they are available
 //      before our top-level code runs.
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/db', () => {
   const chain: any = {
     select: jest.fn().mockReturnThis(),
@@ -30,10 +30,10 @@ jest.mock('@/db', () => {
   };
   (globalThis as any).__mockDbChain = chain;
   return { db: chain };
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/utils/supabase/client-api', () => {
   const mockGetUser = jest.fn();
   (globalThis as any).__mockGetUser = mockGetUser;
@@ -42,17 +42,17 @@ jest.mock('@/utils/supabase/client-api', () => {
       auth: { getUser: mockGetUser },
     }),
   };
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('next/headers', () => {
   const mockHeadersGet = jest.fn();
   (globalThis as any).__mockHeadersGet = mockHeadersGet;
   return {
     headers: jest.fn().mockResolvedValue({ get: mockHeadersGet }),
   };
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
 // Mock all action modules to return controlled values.
@@ -90,6 +90,17 @@ jest.mock('@/actions/governance', () => ({
 jest.mock('@/actions/arena', () => ({
   getArenaData: jest.fn().mockResolvedValue({ activeBattles: [] }),
   getBattleHistory: jest.fn().mockResolvedValue({ pastBattles: [] }),
+  getMemberStats: jest.fn().mockResolvedValue({
+    missionsCompleted: 0,
+    totalSavings: 0,
+    savingsPts: 0,
+    activeStreak: 0,
+    eventsJoined: 0,
+    shopPurchases: 0,
+    marketplaceActivity: 0,
+    loansCount: 0,
+    battlesWon: 0,
+  }),
 }));
 
 jest.mock('@/actions/gamification', () => ({
@@ -102,21 +113,21 @@ jest.mock('@/actions/gamification', () => ({
   getMemberInventory: jest.fn().mockResolvedValue([]),
 }));
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/actions/shop', () => {
   const getMarketplaceItems = jest.fn().mockResolvedValue([
     { id: 1, name: 'X', priceInPoints: 10, stock: 1, sellerId: 2, seller: { namaLengkap: 'Andi' } },
   ]);
   (globalThis as any).__mockGetMarketplaceItems = getMarketplaceItems;
   return { getMarketplaceItems };
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/actions/events', () => {
   const getEventsByCooperative = jest.fn().mockResolvedValue({
     events: [{ id: 1, name: 'E', startDate: new Date(), endDate: new Date(), cooperativeId: 1 }],
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
   });
   const getMemberEventParticipations = jest.fn().mockResolvedValue({
     participations: [{ event: { id: 1 } }],
@@ -125,13 +136,19 @@ jest.mock('@/actions/events', () => {
   return { getEventsByCooperative, getMemberEventParticipations };
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/actions/members', () => {
   const getActiveMembers = jest.fn().mockResolvedValue([{ id: 2, namaLengkap: 'Andi' }]);
   const getCurrentMember = jest.fn().mockResolvedValue({ id: 1, cooperativeId: 1, provinsi: 'Jawa Barat' });
   Object.assign((globalThis as any), { getActiveMembers, getCurrentMember });
   return { getActiveMembers, getCurrentMember };
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
+});
+
+jest.mock('@/actions/notifications', () => {
+  const getMemberNotifications = jest.fn().mockResolvedValue([]);
+  Object.assign((globalThis as any), { getMemberNotifications });
+  return { getMemberNotifications };
 });
 
 import { GET } from '@/app/api/mobile-sync/route';

@@ -12,6 +12,7 @@ export const memberProgress = pgTable("member_progress", {
   lastActivityDate: timestamp("last_activity_date"),
   activeEffect: varchar("active_effect", { length: 255 }),
   walletBalance: integer("wallet_balance").default(0).notNull(),
+  creditScore: integer("credit_score").default(700).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

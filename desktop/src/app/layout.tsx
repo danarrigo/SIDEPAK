@@ -2,8 +2,31 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SIDEPAK",
-  description: "Platform digital untuk pengelolaan koperasi desa",
+  title: {
+    default: "SIDEPAK",
+    template: "%s | SIDEPAK",
+  },
+  description: "Platform digital untuk pengelolaan koperasi desa (Sistem Informasi Desa dan Pengelolaan Aset Koperasi)",
+  applicationName: "SIDEPAK",
+  authors: [{ name: "Kopdes Team" }],
+  keywords: ["koperasi", "desa", "koperasi desa", "simpan pinjam", "platform digital", "pengelolaan koperasi"],
+  openGraph: {
+    title: "SIDEPAK - Platform Koperasi Desa",
+    description: "Platform digital untuk pengelolaan koperasi desa secara transparan dan efisien.",
+    url: "https://sidepak.id", // Optional: Update with actual domain if available
+    siteName: "SIDEPAK",
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SIDEPAK - Platform Koperasi Desa",
+    description: "Platform digital untuk pengelolaan koperasi desa secara transparan dan efisien.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  }
 };
 
 export default function RootLayout({

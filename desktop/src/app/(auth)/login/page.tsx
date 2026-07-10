@@ -61,7 +61,7 @@ export default function LoginPage() {
 
         <div className="mt-8 text-center text-sm text-on-surface-variant">
           Belum punya akun?{' '}
-          <Link href="/signup" className="text-primary font-bold hover:underline">
+          <Link href="/onboarding" className="text-primary font-bold hover:underline">
             Daftar di sini
           </Link>
         </div>

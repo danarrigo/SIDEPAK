@@ -37,7 +37,10 @@ export const getCurrentMember = cache(async () => {
     
     return {
       ...member,
-      koperasi: cooperativeName
+      koperasi: cooperativeName,
+      user: {
+        email: user.email
+      }
     };
   } catch (error) {
     console.error("GetCurrentMember Error:", error);
@@ -55,5 +58,23 @@ export async function getActiveMembers(cooperativeId: number) {
   } catch (error) {
     console.error("GetActiveMembers Error:", error);
     return [];
+  }
+}
+
+export async function updateCurrentMemberPhone(newPhone: string) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated" };
+
+    const [member] = await db.select().from(members).where(eq(members.userId, user.id));
+    if (!member) return { success: false, error: "Member not found" };
+
+    await db.update(members).set({ nomorHp: newPhone }).where(eq(members.id, member.id));
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Update Phone Error:", error);
+    return { success: false, error: "Internal Server Error" };
   }
 }

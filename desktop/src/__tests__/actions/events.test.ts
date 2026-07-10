@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { createEvent, joinEvent } from '@/actions/events';
 import { db } from '@/db';
 
@@ -14,6 +14,10 @@ jest.mock('@/db', () => {
   };
   return { db: mDb };
 });
+
+jest.mock('@/actions/gamification', () => ({
+  awardPoints: jest.fn().mockResolvedValue(undefined),
+}));
 
 describe('Events Actions', () => {
   beforeEach(() => {

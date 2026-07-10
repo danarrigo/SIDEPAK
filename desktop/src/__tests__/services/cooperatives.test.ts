@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { CooperativesService } from '@/services/cooperatives.service';
 import { db } from '@/db';
 

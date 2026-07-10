@@ -7,4 +7,4 @@ export * from "./activities";
 export * from "./financials";
 export * from "./governance";
 export * from "./wallet";
-
+export * from "./notifications";

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 "use client";
 import React, { useState } from "react";
 import { claimQuestReward } from "@/actions/quests";
@@ -21,7 +21,7 @@ export default function MissionList({ initialQuests = [], memberId, frequency = 
 
   return (
     <ul className="space-y-4">
-      {initialQuests.filter(m => m.frequency === frequency).slice(0, 3).map((quest) => {
+      {initialQuests.filter(m => m.frequency === frequency).map((quest) => {
         const currentProgress = quest.progress?.progress || 0;
         const target = quest.targetCount || 1;
         const isCompleted = quest.progress?.isCompleted || false;

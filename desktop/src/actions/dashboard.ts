@@ -38,51 +38,65 @@ export async function getDashboardData(memberId: number) {
 export async function updateStreakOnActivity(memberId: number) {
   try {
     const [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
-    if (!progress) return; // No progress row yet — nothing to update
-
+    
     const now = new Date();
-    const todayUtc = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    // Use WIB (UTC+7) for streak calculation
+    const wibNow = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const todayWib = new Date(
+      Date.UTC(wibNow.getUTCFullYear(), wibNow.getUTCMonth(), wibNow.getUTCDate())
     );
-    const yesterdayUtc = new Date(todayUtc);
-    yesterdayUtc.setUTCDate(yesterdayUtc.getUTCDate() - 1);
+    const yesterdayWib = new Date(todayWib);
+    yesterdayWib.setUTCDate(yesterdayWib.getUTCDate() - 1);
 
-    const lastActivity = progress.lastActivityDate
+    const lastActivity = progress?.lastActivityDate
       ? new Date(progress.lastActivityDate)
       : null;
-    const lastActivityUtc = lastActivity
-      ? new Date(
-          Date.UTC(
-            lastActivity.getUTCFullYear(),
-            lastActivity.getUTCMonth(),
-            lastActivity.getUTCDate()
-          )
+    let lastActivityWib: Date | null = null;
+    
+    if (lastActivity) {
+      // Treat the stored lastActivityDate as UTC since that's how we save it below
+      lastActivityWib = new Date(
+        Date.UTC(
+          lastActivity.getUTCFullYear(),
+          lastActivity.getUTCMonth(),
+          lastActivity.getUTCDate()
         )
-      : null;
+      );
+    }
 
     // Already counted today — no-op
-    if (lastActivityUtc && lastActivityUtc.getTime() === todayUtc.getTime()) {
+    if (lastActivityWib && lastActivityWib.getTime() === todayWib.getTime()) {
       return;
     }
 
     let newStreak: number;
-    if (lastActivityUtc && lastActivityUtc.getTime() === yesterdayUtc.getTime()) {
-      newStreak = (progress.currentStreak ?? 0) + 1;
+    if (lastActivityWib && lastActivityWib.getTime() === yesterdayWib.getTime()) {
+      newStreak = (progress?.currentStreak ?? 0) + 1;
     } else {
       newStreak = 1;
     }
 
-    const newLongest = Math.max(progress.longestStreak ?? 0, newStreak);
+    const newLongest = Math.max(progress?.longestStreak ?? 0, newStreak);
 
-    await db
-      .update(memberProgress)
-      .set({
+    if (!progress) {
+      await db.insert(memberProgress).values({
+        memberId,
         currentStreak: newStreak,
         longestStreak: newLongest,
-        lastActivityDate: todayUtc,
+        lastActivityDate: todayWib,
         updatedAt: now,
-      })
-      .where(eq(memberProgress.id, progress.id));
+      });
+    } else {
+      await db
+        .update(memberProgress)
+        .set({
+          currentStreak: newStreak,
+          longestStreak: newLongest,
+          lastActivityDate: todayWib,
+          updatedAt: now,
+        })
+        .where(eq(memberProgress.id, progress.id));
+    }
   } catch (error) {
     // Streak update is best-effort — never fail the sync because of this.
     console.error("updateStreakOnActivity DB Error:", error);

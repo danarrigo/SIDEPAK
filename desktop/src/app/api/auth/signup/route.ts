@@ -8,7 +8,7 @@ import { and, ilike } from 'drizzle-orm';
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const { email, password, nik, namaLengkap, provinsi, kabupaten, kecamatan, desa, koperasi } = data;
+    const { email, password, nik, namaLengkap, provinsi, kabupaten, kecamatan, desa, koperasi, pekerjaan, nomorHp } = data;
 
     // Check/create cooperative
     let [coop] = await db.select().from(cooperatives).where(
@@ -56,10 +56,12 @@ export async function POST(request: Request) {
         nik,
         statusAnggota: 'active',
         namaLengkap,
+        nomorHp,
         provinsi,
         kabupaten,
         kecamatan,
         desa,
+        pekerjaan,
         cooperativeId: coop.id,
       }).returning();
 

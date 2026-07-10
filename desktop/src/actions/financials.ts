@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/db";
 import { savings, loans, dues } from "@/db/schema/financials";
-import { walletTransactions } from "@/db/schema/wallet";
+import { walletTransactions, disbursements } from "@/db/schema/wallet";
 import { members } from "@/db/schema/members";
 import { eq, and, or, desc } from "drizzle-orm";
 import { awardPoints, getMemberProgress } from "@/actions/gamification";
@@ -16,6 +16,10 @@ export async function getFinancialsData(memberId: number) {
       .from(walletTransactions)
       .where(eq(walletTransactions.memberId, memberId))
       .orderBy(desc(walletTransactions.createdAt));
+    const memberDisbursements = await db.select()
+      .from(disbursements)
+      .where(eq(disbursements.memberId, memberId))
+      .orderBy(desc(disbursements.createdAt));
     
     const totalSavingsAmount = memberSavings.reduce((acc, curr) => acc + (curr.type === 'deposit' ? curr.amount : -curr.amount), 0);
     const simpananPokok = memberDues.filter(d => d.type === 'initial' && d.status === 'paid').reduce((acc, curr) => acc + curr.amount, 0);
@@ -34,7 +38,7 @@ export async function getFinancialsData(memberId: number) {
       return pDate.getMonth() === currentMonth && pDate.getFullYear() === currentYear;
     });
 
-    const isMemberActive = isPokokPaid && isWajibPaidThisMonth;
+    const isMemberActive = isPokokPaid;
     const pendingWajibAmount = isWajibPaidThisMonth ? 0 : 50000;
 
     // Sync active status to members table
@@ -51,6 +55,7 @@ export async function getFinancialsData(memberId: number) {
       loans: memberLoans, 
       dues: memberDues, 
       walletTransactions: memberWalletTxs,
+      disbursements: memberDisbursements,
       totalSavings: totalKonsolidasi,
       simpananPokok,
       simpananWajib,
@@ -67,6 +72,7 @@ export async function getFinancialsData(memberId: number) {
       loans: [], 
       dues: [], 
       walletTransactions: [],
+      disbursements: [],
       totalSavings: 0, 
       simpananPokok: 0, 
       simpananWajib: 0, 
@@ -100,12 +106,28 @@ export async function addSaving(memberId: number, amount: number, description?: 
 
 export async function addLoan(memberId: number, amount: number) {
   try {
-    // Max loan = points * 10,000
-    const progress = await getMemberProgress(memberId);
-    const maxLoan = (progress?.pointsBalance || 0) * 10000;
+    const [member] = await db.select().from(members).where(eq(members.id, memberId));
+    if (!member) return { success: false, error: "Anggota tidak ditemukan." };
+
+    const [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
     
-    if (amount > maxLoan) {
-      return { success: false, error: `Plafon pinjaman tidak mencukupi. Maksimum: Rp ${maxLoan.toLocaleString('id-ID')}` };
+    const { calculateMembershipScore, getRankFromScore, getRankLoanLimits } = await import("@/actions/rank");
+    const score = calculateMembershipScore(progress?.level ?? 1, progress?.walletBalance ?? 0, progress?.creditScore ?? 0);
+    const rank = getRankFromScore(score);
+    const limits = getRankLoanLimits(rank);
+
+    const { getGovernanceData } = await import("@/actions/governance");
+    const gov = await getGovernanceData(member.cooperativeId ?? -1);
+    const kasKoperasi = gov.asetKas;
+
+    const maxPercentAmount = Math.floor(kasKoperasi * (limits.maxPercent / 100));
+    const maxBorrowable = Math.min(limits.maxAmount, maxPercentAmount);
+
+    if (amount > maxBorrowable) {
+      return { 
+        success: false, 
+        error: `Jumlah pinjaman melebihi batas maksimum untuk rank ${rank}. Batas maksimum: Rp ${maxBorrowable.toLocaleString('id-ID')} (${limits.maxPercent}% dari kas koperasi daerah Rp ${kasKoperasi.toLocaleString('id-ID')} atau limit maksimum Rp ${limits.maxAmount.toLocaleString('id-ID')})`
+      };
     }
 
     const [loan] = await db.insert(loans).values({
@@ -242,5 +264,47 @@ export async function depositSavingsFromWallet(memberId: number, amount: number,
   } catch (error) {
     console.error("depositSavingsFromWallet Error:", error);
     return { success: false, error: "Terjadi kesalahan saat menabung dari dompet." };
+  }
+}
+
+export async function withdrawSavingsToWallet(memberId: number, amount: number, description?: string) {
+  try {
+    if (amount <= 0) {
+      return { success: false, error: "Jumlah penarikan harus lebih besar dari Rp 0" };
+    }
+
+    // Get current financials to check simpanan sukarela balance
+    const financials = await getFinancialsData(memberId);
+    if (financials.simpananSukarela < amount) {
+      return { success: false, error: "Saldo simpanan sukarela Anda tidak mencukupi." };
+    }
+
+    // Get current progress or create if missing
+    let [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
+    if (!progress) {
+      const [newProgress] = await db.insert(memberProgress).values({ memberId }).returning();
+      progress = newProgress;
+    }
+
+    // Insert savings record
+    await db.insert(savings).values({
+      memberId,
+      amount,
+      type: 'withdrawal',
+      description: description || 'Tarik Simpanan Sukarela ke Dompet',
+    });
+
+    // Add to wallet balance
+    await db.update(memberProgress)
+      .set({
+        walletBalance: progress.walletBalance + amount,
+        updatedAt: new Date(),
+      })
+      .where(eq(memberProgress.memberId, memberId));
+
+    return { success: true };
+  } catch (error) {
+    console.error("withdrawSavingsToWallet Error:", error);
+    return { success: false, error: "Terjadi kesalahan saat menarik simpanan ke dompet." };
   }
 }

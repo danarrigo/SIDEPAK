@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-require-imports */
+ 
+ 
 /**
  * Tests for POST /api/mobile-sync/action
  *
@@ -13,7 +13,7 @@
 // All mocks use the inline-factory + globalThis pattern so jest.mock
 // hoisting (which runs before top-level consts) works correctly.
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/db', () => {
   const chain: any = {
     select: jest.fn().mockReturnThis(),
@@ -22,29 +22,29 @@ jest.mock('@/db', () => {
   };
   (globalThis as any).__mockDb = chain;
   return { db: chain };
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/utils/supabase/client-api', () => {
   const mockGetUser = jest.fn();
   (globalThis as any).__mockGetUser = mockGetUser;
   return {
     createSupabaseClient: () => ({ auth: { getUser: mockGetUser } }),
   };
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('next/headers', () => {
   const mockHeadersGet = jest.fn();
   (globalThis as any).__mockHeadersGet = mockHeadersGet;
   return { headers: jest.fn().mockResolvedValue({ get: mockHeadersGet }) };
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
 // Server action mocks — declared via jest.mock with inline factories.
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/actions/shop', () => {
   const fns = {
     buyShopItem: jest.fn().mockResolvedValue({ success: true }),
@@ -53,18 +53,18 @@ jest.mock('@/actions/shop', () => {
   };
   Object.assign((globalThis as any), fns);
   return fns;
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/actions/gamification', () => {
   const fns = { useItem: jest.fn().mockResolvedValue({ success: true }) };
   Object.assign((globalThis as any), fns);
   return fns;
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/actions/events', () => {
   const fns = {
     joinEvent: jest.fn().mockResolvedValue({ success: true }),
@@ -72,18 +72,18 @@ jest.mock('@/actions/events', () => {
   };
   Object.assign((globalThis as any), fns);
   return fns;
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/actions/arena', () => {
   const fns = { matchmakeWeeklyBattle: jest.fn().mockResolvedValue({ success: true }) };
   Object.assign((globalThis as any), fns);
   return fns;
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/actions/governance', () => {
   const fns = {
     castVote: jest.fn().mockResolvedValue({ success: true }),
@@ -91,18 +91,18 @@ jest.mock('@/actions/governance', () => {
   };
   Object.assign((globalThis as any), fns);
   return fns;
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/actions/quests', () => {
   const fns = { claimQuestReward: jest.fn().mockResolvedValue({ success: true }) };
   Object.assign((globalThis as any), fns);
   return fns;
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/actions/wallet', () => {
   const fns = {
     createTopUpInvoice: jest.fn().mockResolvedValue({ success: true }),
@@ -110,10 +110,10 @@ jest.mock('@/actions/wallet', () => {
   };
   Object.assign((globalThis as any), fns);
   return fns;
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 });
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 jest.mock('@/actions/financials', () => {
   const fns = {
     payDuesFromWallet: jest.fn().mockResolvedValue({ success: true }),
@@ -121,7 +121,24 @@ jest.mock('@/actions/financials', () => {
   };
   Object.assign((globalThis as any), fns);
   return fns;
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
+});
+
+jest.mock('@/actions/notifications', () => {
+  const fns = {
+    deleteNotification: jest.fn().mockResolvedValue({ success: true }),
+    createTestNotification: jest.fn().mockResolvedValue({ success: true }),
+  };
+  Object.assign((globalThis as any), fns);
+  return fns;
+});
+
+jest.mock('@/actions/members', () => {
+  const fns = {
+    updateCurrentMemberPhone: jest.fn().mockResolvedValue({ success: true }),
+  };
+  Object.assign((globalThis as any), fns);
+  return fns;
 });
 
 // Import the route after all mocks are registered

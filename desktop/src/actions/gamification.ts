@@ -291,7 +291,7 @@ export async function getCooperativeLeaderboard() {
       .innerJoin(members, eq(cooperatives.id, members.cooperativeId))
       .innerJoin(memberProgress, eq(members.id, memberProgress.memberId))
       .groupBy(cooperatives.id, cooperatives.name)
-      .orderBy(desc(sql`sum(${memberProgress.xp})`))
+      .orderBy(desc(sql`sum(${memberProgress.pointsBalance})`))
       .limit(10);
       
     return topCooperatives;

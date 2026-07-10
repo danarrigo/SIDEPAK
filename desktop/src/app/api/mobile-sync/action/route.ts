@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import { castVote, submitProposal } from "@/actions/governance";
 import { claimQuestReward } from "@/actions/quests";
 import { buyShopItem, listMarketplaceItem, buyMarketplaceItem } from "@/actions/shop";
 import { useItem as applyItem } from "@/actions/gamification";
-import { createTopUpInvoice, verifyInvoicePayment } from "@/actions/wallet";
-import { payDuesFromWallet, depositSavingsFromWallet } from "@/actions/financials";
+import { createTopUpInvoice, verifyInvoicePayment, verifyAndPaySimpananPokok } from "@/actions/wallet";
+import { payDuesFromWallet, depositSavingsFromWallet, addLoan } from "@/actions/financials";
 import { joinEvent, createEvent } from "@/actions/events";
 import { matchmakeWeeklyBattle } from "@/actions/arena";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
@@ -13,6 +12,8 @@ import { db } from '@/db';
 import { members } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
+import { deleteNotification, createTestNotification } from "@/actions/notifications";
+import { updateCurrentMemberPhone } from "@/actions/members";
 
 
 export async function POST(request: Request) {
@@ -72,6 +73,8 @@ export async function POST(request: Request) {
     } else if (action === 'verify-topup') {
       const { invoiceId } = body;
       result = await verifyInvoicePayment(memberId, invoiceId);
+    } else if (action === 'verify-and-pay-simpanan-pokok') {
+      result = await verifyAndPaySimpananPokok(memberId);
     } else if (action === 'pay-dues-wallet') {
       const { type } = body;
       result = await payDuesFromWallet(memberId, type);
@@ -99,6 +102,95 @@ export async function POST(request: Request) {
       result = await createEvent(memberId, name || '', description || '', new Date(startDate), new Date(endDate));
     } else if (action === 'matchmake-battle') {
       result = await matchmakeWeeklyBattle(memberId);
+    } else if (action === 'withdraw-wallet') {
+      let { amount, bankCode, accountNumber, accountName } = body;
+      amount = Number(amount);
+      bankCode = String(bankCode ?? '').trim();
+      accountNumber = String(accountNumber ?? '').trim();
+      accountName = String(accountName ?? '').trim();
+
+      if (!Number.isFinite(amount) || amount < 10000) {
+        result = { success: false, error: 'Minimal penarikan adalah Rp 10.000' };
+      } else if (!bankCode || !accountNumber || !accountName) {
+        result = { success: false, error: 'Data rekening/bank tidak lengkap' };
+      } else {
+        const { memberProgress } = await import('@/db/schema/gamification');
+        const [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
+        if (!progress || progress.walletBalance < amount) {
+          result = { success: false, error: 'Saldo dompet tidak mencukupi' };
+        } else {
+          // Generate unique external ID for this transaction
+          const externalId = `withdraw-${memberId}-${Date.now()}`;
+
+          // Insert pending disbursement to database
+          const { disbursements } = await import('@/db/schema/wallet');
+          const [newDisbursement] = await db.insert(disbursements).values({
+            memberId: memberId,
+            amount,
+            bankCode,
+            accountNumber,
+            accountName,
+            status: 'PENDING',
+            externalId,
+          }).returning();
+
+          // Deduct saldo dompet
+          await db.update(memberProgress)
+            .set({
+              walletBalance: progress.walletBalance - amount,
+              updatedAt: new Date(),
+            })
+            .where(eq(memberProgress.memberId, memberId));
+
+          // Simulate/execute Xendit payout if secret key is present
+          if (process.env.XENDIT_SECRET_KEY) {
+            try {
+              const { Xendit } = await import('xendit-node');
+              const xenditClient = new Xendit({
+                secretKey: process.env.XENDIT_SECRET_KEY,
+              });
+              const payoutResponse = await xenditClient.Payout.createPayout({
+                idempotencyKey: externalId,
+                data: {
+                  referenceId: externalId,
+                  amount: amount,
+                  channelCode: bankCode,
+                  channelProperties: {
+                    accountHolderName: accountName,
+                    accountNumber: accountNumber,
+                  },
+                  description: `Penarikan saldo koperasi oleh ${member.namaLengkap}`,
+                  currency: 'IDR',
+                }
+              });
+              console.log('Xendit Payout Created:', payoutResponse);
+            } catch (e: any) {
+              console.error("Xendit Payout Error:", e);
+            }
+          }
+
+          result = { success: true, data: newDisbursement as any };
+        }
+      }
+    } else if (action === 'delete-notification') {
+      const { notificationId } = body;
+      result = await deleteNotification(Number(notificationId));
+    } else if (action === 'create-test-notification') {
+      result = await createTestNotification(memberId);
+    } else if (action === 'update-phone') {
+      const { newPhone } = body;
+      const normalizedPhone = String(newPhone ?? '').trim();
+      if (normalizedPhone.length < 9) {
+        result = { success: false, error: 'Nomor telepon tidak valid.' };
+      } else {
+        await db.update(members)
+          .set({ nomorHp: normalizedPhone, updatedAt: new Date() })
+          .where(eq(members.id, memberId));
+        result = { success: true };
+      }
+    } else if (action === 'apply-loan') {
+      const { amount } = body;
+      result = await addLoan(memberId, Number(amount));
     }
 
     return NextResponse.json(result, {

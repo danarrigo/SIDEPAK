@@ -33,7 +33,7 @@ export default async function MembersPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {activeMembers.map((m) => (
-              <div key={m.id} className="flex items-center gap-4 p-4 rounded-xl border border-outline-variant/30 bg-surface-container hover:border-primary/50 transition-colors">
+              <Link href={`/governance/members/${m.id}`} key={m.id} className="flex items-center gap-4 p-4 rounded-xl border border-outline-variant/30 bg-surface-container hover:border-primary/50 transition-all hover:-translate-y-1 hover:shadow-lg cursor-pointer">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
                   {m.namaLengkap.charAt(0).toUpperCase()}
                 </div>
@@ -41,7 +41,7 @@ export default async function MembersPage() {
                   <p className="text-sm font-bold text-on-surface">{m.namaLengkap}</p>
                   <p className="text-[10px] text-on-surface-variant mt-0.5">No. Anggota: {m.nomorAnggota || '-'}</p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
           

@@ -46,6 +46,8 @@ export async function signup(prevState: unknown, formData: FormData) {
     kecamatan: (formData.get("kecamatan") as string)?.trim() ?? "",
     desa: (formData.get("desa") as string)?.trim() ?? "",
     koperasi: (formData.get("koperasi") as string)?.trim() ?? "",
+    pekerjaan: (formData.get("pekerjaan") as string)?.trim() ?? "",
+    nomorHp: (formData.get("nomorHp") as string)?.trim() ?? "",
   };
 
   // Check if the cooperative exists for the given desa/kelurahan
@@ -79,6 +81,13 @@ export async function signup(prevState: unknown, formData: FormData) {
     return { error: "NIK sudah terdaftar di sistem. Silakan gunakan NIK lain atau login." };
   }
 
+  if (data.nomorHp) {
+    const existingHp = await db.select().from(members).where(eq(members.nomorHp, data.nomorHp));
+    if (existingHp.length > 0) {
+      return { error: "Nomor HP sudah terdaftar di sistem. Silakan gunakan Nomor HP lain." };
+    }
+  }
+
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: data.email,
     password: data.password,
@@ -107,6 +116,8 @@ export async function signup(prevState: unknown, formData: FormData) {
         kabupaten: data.kabupaten,
         kecamatan: data.kecamatan,
         desa: data.desa,
+        pekerjaan: data.pekerjaan,
+        nomorHp: data.nomorHp,
         cooperativeId: coop.id,
       }).returning();
 

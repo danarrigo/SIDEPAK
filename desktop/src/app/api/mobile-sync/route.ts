@@ -1,19 +1,22 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { NextResponse } from 'next/server';
 import { getDashboardData } from "@/actions/dashboard";
 import { getFinancialsData } from "@/actions/financials";
 import { getActiveQuests } from "@/actions/quests";
 import { getGovernanceData, getKoperasiStats } from "@/actions/governance";
-import { getArenaData, getBattleHistory } from "@/actions/arena";
+import { getArenaData, getBattleHistory, getMemberStats } from "@/actions/arena";
 import { getMemberBadges, getWinRate, getStoreItems, getLeaderboard, getLeaderboardProvincial, getLeaderboardNational, getMemberInventory } from "@/actions/gamification";
 import { getMarketplaceItems } from "@/actions/shop";
 import { getEventsByCooperative, getMemberEventParticipations } from "@/actions/events";
 import { getActiveMembers } from "@/actions/members";
 import { getActiveLoan } from "@/actions/financials";
 import { updateStreakOnActivity } from "@/actions/dashboard";
+import { getMemberNotifications } from "@/actions/notifications";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
 import { members } from '@/db/schema';
+import { votes } from '@/db/schema/governance';
+import { and as dbAnd } from 'drizzle-orm';
 import { eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 
@@ -65,7 +68,23 @@ export async function GET() {
     const financialsData = await getFinancialsData(memberId);
     const questsData = await getActiveQuests(memberId);
     const governanceData = await getGovernanceData(cooperativeId);
+    const activeProposal = governanceData?.activeProposals?.[0];
+    let userVote: string | null = null;
+    if (activeProposal && memberId !== -1) {
+      const userVoteRes = await db.select().from(votes).where(
+        dbAnd(
+          eq(votes.memberId, memberId),
+          eq(votes.proposalId, activeProposal.id)
+        )
+      ).catch(() => []);
+      if (userVoteRes.length > 0) {
+        userVote = userVoteRes[0].voteType;
+      }
+    }
     const arenaData = await getArenaData(memberId);
+    const opponentId = arenaData?.activeBattles?.[0]?.opponent?.id;
+    const myStats = await getMemberStats(memberId).catch(() => null);
+    const opStats = opponentId ? await getMemberStats(opponentId).catch(() => null) : null;
     const koperasiStats = await getKoperasiStats(cooperativeId);
     const battleHistoryData = await getBattleHistory(memberId);
     const badgesData = await getMemberBadges(memberId);
@@ -73,13 +92,14 @@ export async function GET() {
     const storeItemsData = await getStoreItems();
     const leaderboardData = await getLeaderboard(cooperativeId);
     const inventoryData = await getMemberInventory(memberId);
-    const marketplaceData = await getMarketplaceItems();
+    const marketplaceData = await getMarketplaceItems(cooperativeId !== -1 ? cooperativeId : undefined);
     const eventsData = await getEventsByCooperative(cooperativeId);
     const eventParticipationsData = await getMemberEventParticipations(memberId);
     const leaderboardByProvinsi = currentProvinsi ? await getLeaderboardProvincial(currentProvinsi).catch(() => []) : [];
     const leaderboardByNasional = await getLeaderboardNational().catch(() => []);
     const activeMembersData = cooperativeId ? await getActiveMembers(cooperativeId).catch(() => []) : [];
     const activeLoanData = await getActiveLoan(memberId).catch(() => null);
+    const notificationsData = await getMemberNotifications(memberId);
 
     return NextResponse.json({
       success: true,
@@ -90,10 +110,15 @@ export async function GET() {
         },
         financials: financialsData,
         quests: questsData,
-        governance: governanceData,
+        governance: {
+          ...governanceData,
+          userVote,
+        },
         arena: {
           ...arenaData,
-          pastBattles: battleHistoryData?.pastBattles || []
+          pastBattles: battleHistoryData?.pastBattles || [],
+          myStats,
+          opStats,
         },
         koperasiStats: koperasiStats,
         badges: badgesData,
@@ -109,6 +134,19 @@ export async function GET() {
         activeMembers: activeMembersData,
         activeLoan: activeLoanData,
         activeEffect: dashboardData?.progress?.activeEffect ?? null,
+        notifications: notificationsData,
+        profile: {
+          id: member.id,
+          email: user.email,
+          namaLengkap: member.namaLengkap,
+          nomorHp: member.nomorHp,
+          provinsi: member.provinsi,
+          kabupaten: member.kabupaten,
+          kecamatan: member.kecamatan,
+          desa: member.desa,
+          pekerjaan: member.pekerjaan,
+          cooperativeId: member.cooperativeId,
+        },
       }
     }, {
       headers: {

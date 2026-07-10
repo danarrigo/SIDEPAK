@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { getGovernanceData, submitProposal, castVote } from "@/actions/governance";
+import { getGovernanceData, submitProposal, castVote, getKoperasiStats } from "@/actions/governance";
 import { getCurrentMember } from "@/actions/members";
 import { getLeaderboard, getMemberProgress, getCooperativeLeaderboard } from "@/actions/gamification";
 import { getEventsByCooperative, getMemberEventParticipations } from "@/actions/events";
 import EventCard from "@/components/EventCard";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import CooperativeLoanForm from "@/components/CooperativeLoanForm";
 
 export default async function Page() {
   const currentMember = await getCurrentMember();
@@ -20,6 +21,9 @@ export default async function Page() {
     asetKas,
     asetInvestasi,
   } = await getGovernanceData(currentMember.cooperativeId as number);
+  
+  const kopStats = await getKoperasiStats(currentMember.cooperativeId as number);
+
   const mainProposal = activeProposals[0];
   const proposalTitle = mainProposal?.title || "Tidak Ada Voting Aktif";
   const proposalDesc =
@@ -30,6 +34,29 @@ export default async function Page() {
   const progress = await getMemberProgress(currentMember.id);
   const userLevel = progress?.level || 1;
   const canSubmit = userLevel >= 20;
+
+  const { calculateMembershipScore, getRankFromScore, getRankLoanLimits } = await import("@/actions/rank");
+  const membershipScoreValue = calculateMembershipScore(progress?.level ?? 1, progress?.walletBalance ?? 0, progress?.creditScore ?? 0);
+  const userRankName = getRankFromScore(membershipScoreValue);
+  const loanLimits = getRankLoanLimits(userRankName);
+  const maxPercentAmt = Math.floor(asetKas * (loanLimits.maxPercent / 100));
+  const maxBorrowableAmt = Math.min(loanLimits.maxAmount, maxPercentAmt);
+
+  let userVote: string | null = null;
+  if (mainProposal) {
+    const { votes } = await import("@/db/schema/governance");
+    const { and: dbAnd, eq: dbEq } = await import("drizzle-orm");
+    const { db } = await import("@/db");
+    const userVoteRes = await db.select().from(votes).where(
+      dbAnd(
+        dbEq(votes.memberId, currentMember.id),
+        dbEq(votes.proposalId, mainProposal.id)
+      )
+    ).catch(() => []);
+    if (userVoteRes.length > 0) {
+      userVote = userVoteRes[0].voteType;
+    }
+  }
 
   const topContributors = await getCooperativeLeaderboard();
 
@@ -81,7 +108,8 @@ export default async function Page() {
 
   return (
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">
-      <div className="flex-1 overflow-y-auto px-6 py-10 space-y-8 pb-32 w-full">
+      {/* Desktop View */}
+      <div className="hidden md:block flex-1 overflow-y-auto px-6 py-10 space-y-8 pb-32 w-full">
         <div className="relative w-full h-[200px] rounded-xl overflow-hidden mb-8 glass-card animate-slide-up flex items-center px-10">
           <div className="relative z-10">
             <h1 className="font-headline-lg text-headline-lg mb-2">
@@ -321,12 +349,21 @@ export default async function Page() {
                 </p>
               </div>
             </div>
+
+            <CooperativeLoanForm
+              memberId={currentMember.id}
+              rankName={userRankName}
+              maxPercent={loanLimits.maxPercent}
+              maxAmount={loanLimits.maxAmount}
+              kasKoperasi={asetKas}
+              maxBorrowable={maxBorrowableAmt}
+            />
           </section>
 
           {/* Top Cooperatives */}
           <section className="glass-card rounded-xl p-6">
             <h3 className="font-headline-md text-headline-md mb-6">
-              Leaderboard Koperasi (Nasional)
+              Leaderboard Nasional
             </h3>
             <div className="space-y-4">
               {topContributors.slice(0, 3).map((member, idx) => (
@@ -349,7 +386,7 @@ export default async function Page() {
                   </div>
                   <div className="text-right">
                     <p className="font-points-display text-points-display text-primary">
-                      {member.xp} XP
+                      {member.pointsBalance} Poin
                     </p>
                   </div>
                 </div>
@@ -557,6 +594,222 @@ export default async function Page() {
               </div>
             )}
           </section>
+        </div>
+      </div>
+
+      {/* Mobile View (1-to-1 with Flutter app) */}
+      <div className="md:hidden flex flex-col min-h-screen bg-[#F1F5F9] pb-16">
+        {/* Top Header Section */}
+        <div className="bg-[#111827] pt-12 px-6 pb-8 flex flex-col gap-1">
+          <h1 className="text-white text-2xl font-bold">Dashboard Koperasi</h1>
+          <p className="text-white/60 text-xs">{currentMember.koperasi || 'Koperasi Merah Putih Desa Sukamaju'}</p>
+        </div>
+
+        {/* Content Area */}
+        <div className="px-5 py-4 space-y-5">
+          {/* Statistik Koperasi Card */}
+          <div className="bg-gradient-to-br from-[#718096] to-[#4A5568] rounded-[20px] p-4 text-white shadow flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <h3 className="font-bold text-sm">Statistik Koperasi</h3>
+              <Link href="/governance/members" className="bg-white/20 border border-white/20 rounded-lg px-2.5 py-1 text-[10px] font-bold flex items-center gap-1 transition-all">
+                <span>Lihat Anggota</span>
+                <span className="material-symbols-outlined text-xs">arrow_forward</span>
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white rounded-xl p-3 text-[#1E293B] flex flex-col justify-center shadow-sm">
+                <span className="text-[9px] font-bold text-slate-400">Total Anggota</span>
+                <span className="text-base font-black mt-1">{totalMembers}</span>
+                <span className="text-[8px] text-slate-400">Terdaftar aktif</span>
+              </div>
+              <div className="bg-white rounded-xl p-3 text-[#1E293B] flex flex-col justify-center shadow-sm">
+                <span className="text-[9px] font-bold text-slate-400">Total Transaksi</span>
+                <span className="text-base font-black mt-1">{kopStats.transaksi}</span>
+                <span className="text-[8px] text-slate-400">Simpanan & Pinjaman</span>
+              </div>
+              <div className="bg-white rounded-xl p-3 text-[#1E293B] flex flex-col justify-center shadow-sm">
+                <span className="text-[9px] font-bold text-slate-400">Total Aset Desa</span>
+                <span className="text-xs font-black mt-1 truncate">Rp {totalAsetDesa.toLocaleString("id-ID")}</span>
+                <span className="text-[8px] text-slate-400">Konsolidasi</span>
+              </div>
+              <div className="bg-white rounded-xl p-3 text-[#1E293B] flex flex-col justify-center shadow-sm">
+                <span className="text-[9px] font-bold text-slate-400">UMKM Aktif</span>
+                <span className="text-base font-black mt-1">{kopStats.umkmAktif || '-'}</span>
+                <span className="text-[8px] text-slate-400">Data UMKM</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Distribusi Aset Desa Card */}
+          <div className="bg-white rounded-[20px] p-5 border border-slate-100 shadow-sm flex flex-col gap-4">
+            <h3 className="text-[#475569] text-sm font-bold">Distribusi Aset Desa</h3>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1">
+                  <span>Kas & Likuiditas</span>
+                  <span className="text-[#3B82F6]">{kasPercent}%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#3B82F6]" style={{ width: `${kasPercent}%` }}></div>
+                </div>
+                <p className="text-[10px] text-right font-bold text-slate-400 mt-1">Rp {asetKas.toLocaleString("id-ID")}</p>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1">
+                  <span>Pinjaman Anggota</span>
+                  <span className="text-[#F59E0B]">{pinjamanPercent}%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#F59E0B]" style={{ width: `${pinjamanPercent}%` }}></div>
+                </div>
+                <p className="text-[10px] text-right font-bold text-slate-400 mt-1">Rp {asetPinjaman.toLocaleString("id-ID")}</p>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1">
+                  <span>Investasi & Lainnya</span>
+                  <span className="text-[#EF4444]">{investasiPercent}%</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#EF4444]" style={{ width: `${investasiPercent}%` }}></div>
+                </div>
+                <p className="text-[10px] text-right font-bold text-slate-400 mt-1">Rp {asetInvestasi.toLocaleString("id-ID")}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Voting Digital (E-RAT) Section */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <span className="material-symbols-outlined text-[#3B82F6] text-xl">how_to_vote</span>
+              <h3 className="text-[#1E293B] text-sm font-black">Voting Digital (E-RAT)</h3>
+            </div>
+            <div className="bg-gradient-to-br from-[#3B82F6] to-[#1D4ED8] rounded-[20px] p-5 text-white shadow-md flex flex-col gap-4">
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] font-bold text-white/90">Agenda E-RAT Aktif</span>
+                {mainProposal && (
+                  <span className="bg-white/20 border border-white/30 text-white text-[9px] font-bold px-2 py-0.5 rounded">
+                    Sisa {sisaWaktu}
+                  </span>
+                )}
+              </div>
+              <div>
+                <h4 className="text-base font-bold leading-tight">{proposalTitle}</h4>
+                {mainProposal?.description && (
+                  <p className="text-white/80 text-[10px] mt-1.5 leading-relaxed">{proposalDesc}</p>
+                )}
+              </div>
+
+              {mainProposal && (
+                <div className="bg-white/10 border border-white/20 rounded-lg p-2.5 flex justify-between items-center text-[10px] font-bold">
+                  <span className="text-white/80">TARGET QUORUM</span>
+                  <span>{proposalTarget}%</span>
+                </div>
+              )}
+
+              {userVote ? (
+                <div className="bg-white/15 rounded-xl p-3 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-emerald-400 text-base">check_circle</span>
+                  <span className="text-xs font-bold">Pilihan Anda: {userVote === 'agree' ? 'Setuju' : userVote === 'reject' ? 'Tolak' : 'Abstain'}</span>
+                </div>
+              ) : mainProposal ? (
+                <div className="grid grid-cols-3 gap-2">
+                  <form action={voteAction} className="w-full">
+                    <input type="hidden" name="voteType" value="agree" />
+                    <button type="submit" className="w-full py-2 bg-[#16A34A] text-white rounded-lg font-bold text-[10px] text-center">Setuju</button>
+                  </form>
+                  <form action={voteAction} className="w-full">
+                    <input type="hidden" name="voteType" value="reject" />
+                    <button type="submit" className="w-full py-2 bg-[#DC2626] text-white rounded-lg font-bold text-[10px] text-center">Tolak</button>
+                  </form>
+                  <form action={voteAction} className="w-full">
+                    <input type="hidden" name="voteType" value="abstain" />
+                    <button type="submit" className="w-full py-2 bg-white/20 text-white rounded-lg font-bold text-[10px] text-center">Abstain</button>
+                  </form>
+                </div>
+              ) : (
+                <p className="text-white/70 text-xs">Belum ada vote yang aktif. Ajukan proposal baru di bawah.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Ajukan Proposal Desa */}
+          <div className="bg-white rounded-[20px] p-5 border border-slate-100 shadow-sm flex flex-col gap-4">
+            <div>
+              <h3 className="text-[#1E293B] text-sm font-bold">Ajukan Proposal Desa</h3>
+              <p className="text-slate-400 text-[10px] mt-0.5">Suarakan ide Anda untuk kemajuan bersama.</p>
+            </div>
+
+            {canSubmit ? (
+              <form action={handleCreateProposal} className="space-y-3">
+                <div>
+                  <input
+                    name="title"
+                    required
+                    placeholder="Contoh: Pembangunan Sumur Bor Baru"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-[#1E293B] placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
+                  />
+                </div>
+                <div>
+                  <textarea
+                    name="description"
+                    required
+                    rows={3}
+                    placeholder="Jelaskan tujuan dan manfaat usulan ini..."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-[#1E293B] placeholder:text-slate-400 focus:outline-none focus:border-slate-400 resize-none"
+                  ></textarea>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full py-2.5 bg-[#0F172A] text-white font-bold text-xs rounded-lg hover:bg-slate-800 transition-colors"
+                >
+                  AJUKAN PROPOSAL
+                </button>
+              </form>
+            ) : (
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center flex flex-col items-center gap-2">
+                <span className="material-symbols-outlined text-slate-400 text-2xl">lock</span>
+                <p className="text-xs text-slate-600 font-bold leading-normal">
+                  Pengajuan proposal hanya untuk anggota Level 20 (Emas) ke atas.
+                </p>
+                <p className="text-[10px] text-slate-400">
+                  Level Anda saat ini: {userLevel} ({userLevel >= 10 && userLevel < 20 ? 'Perak' : 'Perunggu'})
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Arsip Keputusan */}
+          <div className="space-y-2">
+            <h3 className="text-[#475569] text-sm font-bold px-1">Arsip Keputusan</h3>
+            {pastProposals.length === 0 ? (
+              <div className="bg-slate-50 rounded-[20px] p-5 text-center text-slate-400 text-xs border border-slate-200">
+                Belum ada riwayat proposal.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {pastProposals.map((prop) => {
+                  const isPassed = prop.status === "passed";
+                  const isRejected = prop.status === "rejected";
+                  return (
+                    <div key={prop.id} className="bg-white rounded-[20px] p-4 border border-slate-100 shadow-sm flex flex-col gap-2">
+                      <div className="flex justify-between items-start">
+                        <h4 className="text-xs font-bold text-slate-800 truncate max-w-[70%]">{prop.title}</h4>
+                        <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${
+                          isPassed ? "bg-emerald-100 text-emerald-700" : isRejected ? "bg-rose-100 text-rose-700" : "bg-slate-100 text-slate-600"
+                        }`}>
+                          {isPassed ? "Disetujui" : isRejected ? "Ditolak" : prop.status}
+                        </span>
+                      </div>
+                      <p className="text-slate-400 text-[10px] leading-relaxed line-clamp-2">{prop.description}</p>
+                      <span className="text-slate-400 text-[8px] block mt-1">Berakhir pada: {new Date(prop.endDate).toLocaleDateString("id-ID")}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </main>

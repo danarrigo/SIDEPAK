@@ -23,7 +23,7 @@ export default function LeaderboardClient({ memberId, koperasiData, provinsiData
   const title = scope === 'koperasi' ? 'Peringkat Koperasi' : scope === 'provinsi' ? 'Peringkat Provinsi' : 'Peringkat Nasional';
 
   return (
-    <div className="glass-card border border-outline-variant rounded-2xl p-6 flex flex-col h-[520px]">
+    <div className="glass-card border border-outline-variant rounded-2xl p-6 flex flex-col h-full">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-sm uppercase font-extrabold tracking-widest text-on-surface">{title}</h3>
         <span className="material-symbols-outlined text-tertiary">leaderboard</span>

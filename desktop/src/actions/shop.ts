@@ -1,6 +1,6 @@
 "use server";
 import { db } from "@/db";
-import { items, memberItems, memberProgress, marketplaceItems, marketplaceTransactions } from "@/db/schema/gamification";
+import { items, memberItems, memberProgress, marketplaceItems, marketplaceTransactions, pointTransactions } from "@/db/schema/gamification";
 import { members } from "@/db/schema/members";
 import { eq, and, desc } from "drizzle-orm";
 import { awardPoints } from "@/actions/gamification";
@@ -24,6 +24,13 @@ export async function buyShopItem(memberId: number, itemId: number) {
       updatedAt: new Date()
     }).where(eq(memberProgress.id, progress[0].id));
 
+    await db.insert(pointTransactions).values({
+      memberId,
+      amount: -price,
+      source: 'purchase',
+      description: `Membeli item Pasar Poin ${item.name}`
+    });
+
     const existingItem = await db.select().from(memberItems).where(
       and(
         eq(memberItems.memberId, memberId),
@@ -46,7 +53,7 @@ export async function buyShopItem(memberId: number, itemId: number) {
 
     await awardPoints(memberId, 25, 'shop', 'Membeli barang di koperasi');
 
-    return { success: true, updatedPoints: progress[0].pointsBalance - price };
+    return { success: true, updatedPoints: progress[0].pointsBalance - price + 25 };
   } catch (error) {
     console.error("Buy Shop Item DB Error:", error);
     return { success: false, error: "Failed to purchase item" };
@@ -126,11 +133,27 @@ export async function buyMarketplaceItem(buyerId: number, itemId: number) {
       updatedAt: new Date()
     }).where(eq(memberProgress.id, buyerProgress.id));
 
+    // Buyer transaction
+    await db.insert(pointTransactions).values({
+      memberId: buyerId,
+      amount: -price,
+      source: 'purchase',
+      description: `Membeli item dari pasar anggota`
+    });
+
     // Update seller points
     await db.update(memberProgress).set({
       pointsBalance: sellerProgress.pointsBalance + price,
       updatedAt: new Date()
     }).where(eq(memberProgress.id, sellerProgress.id));
+
+    // Seller transaction
+    await db.insert(pointTransactions).values({
+      memberId: item.sellerId,
+      amount: price,
+      source: 'sale',
+      description: `Penjualan item di pasar anggota`
+    });
 
     // Reduce stock
     await db.update(marketplaceItems).set({
@@ -149,7 +172,7 @@ export async function buyMarketplaceItem(buyerId: number, itemId: number) {
 
     await awardPoints(buyerId, 50, 'marketplace', 'Membeli barang dari member lain');
 
-    return { success: true, updatedPoints: buyerProgress.pointsBalance - price };
+    return { success: true, updatedPoints: buyerProgress.pointsBalance - price + 50 };
   } catch (error) {
     console.error("Buy Marketplace Item DB Error:", error);
     return { success: false, error: "Gagal membeli barang" };

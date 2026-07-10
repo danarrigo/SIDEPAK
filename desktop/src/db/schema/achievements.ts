@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, timestamp, varchar, uuid, boolean } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, timestamp, varchar, uuid, boolean, uniqueIndex } from "drizzle-orm/pg-core";
 import { members } from "./members";
 
 export const badges = pgTable("badges", {
@@ -36,6 +36,9 @@ export const memberQuests = pgTable("member_quests", {
   progress: integer("progress").default(0).notNull(),
   isCompleted: boolean("is_completed").default(false).notNull(),
   completedAt: timestamp("completed_at"),
+  expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  unq: uniqueIndex("member_quest_unq").on(table.memberId, table.questId)
+}));

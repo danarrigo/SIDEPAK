@@ -1174,10 +1174,15 @@ class ProfileView extends StatelessWidget {
                 GestureDetector(
                   onTap: () async {
                     if (loan['status'] == 'approved') {
-                      final msg = await context.read<KoperasiProvider>().payLoan(loan['id'] as int);
+                      final msg = await context
+                          .read<KoperasiProvider>()
+                          .payLoan(loan['id'] as int);
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(msg == 'success' ? 'Pinjaman berhasil dilunasi!' : msg)),
+                        SnackBar(
+                            content: Text(msg == 'success'
+                                ? 'Pinjaman berhasil dilunasi!'
+                                : msg)),
                       );
                     }
                   },
@@ -1185,7 +1190,9 @@ class ProfileView extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: loan['status'] == 'approved' ? const Color(0xFF0F172A) : Colors.grey,
+                      color: loan['status'] == 'approved'
+                          ? const Color(0xFF0F172A)
+                          : Colors.grey,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(

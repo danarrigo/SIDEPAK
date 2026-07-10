@@ -809,7 +809,8 @@ class KoperasiProvider extends ChangeNotifier {
     }
   }
 
-  Future<String> submitEvent(String name, String description, DateTime startDate, DateTime endDate) async {
+  Future<String> submitEvent(String name, String description,
+      DateTime startDate, DateTime endDate) async {
     try {
       final body = await _postAction({
         'action': 'submit-event',

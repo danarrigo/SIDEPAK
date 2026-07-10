@@ -81,6 +81,9 @@ export const koperasiSeasonScores = pgTable("koperasi_season_scores", {
   id: serial("id").primaryKey(),
   koperasiId: integer("koperasi_id").notNull().references(() => cooperatives.id, { onDelete: 'cascade' }),
   seasonId: integer("season_id").notNull().references(() => seasons.id, { onDelete: 'cascade' }),
+  totalWins: integer("total_wins").default(0).notNull(),
+  totalLosses: integer("total_losses").default(0).notNull(),
+  totalDraws: integer("total_draws").default(0).notNull(),
   totalXp: integer("total_xp").default(0).notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

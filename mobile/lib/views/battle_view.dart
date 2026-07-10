@@ -9,10 +9,13 @@ class BattleView extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<KoperasiProvider>();
 
-    // Using mock data since we don't have league actions synced to Flutter yet.
-    // In a full implementation, we'd fetch this from the backend via KoperasiProvider.
-    final myCoopScore = 1500;
-    final myCoopRank = 3;
+    // Mock data based on new Guild War design
+    final myCoopName = "Koperasi Suka Maju";
+    final rivalCoopName = "Koperasi Jaya Abadi";
+    final myCoopScore = 12; // Wins
+    final rivalCoopScore = 9; // Wins
+    final myCoopRank = 1;
+    final totalXp = 1500;
 
     return RefreshIndicator(
       onRefresh: () => provider.fetchData(),
@@ -22,7 +25,13 @@ class BattleView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              color: const Color(0xFF121926),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF0D8ABC), Color(0xFF22C55E)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
               padding: const EdgeInsets.only(
                   top: 60, left: 24, right: 24, bottom: 30),
               child: const Row(
@@ -32,13 +41,13 @@ class BattleView extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Liga Koperasi',
+                      Text('Guild Wars',
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 24,
                               fontWeight: FontWeight.bold)),
                       Text('Musim Tanam Raya',
-                          style: TextStyle(color: Colors.white60, fontSize: 12))
+                          style: TextStyle(color: Colors.white70, fontSize: 12))
                     ],
                   )
                 ],
@@ -49,130 +58,201 @@ class BattleView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Card(
-                    color: const Color(0xFF0D8ABC).withOpacity(0.1),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(
-                            color: const Color(0xFF0D8ABC).withOpacity(0.3))),
-                    elevation: 0,
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Status Koperasi Anda',
-                                  style: TextStyle(
-                                      color: Color(0xFF0D8ABC),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold)),
-                              Text('Peringkat #$myCoopRank',
-                                  style: const TextStyle(
-                                      color: Color(0xFF94A3B8), fontSize: 12)),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text('$myCoopScore',
-                                  style: const TextStyle(
-                                      color: Color(0xFF0D8ABC),
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w900)),
-                              const Text('TOTAL XP',
-                                  style: TextStyle(
-                                      color: Color(0xFF94A3B8),
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1)),
-                            ],
-                          ),
-                        ],
-                      ),
+                  // Guild War Match Card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFF0D8ABC).withOpacity(0.3)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF0D8ABC).withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        const Text('MINGGU INI VS RIVAL',
+                            style: TextStyle(
+                                color: Color(0xFF1E293B),
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2)),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  const Text('ANDA',
+                                      style: TextStyle(
+                                          color: Color(0xFF0D8ABC),
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold)),
+                                  Text('$myCoopScore',
+                                      style: const TextStyle(
+                                          color: Color(0xFF0D8ABC),
+                                          fontSize: 36,
+                                          fontWeight: FontWeight.w900)),
+                                ],
+                              ),
+                            ),
+                            const Text('VS',
+                                style: TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                    fontSize: 20,
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.w900)),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  const Text('RIVAL',
+                                      style: TextStyle(
+                                          color: Colors.redAccent,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold)),
+                                  Text('$rivalCoopScore',
+                                      style: const TextStyle(
+                                          color: Colors.redAccent,
+                                          fontSize: 36,
+                                          fontWeight: FontWeight.w900)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(rivalCoopName,
+                            style: const TextStyle(
+                                color: Color(0xFF64748B),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500)),
+                      ],
                     ),
                   ),
+
                   const SizedBox(height: 24),
-                  const Text('Top Koperasi Nasional',
+
+                  // 1v1 Battle Button
+                  ElevatedButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Mencari lawan dari koperasi rival...')),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0D8ABC),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.sports_kabaddi, color: Colors.white),
+                        SizedBox(width: 8),
+                        Text('Cari Lawan 1v1',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Leaderboard
+                  const Text('Klasemen Liga (Top 50)',
                       style: TextStyle(
                           color: Color(0xFF1E293B),
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
-                  _buildLeaderboardRow('Koperasi Makmur Jaya', 3450, 1, false),
-                  _buildLeaderboardRow('Koperasi Sejahtera', 2100, 2, false),
-                  _buildLeaderboardRow('Koperasi Anda', 1500, 3, true),
-                  _buildLeaderboardRow('Koperasi Bina Warga', 1240, 4, false),
-                  _buildLeaderboardRow('Koperasi Desa Hijau', 980, 5, false),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 5,
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      itemBuilder: (context, index) {
+                        final isMine = index == 0;
+                        return Container(
+                          color: isMine ? const Color(0xFF0D8ABC).withOpacity(0.05) : null,
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 24,
+                                child: Text(
+                                  index == 0 ? '🥇' : index == 1 ? '🥈' : index == 2 ? '🥉' : '${index + 1}',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      index == 0 ? myCoopName : 'Koperasi Lain ${index + 1}',
+                                      style: TextStyle(
+                                        color: isMine ? const Color(0xFF0D8ABC) : const Color(0xFF1E293B),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    if (isMine)
+                                      const Text(
+                                        'Koperasi Anda',
+                                        style: TextStyle(color: Color(0xFF0D8ABC), fontSize: 10),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '${12 - index} W',
+                                    style: const TextStyle(
+                                      color: Color(0xFF0D8ABC),
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${1500 - (index * 100)} XP',
+                                    style: const TextStyle(
+                                      color: Color(0xFF64748B),
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildLeaderboardRow(String name, int score, int rank, bool isMine) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color:
-            isMine ? const Color(0xFF0D8ABC).withOpacity(0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: isMine
-                ? const Color(0xFF0D8ABC).withOpacity(0.3)
-                : const Color(0xFFE2E8F0)),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 32,
-            child: Text(
-              rank == 1
-                  ? '🥇'
-                  : rank == 2
-                      ? '🥈'
-                      : rank == 3
-                          ? '🥉'
-                          : '$rank',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: rank > 3 ? const Color(0xFF94A3B8) : null),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name,
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isMine
-                            ? const Color(0xFF0D8ABC)
-                            : const Color(0xFF1E293B))),
-                if (isMine)
-                  const Text('Koperasi Anda',
-                      style: TextStyle(fontSize: 10, color: Color(0xFF0D8ABC))),
-              ],
-            ),
-          ),
-          Text(
-            '$score XP',
-            style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFFF59E0B)),
-          )
-        ],
       ),
     );
   }

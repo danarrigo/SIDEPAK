@@ -29,6 +29,13 @@
       "when": 1783705609848,
       "tag": "0003_simple_patch",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1783707198418,
+      "tag": "0004_stormy_lionheart",
+      "breakpoints": true
     }
   ]
 }

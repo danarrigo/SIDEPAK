@@ -128,7 +128,6 @@ export async function matchmakeGuildWarBattle(memberId: number) {
 
     const randomOpponent = availableOpponents[Math.floor(Math.random() * availableOpponents.length)];
 
-    const now = new Date();
     const endDate = new Date();
     endDate.setDate(now.getDate() + 1); // 1v1 battles last 1 day within a 7-day Guild War
 

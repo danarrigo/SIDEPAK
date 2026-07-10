@@ -68,7 +68,7 @@ export default function AdminSidebar({ memberName }: { memberName?: string }) {
           </div>
           <div className={`flex flex-col overflow-hidden transition-all duration-300 whitespace-nowrap ${!isPinned ? "max-w-0 opacity-0 ml-0 group-hover:max-w-[150px] group-hover:opacity-100 group-hover:ml-3" : "max-w-[150px] opacity-100 ml-3"}`}>
             <span className="text-sm font-black truncate max-w-[110px]">{memberName || "Pengurus"}</span>
-            <span className="text-[10px] uppercase tracking-wider font-bold opacity-80 text-tertiary">Super Admin</span>
+            <span className="text-[10px] uppercase tracking-wider font-bold opacity-80 text-tertiary">Admin</span>
           </div>
         </div>
 

@@ -54,14 +54,6 @@ export async function getWinRate(memberId: number) {
 
 export async function awardPoints(memberId: number, amount: number, source: string, description?: string) {
   try {
-    // Insert transaction
-    await db.insert(pointTransactions).values({
-      memberId,
-      amount,
-      source,
-      description
-    });
-
     // Get current progress
     let [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, memberId));
     
@@ -70,9 +62,27 @@ export async function awardPoints(memberId: number, amount: number, source: stri
       progress = newProgress;
     }
 
-    // Determine multiplier or flat value? The user said "dont worry about the conversion rate for now". So amount = amount.
-    const newXp = progress.xp + amount;
-    const newPointsBalance = progress.pointsBalance + amount;
+    // Calculate streak multiplier
+    let multiplier = 1.0;
+    if (progress.loginStreak >= 7) {
+      multiplier = 1.5;
+    } else if (progress.loginStreak >= 3) {
+      multiplier = 1.2;
+    }
+
+    const finalAmount = Math.floor(amount * multiplier);
+    const streakText = multiplier > 1.0 ? ` (Streak x${multiplier})` : '';
+
+    // Insert transaction
+    await db.insert(pointTransactions).values({
+      memberId,
+      amount: finalAmount,
+      source,
+      description: description ? `${description}${streakText}` : `Poin tambahan${streakText}`
+    });
+
+    const newXp = progress.xp + finalAmount;
+    const newPointsBalance = progress.pointsBalance + finalAmount;
     
     // Level calc: 1 level per 1000 XP
     const newLevel = Math.floor(newXp / 1000) + 1;
@@ -101,9 +111,9 @@ export async function awardPoints(memberId: number, amount: number, source: stri
     if (activeBattles.length > 0) {
       const battle = activeBattles[0];
       if (battle.challengerId === memberId) {
-        await db.update(battles).set({ challengerPoints: battle.challengerPoints + amount }).where(eq(battles.id, battle.id));
+        await db.update(battles).set({ challengerPoints: battle.challengerPoints + finalAmount }).where(eq(battles.id, battle.id));
       } else {
-        await db.update(battles).set({ opponentPoints: battle.opponentPoints + amount }).where(eq(battles.id, battle.id));
+        await db.update(battles).set({ opponentPoints: battle.opponentPoints + finalAmount }).where(eq(battles.id, battle.id));
       }
     }
 

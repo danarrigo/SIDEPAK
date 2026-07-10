@@ -323,3 +323,102 @@ export async function withdrawSavingsToWallet(memberId: number, amount: number, 
     return { success: false, error: "Terjadi kesalahan saat menarik simpanan ke dompet." };
   }
 }
+
+export async function getPendingLoans(cooperativeId: number) {
+  try {
+    const pendingLoans = await db.select({
+      id: loans.id,
+      amount: loans.amount,
+      createdAt: loans.createdAt,
+      memberName: members.namaLengkap,
+      memberId: members.id
+    })
+    .from(loans)
+    .innerJoin(members, eq(loans.memberId, members.id))
+    .where(and(
+      eq(members.cooperativeId, cooperativeId),
+      eq(loans.status, 'pending')
+    ))
+    .orderBy(desc(loans.createdAt));
+
+    return pendingLoans;
+  } catch (error) {
+    console.error("getPendingLoans Error:", error);
+    return [];
+  }
+}
+
+export async function approveLoan(loanId: number) {
+  try {
+    const [loan] = await db.select().from(loans).where(eq(loans.id, loanId));
+    if (!loan || loan.status !== 'pending') {
+      return { success: false, error: "Pinjaman tidak valid atau sudah diproses." };
+    }
+
+    // 1. Update loan status to approved
+    await db.update(loans)
+      .set({ status: 'approved', updatedAt: new Date() })
+      .where(eq(loans.id, loanId));
+
+    // 2. Get current wallet balance
+    let [progress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, loan.memberId));
+    if (!progress) {
+      const [newProgress] = await db.insert(memberProgress).values({ memberId: loan.memberId }).returning();
+      progress = newProgress;
+    }
+
+    // 3. Add to wallet balance
+    await db.update(memberProgress)
+      .set({
+        walletBalance: progress.walletBalance + loan.amount,
+        updatedAt: new Date(),
+      })
+      .where(eq(memberProgress.memberId, loan.memberId));
+
+    // 4. Create wallet transaction record so it shows up in history
+    await db.insert(walletTransactions).values({
+      memberId: loan.memberId,
+      invoiceId: `PINJAMAN-KOPDES-${loanId}-${Date.now()}`,
+      amount: loan.amount,
+      status: 'paid'
+    });
+
+    // 5. Send notification
+    const { createNotification } = await import("./notifications");
+    await createNotification(
+      loan.memberId, 
+      "Pinjaman Disetujui! 🎉", 
+      `Pinjaman Anda sebesar Rp ${loan.amount.toLocaleString("id-ID")} telah disetujui dan ditambahkan ke saldo dompet.`
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("approveLoan Error:", error);
+    return { success: false, error: "Terjadi kesalahan saat menyetujui pinjaman." };
+  }
+}
+
+export async function rejectLoan(loanId: number) {
+  try {
+    const [loan] = await db.select().from(loans).where(eq(loans.id, loanId));
+    if (!loan || loan.status !== 'pending') {
+      return { success: false, error: "Pinjaman tidak valid atau sudah diproses." };
+    }
+
+    await db.update(loans)
+      .set({ status: 'rejected', updatedAt: new Date() })
+      .where(eq(loans.id, loanId));
+
+    const { createNotification } = await import("./notifications");
+    await createNotification(
+      loan.memberId, 
+      "Pinjaman Ditolak", 
+      `Maaf, pengajuan pinjaman Anda sebesar Rp ${loan.amount.toLocaleString("id-ID")} belum dapat disetujui saat ini.`
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("rejectLoan Error:", error);
+    return { success: false, error: "Terjadi kesalahan saat menolak pinjaman." };
+  }
+}

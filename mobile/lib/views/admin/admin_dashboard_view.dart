@@ -484,6 +484,8 @@ class AdminDashboardView extends StatelessWidget {
         ],
       ),
     );
+  }
+
   Widget _buildPendingApprovals(Map<String, dynamic> stats) {
     final pendingProposals = stats['pendingProposals'] as List<dynamic>? ?? [];
     final pendingEvents = stats['pendingEvents'] as List<dynamic>? ?? [];

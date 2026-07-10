@@ -98,6 +98,15 @@ class _StubProvider extends ChangeNotifier implements KoperasiProvider {
   Future<String?> checkActiveEffect() async => null;
 
   @override
+  bool get canSubmitEvent => level >= 20;
+  @override
+  bool get canSubmitProposal => level >= 20;
+  @override
+  Future<String> applyLoan(int amount) async => '';
+  @override
+  Future<String> payLoan(int loanId) async => '';
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 

@@ -998,12 +998,15 @@ class ProfileView extends StatelessWidget {
                             color: Color(0xFF475569))),
                     const SizedBox(height: 8),
                     Card(
-                      color: const Color(0xFF718096),
+                      color: const Color(0xFF6D7D91),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20)),
                       child: Column(
                         children: [
-                          _buildSettingsTile('Keamanan & Password'),
+                          _buildSettingsTile(
+                            'Keamanan & Password',
+                            onTap: () => _showSecurityDialog(context),
+                          ),
                           const Divider(color: Colors.white10, height: 1),
                           _buildSettingsTile(
                             'Notifikasi',
@@ -1011,7 +1014,11 @@ class ProfileView extends StatelessWidget {
                                 _showNotificationsSheet(context, provider),
                           ),
                           const Divider(color: Colors.white10, height: 1),
-                          _buildSettingsTile('Pusat Bantuan'),
+                          _buildSettingsTile(
+                            'Profil & Kontak',
+                            onTap: () =>
+                                _showProfileContactDialog(context, provider),
+                          ),
                         ],
                       ),
                     ),
@@ -1368,6 +1375,312 @@ class ProfileView extends StatelessWidget {
     );
   }
 
+  void _showSecurityDialog(BuildContext context) {
+    final TextEditingController currentPassCtrl = TextEditingController();
+    final TextEditingController newPassCtrl = TextEditingController();
+    final TextEditingController confirmPassCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Ganti Password',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: currentPassCtrl,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password Saat Ini',
+                    labelStyle: const TextStyle(fontSize: 13),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: newPassCtrl,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password Baru',
+                    labelStyle: const TextStyle(fontSize: 13),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: confirmPassCtrl,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Konfirmasi Password Baru',
+                    labelStyle: const TextStyle(fontSize: 13),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final currentPass = currentPassCtrl.text.trim();
+                final newPass = newPassCtrl.text.trim();
+                final confirmPass = confirmPassCtrl.text.trim();
+
+                if (currentPass.isEmpty ||
+                    newPass.isEmpty ||
+                    confirmPass.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Semua field wajib diisi.')),
+                  );
+                  return;
+                }
+
+                if (newPass != confirmPass) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Password baru tidak cocok.')),
+                  );
+                  return;
+                }
+
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Password berhasil diperbarui.'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0F172A),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Simpan',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showProfileContactDialog(
+      BuildContext context, KoperasiProvider provider) {
+    final TextEditingController phoneCtrl = TextEditingController();
+    bool obscurePhone = true;
+    bool isLoading = false;
+
+    String getObscuredPhone(String? phone) {
+      if (phone == null || phone.isEmpty) return "-";
+      if (phone.length <= 4) return phone;
+      return "••••••••${phone.substring(phone.length - 4)}";
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (sheetContext, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+              ),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const Row(
+                      children: [
+                        Icon(Icons.person, color: Color(0xFF0F172A), size: 24),
+                        SizedBox(width: 8),
+                        Text(
+                          'Profil & Kontak',
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0F172A)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Ganti Nomor Handphone',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1E293B)),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Nomor Handphone Saat Ini',
+                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            obscurePhone
+                                ? getObscuredPhone(provider.phoneNumber)
+                                : (provider.phoneNumber ?? '-'),
+                            style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1E293B)),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setSheetState(() {
+                                obscurePhone = !obscurePhone;
+                              });
+                            },
+                            child: Icon(
+                              obscurePhone
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Colors.grey,
+                              size: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Nomor Handphone Baru',
+                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    TextField(
+                      controller: phoneCtrl,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        hintText: '6281234567890',
+                        hintStyle:
+                            const TextStyle(color: Colors.grey, fontSize: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                      ),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: isLoading
+                          ? null
+                          : () async {
+                              final newPhoneVal = phoneCtrl.text.trim();
+                              if (newPhoneVal.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Nomor handphone tidak boleh kosong!')),
+                                );
+                                return;
+                              }
+                              if (newPhoneVal.length < 9) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Nomor telepon tidak valid.')),
+                                );
+                                return;
+                              }
+                              setSheetState(() {
+                                isLoading = true;
+                              });
+                              final res =
+                                  await provider.updatePhone(newPhoneVal);
+                              setSheetState(() {
+                                isLoading = false;
+                              });
+                              if (res == 'success') {
+                                Navigator.pop(sheetContext);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Nomor handphone berhasil diperbarui.'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(res)),
+                                );
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0F172A),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2))
+                          : const Text(
+                              'Simpan Nomor',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _showEditPhoneDialog(BuildContext context, KoperasiProvider provider) {
     final TextEditingController phoneCtrl =
         TextEditingController(text: provider.phoneNumber ?? '');
@@ -1429,178 +1742,124 @@ class ProfileView extends StatelessWidget {
 
   void _showNotificationsSheet(
       BuildContext context, KoperasiProvider provider) {
-    void showSnackBar(String msg) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
-    }
+    bool notifIuran = true;
+    bool notifShu = true;
+    bool notifPromo = false;
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (sheetContext, setSheetState) {
-            final notifs = provider.listNotifications;
-            return DraggableScrollableSheet(
-              initialChildSize: 0.6,
-              minChildSize: 0.4,
-              maxChildSize: 0.9,
-              expand: false,
-              builder: (ctx, scrollController) {
-                return SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Notifikasi',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0F172A)),
-                            ),
-                            Row(
-                              children: [
-                                TextButton.icon(
-                                  onPressed: () async {
-                                    final res =
-                                        await provider.createTestNotification();
-                                    if (res == 'success') {
-                                      showSnackBar(
-                                          'Notifikasi tes berhasil dikirim!');
-                                      setSheetState(() {});
-                                    } else {
-                                      showSnackBar(res);
-                                    }
-                                  },
-                                  icon: const Icon(Icons.add_alert,
-                                      size: 14, color: Color(0xFF3B82F6)),
-                                  label: const Text(
-                                    'Kirim Tes',
-                                    style: TextStyle(
-                                        fontSize: 10,
-                                        color: Color(0xFF3B82F6),
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  style: TextButton.styleFrom(
-                                    minimumSize: Size.zero,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 4),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.pop(sheetContext);
-                                  },
-                                  child: const Text(
-                                    'Tutup',
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const Divider(height: 24),
-                        Expanded(
-                          child: notifs.isEmpty
-                              ? const Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.notifications_paused,
-                                        size: 56, color: Color(0xFFCBD5E1)),
-                                    SizedBox(height: 12),
-                                    Text(
-                                      'Belum ada notifikasi baru.',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                  ],
-                                )
-                              : ListView.separated(
-                                  controller: scrollController,
-                                  itemCount: notifs.length,
-                                  separatorBuilder: (_, __) =>
-                                      const Divider(height: 1),
-                                  itemBuilder: (ctx, index) {
-                                    final notif = notifs[index];
-                                    return ListTile(
-                                      contentPadding: EdgeInsets.zero,
-                                      leading: const CircleAvatar(
-                                        backgroundColor: Color(0xFFEFF6FF),
-                                        child: Icon(Icons.notifications,
-                                            color: Color(0xFF3B82F6), size: 20),
-                                      ),
-                                      title: Text(
-                                        notif['title'] ?? 'Notifikasi',
-                                        style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF1E293B)),
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            notif['message'] ?? '',
-                                            style: const TextStyle(
-                                                fontSize: 11,
-                                                color: Colors.grey),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            notif['createdAt'] != null
-                                                ? notif['createdAt']
-                                                    .toString()
-                                                    .split('T')[0]
-                                                : '',
-                                            style: const TextStyle(
-                                                fontSize: 9,
-                                                color: Colors.black26),
-                                          ),
-                                        ],
-                                      ),
-                                      trailing: IconButton(
-                                        icon: const Icon(Icons.delete_outline,
-                                            color: Colors.redAccent, size: 18),
-                                        onPressed: () async {
-                                          final res = await provider
-                                              .deleteNotification(notif['id']);
-                                          if (res == 'success') {
-                                            showSnackBar('Notifikasi dihapus.');
-                                            setSheetState(() {});
-                                          } else {
-                                            showSnackBar(res);
-                                          }
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ),
-                        ),
-                      ],
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                );
-              },
+                  const Row(
+                    children: [
+                      Icon(Icons.notifications_active,
+                          color: Color(0xFF0F172A), size: 24),
+                      SizedBox(width: 8),
+                      Text(
+                        'Notifikasi',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0F172A)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    title: const Text('Notifikasi Iuran',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E293B))),
+                    subtitle: const Text(
+                        'Terima pengingat saat mendekati jatuh tempo',
+                        style: TextStyle(fontSize: 10, color: Colors.grey)),
+                    value: notifIuran,
+                    activeColor: const Color(0xFF0F172A),
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (val) {
+                      setSheetState(() {
+                        notifIuran = val;
+                      });
+                    },
+                  ),
+                  const Divider(color: Color(0xFFF1F5F9)),
+                  SwitchListTile(
+                    title: const Text('Pencairan SHU',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E293B))),
+                    subtitle: const Text('Info saat SHU sudah bisa dicairkan',
+                        style: TextStyle(fontSize: 10, color: Colors.grey)),
+                    value: notifShu,
+                    activeColor: const Color(0xFF0F172A),
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (val) {
+                      setSheetState(() {
+                        notifShu = val;
+                      });
+                    },
+                  ),
+                  const Divider(color: Color(0xFFF1F5F9)),
+                  SwitchListTile(
+                    title: const Text('Promo Koperasi',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E293B))),
+                    subtitle: const Text(
+                        'Update item baru dan diskon di pasar poin',
+                        style: TextStyle(fontSize: 10, color: Colors.grey)),
+                    value: notifPromo,
+                    activeColor: const Color(0xFF0F172A),
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (val) {
+                      setSheetState(() {
+                        notifPromo = val;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(sheetContext),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F172A),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text('Selesai',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
             );
           },
         );

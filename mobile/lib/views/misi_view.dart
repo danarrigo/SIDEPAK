@@ -306,17 +306,27 @@ class MisiView extends StatelessWidget {
                           final msg = await provider.claimWeeklyChest(index);
                           ScaffoldMessenger.of(context).clearSnackBars();
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(msg, style: const TextStyle(fontWeight: FontWeight.bold))),
+                            SnackBar(
+                                content: Text(msg,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold))),
                           );
                         } else if (isClaimed) {
                           ScaffoldMessenger.of(context).clearSnackBars();
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Peti harta ini sudah diklaim!', style: TextStyle(fontWeight: FontWeight.bold))),
+                            const SnackBar(
+                                content: Text('Peti harta ini sudah diklaim!',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold))),
                           );
                         } else {
                           ScaffoldMessenger.of(context).clearSnackBars();
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Selesaikan lebih banyak misi untuk membuka peti ini.', style: TextStyle(fontWeight: FontWeight.bold))),
+                            const SnackBar(
+                                content: Text(
+                                    'Selesaikan lebih banyak misi untuk membuka peti ini.',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold))),
                           );
                         }
                       },
@@ -343,7 +353,9 @@ class MisiView extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(
-                              isClaimed ? Icons.check : (isUnlocked ? Icons.redeem : Icons.lock),
+                              isClaimed
+                                  ? Icons.check
+                                  : (isUnlocked ? Icons.redeem : Icons.lock),
                               size: 18,
                               color: isClaimed
                                   ? const Color(0xFF94A3B8)

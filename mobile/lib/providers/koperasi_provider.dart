@@ -472,7 +472,9 @@ class KoperasiProvider extends ChangeNotifier {
         }
 
         if (data['claimedChests'] != null && data['claimedChests'] is List) {
-          claimedChests = (data['claimedChests'] as List).map((e) => (e as num).toInt()).toList();
+          claimedChests = (data['claimedChests'] as List)
+              .map((e) => (e as num).toInt())
+              .toList();
         } else {
           claimedChests = [];
         }

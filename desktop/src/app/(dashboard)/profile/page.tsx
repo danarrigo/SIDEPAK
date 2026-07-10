@@ -1,11 +1,12 @@
 import { getFinancialsData, getActiveLoan } from "@/actions/financials";
-import { getCurrentMember } from "@/actions/members";
+import { getCurrentMember, updateCurrentMemberPhone } from "@/actions/members";
 import { redirect } from "next/navigation";
 import { getWinRate, getMemberInventory, getRecentPointTransactions, getMemberProgress, getMemberBadges, useItem as applyInventoryItem } from "@/actions/gamification";
 import { logout } from "@/actions/auth";
 import TopUpModal from "@/components/TopUpModal";
 import Link from "next/link";
 import ProfileSettings from "./ProfileSettings";
+import MobileSettingsMenu from "@/components/MobileSettingsMenu";
 import React from "react";
 import { revalidatePath } from "next/cache";
 import { calculateMembershipScore, getRankFromScore } from "@/actions/rank";
@@ -614,19 +615,20 @@ export default async function Page() {
             </div>
           </div>
 
-          {/* Pengaturan */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-bold text-[#475569]">Pengaturan</h3>
-            <ProfileSettings currentPhone={currentMember.nomorHp} />
-          </div>
-
-          {/* Logout Button */}
-          <form action={logout} className="pt-2">
-            <button type="submit" className="flex items-center justify-center gap-2 py-3 bg-[#0F172A] text-white hover:bg-slate-800 rounded-xl transition-all w-full font-bold text-xs cursor-pointer">
-              <span className="material-symbols-outlined text-base">logout</span>
-              <span>Keluar dari Aplikasi</span>
-            </button>
-          </form>
+          {/* Pengaturan & Keluar */}
+          <MobileSettingsMenu
+            currentPhone={currentMember.nomorHp}
+            onUpdatePhone={async (phone: string) => {
+              "use server";
+              const res = await updateCurrentMemberPhone(phone);
+              revalidatePath("/profile");
+              return res;
+            }}
+            logoutAction={async () => {
+              "use server";
+              await logout();
+            }}
+          />
         </div>
       </div>
     </main>

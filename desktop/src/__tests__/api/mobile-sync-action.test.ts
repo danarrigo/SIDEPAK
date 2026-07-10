@@ -68,7 +68,7 @@ jest.mock('@/actions/gamification', () => {
 
  
 jest.mock('@/actions/arena', () => {
-  const fns = { matchmakeWeeklyBattle: jest.fn().mockResolvedValue({ success: true }) };
+  const fns = { matchmakeGuildWarBattle: jest.fn().mockResolvedValue({ success: true }) };
   Object.assign((globalThis as any), fns);
   return fns;
  
@@ -189,11 +189,11 @@ describe('POST /api/mobile-sync/action', () => {
 
 
   describe('Matchmake action (Phase 4d)', () => {
-    it('matchmake-battle forwards to matchmakeWeeklyBattle', async () => {
+    it('matchmake-battle forwards to matchmakeGuildWarBattle', async () => {
       setupAuth();
       const res = await POST(makeRequest({ action: 'matchmake-battle', memberId: 1 }));
       expect(res.status).toBe(200);
-      expect((globalThis as any).matchmakeWeeklyBattle).toHaveBeenCalled();
+      expect((globalThis as any).matchmakeGuildWarBattle).toHaveBeenCalled();
     });
   });
 

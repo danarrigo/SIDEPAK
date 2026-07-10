@@ -4,16 +4,15 @@ import UseItemClient from "@/components/UseItemClient";
 import AutoMatchmake from "@/components/AutoMatchmake";
 
 export default async function ArenaClient({ memberId, initialBattles }: { memberId: number, initialBattles: any[] }) {
-  const numMemberId = Number(memberId);
-  const { pastBattles } = await getBattleHistory(numMemberId);
+  const { pastBattles } = await getBattleHistory(memberId);
   const battle = initialBattles[0];
   
-  const myStats = await getMemberStats(numMemberId);
+  const myStats = await getMemberStats(memberId);
   const opStats = battle?.opponent?.id ? await getMemberStats(battle.opponent.id) : { missionsCompleted: 0, totalSavings: 0, savingsPts: 0, activeStreak: 0, eventsJoined: 0, shopPurchases: 0, marketplaceActivity: 0, loansCount: 0, battlesWon: 0 };
-  const inventory = await getMemberInventory(numMemberId);
+  const inventory = await getMemberInventory(memberId);
   
-  const p1 = battle ? (battle.challengerId === numMemberId ? battle.challengerPoints : battle.opponentPoints) : 0;
-  const p2 = battle ? (battle.challengerId === numMemberId ? battle.opponentPoints : battle.challengerPoints) : 0;
+  const p1 = battle ? (battle.challengerId === memberId ? battle.challengerPoints : battle.opponentPoints) : 0;
+  const p2 = battle ? (battle.challengerId === memberId ? battle.opponentPoints : battle.challengerPoints) : 0;
   
   const opponent = battle?.opponent;
   const opponentName = opponent?.namaLengkap ? opponent.namaLengkap.split(' ')[0] : "Menunggu Lawan";
@@ -48,7 +47,7 @@ export default async function ArenaClient({ memberId, initialBattles }: { member
           </div>
           <h3 className="font-headline-md text-headline-md text-on-surface mb-1">{myName}</h3>
           <span className="font-label-caps text-label-caps text-on-surface-variant mb-6">Anda</span>
-          <UseItemClient currentMemberId={numMemberId} targetMemberId={battle?.opponent?.id} inventory={inventory} />
+          <UseItemClient currentMemberId={memberId} targetMemberId={battle?.opponent?.id} inventory={inventory} />
           <div className="w-full space-y-6">
             <div>
               <div className="flex justify-between mb-2">
@@ -67,7 +66,7 @@ export default async function ArenaClient({ memberId, initialBattles }: { member
             <span className="text-4xl font-black vs-gradient italic">VS</span>
             <div className="absolute -inset-4 border border-tertiary/20 rounded-full animate-pulse"></div>
           </div>
-          {!battle && <AutoMatchmake memberId={numMemberId} />}
+          {!battle && <AutoMatchmake memberId={memberId} />}
         </div>
 
         <div className="glass-card rounded-xl p-8 flex flex-col items-center border-r-4 border-r-tertiary group transition-all duration-300 hover:translate-y-[-4px]">
@@ -153,10 +152,10 @@ export default async function ArenaClient({ memberId, initialBattles }: { member
                 </tr>
               ) : (
                 pastBattles.map((b: any) => {
-                  const isWinner = b.winnerId === numMemberId;
+                  const isWinner = b.winnerId === memberId;
                   const op = b.opponent;
-                  const myScore = b.challengerId === numMemberId ? b.challengerPoints : b.opponentPoints;
-                  const opScore = b.challengerId === numMemberId ? b.opponentPoints : b.challengerPoints;
+                  const myScore = b.challengerId === memberId ? b.challengerPoints : b.opponentPoints;
+                  const opScore = b.challengerId === memberId ? b.opponentPoints : b.challengerPoints;
                   return (
                     <tr key={b.id} className="hover:bg-surface-container-low/30 transition-colors">
                       <td className="p-4 pl-8">{new Date(b.endDate).toLocaleDateString("id-ID")}</td>

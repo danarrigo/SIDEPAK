@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { matchmakeWeeklyBattle } from '@/actions/arena';
+import { matchmakeGuildWarBattle } from '@/actions/arena';
 
 export default function MatchmakeButton({ memberId }: { memberId: number }) {
   const [loading, setLoading] = useState(false);
@@ -10,7 +10,7 @@ export default function MatchmakeButton({ memberId }: { memberId: number }) {
   const handleMatchmake = async () => {
     setLoading(true);
     try {
-      const res = await matchmakeWeeklyBattle(memberId);
+      const res = await matchmakeGuildWarBattle(memberId);
       if (res.success) {
         router.refresh();
       } else {

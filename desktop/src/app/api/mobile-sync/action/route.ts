@@ -7,7 +7,7 @@ import { useItem as applyItem, claimWeeklyChest } from "@/actions/gamification";
 import { createTopUpInvoice, verifyInvoicePayment, verifyAndPaySimpananPokok } from "@/actions/wallet";
 import { payDuesFromWallet, depositSavingsFromWallet, addLoan, repayLoanFromWallet } from "@/actions/financials";
 
-import { matchmakeWeeklyBattle } from "@/actions/arena";
+import { matchmakeGuildWarBattle } from "@/actions/arena";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
 import { members } from '@/db/schema';
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
       result = await buyMarketplaceItem(memberId, Number(itemId));
 
     } else if (action === 'matchmake-battle') {
-      result = await matchmakeWeeklyBattle(memberId);
+      result = await matchmakeGuildWarBattle(memberId);
     } else if (action === 'withdraw-wallet') {
       let { amount, bankCode, accountNumber, accountName } = body;
       amount = Number(amount);

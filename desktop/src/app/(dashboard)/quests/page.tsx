@@ -181,21 +181,35 @@ export default async function Page() {
         </aside>
 
         <div className="col-span-12 xl:col-span-8 space-y-6 animate-slide-up delay-200">
-          <section className="glass-card rounded-xl p-6 relative">
-            <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
-              <div className="absolute top-0 right-0 p-8 opacity-10">
-                <span className="material-symbols-outlined text-[120px]">
-                  account_balance
-                </span>
-              </div>
+          <section className="glass-card rounded-2xl p-8 relative overflow-hidden shadow-lg border border-white/10 bg-gradient-to-br from-surface to-surface-container-highest">
+            {/* Decorative Background Elements */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-tertiary/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
+              <span className="material-symbols-outlined text-[140px] transform rotate-12">
+                account_balance
+              </span>
             </div>
+
             <div className="relative z-10">
-              <h3 className="font-headline-md text-headline-md mb-8">
-                Peta Perjalanan Anggota
-              </h3>
-              <div className="flex items-center justify-between gap-4 relative">
-                <div className="absolute top-1/2 left-0 w-full h-1 bg-surface-container-highest -translate-y-1/2 z-0"></div>
-                <div className="absolute top-1/2 left-0 h-1 bg-gradient-to-r from-primary to-tertiary -translate-y-1/2 z-0 transition-all duration-1000" style={{ width: `${progressPercent}%` }}></div>
+              <div className="flex flex-col mb-12">
+                <h3 className="font-headline-md text-headline-md bg-gradient-to-r from-on-surface to-on-surface-variant bg-clip-text text-transparent">
+                  Peta Perjalanan Anggota
+                </h3>
+                <p className="text-sm text-on-surface-variant mt-1">
+                  Tingkatkan transaksi dan aktivitas Anda untuk mencapai peringkat tertinggi.
+                </p>
+              </div>
+              
+              <div className="flex items-center justify-between gap-4 relative pt-4 pb-8">
+                {/* Track Line Background */}
+                <div className="absolute top-1/2 left-0 w-full h-2 rounded-full bg-surface-container-highest border border-white/5 -translate-y-1/2 z-0 shadow-inner"></div>
+                
+                {/* Track Line Active */}
+                <div className="absolute top-1/2 left-0 h-2 rounded-full bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600 -translate-y-1/2 z-0 transition-all duration-1000 shadow-[0_0_15px_rgba(245,158,11,0.6)]" style={{ width: `${progressPercent}%` }}>
+                  {/* Glowing end point */}
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-[0_0_10px_#fff,0_0_20px_#f59e0b]"></div>
+                </div>
 
                 {ranks.map((r, idx) => {
                   const isActive = idx === currentRankIndex;
@@ -203,33 +217,71 @@ export default async function Page() {
                   const isFuture = idx > currentRankIndex;
                   const benefits = getRankBenefits(r.name);
                   
-                  let containerClass = "w-12 h-12 bg-surface-container-highest border-outline";
-                  if (isActive) containerClass = `w-20 h-20 border-4 ${r.border} ${r.bg} ${r.glow} transform scale-110`;
-                  else if (isPast) containerClass = `w-14 h-14 ${r.bg} ${r.border} ${r.glow}`;
+                  let containerClass = "w-12 h-12 bg-surface-container-highest border-outline shadow-inner";
+                  if (isActive) containerClass = `w-20 h-20 border-4 ${r.border} ${r.bg} ${r.glow} transform scale-110 backdrop-blur-md`;
+                  else if (isPast) containerClass = `w-14 h-14 ${r.bg} ${r.border} ${r.glow} backdrop-blur-md`;
 
                   let textClass = "text-on-surface-variant";
-                  if (isActive) textClass = `${r.color} text-label-caps font-black`;
+                  if (isActive) textClass = `${r.color} text-label-caps font-black drop-shadow-md`;
                   else if (isPast) textClass = `${r.color} font-bold`;
                   
                   return (
-                    <div key={r.name} className={`group flex flex-col items-center gap-3 relative z-10 hover:z-[100] transition-all duration-500 cursor-pointer ${isFuture ? 'opacity-40 grayscale' : ''} ${isActive ? '-mt-4' : ''}`}>
-                      <div className={`rounded-full flex items-center justify-center border-2 transition-all duration-500 ${containerClass}`}>
-                        <span className={`material-symbols-outlined transition-all duration-500 ${isActive || isPast ? r.color : ''} ${isActive ? 'text-4xl' : ''}`} style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                    <div key={r.name} className={`group flex flex-col items-center gap-3 relative z-10 hover:z-[100] transition-all duration-500 cursor-pointer ${isFuture ? 'opacity-50 grayscale hover:grayscale-0' : ''} ${isActive ? '-mt-4' : ''}`}>
+                      
+                      {/* Pulsing ring for active rank */}
+                      {isActive && (
+                        <div className={`absolute top-0 w-20 h-20 rounded-full border-2 ${r.border} animate-ping opacity-20`}></div>
+                      )}
+
+                      <div className={`relative rounded-full flex items-center justify-center border-2 transition-all duration-500 ${containerClass}`}>
+                        {/* Inner subtle gradient for 3D effect */}
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent pointer-events-none"></div>
+                        <span className={`relative z-10 material-symbols-outlined transition-all duration-500 ${isActive || isPast ? r.color : ''} ${isActive ? 'text-4xl drop-shadow-lg' : ''}`} style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
                           {r.icon}
                         </span>
                       </div>
                       <span className={`font-label-caps text-[10px] tracking-widest ${textClass}`}>{r.name.toUpperCase()}</span>
                       
-                      {/* Tooltip */}
-                      <div className={`absolute top-full mt-2 w-48 p-3 bg-surface-container-highest border border-outline-variant/30 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-left ${
+                      {/* Enhanced Tooltip */}
+                      <div className={`absolute top-full mt-4 w-56 p-4 backdrop-blur-xl bg-surface/95 border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-50 text-left ${
                         idx === 0 ? 'left-0' : idx === ranks.length - 1 ? 'right-0' : 'left-1/2 -translate-x-1/2'
                       }`}>
-                        <p className="text-xs font-bold mb-1 text-on-surface">Benefit {r.name}:</p>
-                        <ul className="text-[10px] space-y-1 text-on-surface-variant list-disc pl-3">
-                          <li>Bobot SHU {benefits.shuMultiplier}x</li>
-                          <li>Biaya layanan {benefits.serviceFee}%</li>
-                          <li>Prioritas layanan {r.name}</li>
-                        </ul>
+                        {/* Triangle pointer */}
+                        <div className={`absolute -top-2 w-4 h-4 backdrop-blur-xl bg-surface/95 border-t border-l border-white/10 transform rotate-45 ${
+                          idx === 0 ? 'left-8' : idx === ranks.length - 1 ? 'right-8' : 'left-1/2 -translate-x-1/2'
+                        }`}></div>
+                        
+                        <div className="relative z-10">
+                          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/5">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${r.bg} ${r.border} border`}>
+                              <span className={`material-symbols-outlined text-[16px] ${r.color}`} style={{ fontVariationSettings: "'FILL' 1" }}>{r.icon}</span>
+                            </div>
+                            <p className="text-sm font-bold text-on-surface">Benefit {r.name}</p>
+                          </div>
+                          <ul className="text-[11px] space-y-2 text-on-surface-variant font-medium">
+                            <li className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                Bobot SHU
+                              </div>
+                              <span className="font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded">{benefits.shuMultiplier}x</span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                Biaya Layanan
+                              </div>
+                              <span className="font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded">{benefits.serviceFee}%</span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                Prioritas
+                              </div>
+                              <span className="font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded capitalize">{r.name}</span>
+                            </li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   )

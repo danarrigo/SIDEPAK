@@ -13,17 +13,29 @@ export default async function Page() {
   const currentMember = await getCurrentMember();
   if (!currentMember) redirect("/login");
 
-  const { savings, loans, walletTransactions, totalSavings } = await getFinancialsData(currentMember.id);
+  const [
+    financialsData,
+    winRateData,
+    activeLoan,
+    inventory,
+    activityLog,
+    progress,
+    badges
+  ] = await Promise.all([
+    getFinancialsData(currentMember.id),
+    getWinRate(currentMember.id),
+    getActiveLoan(currentMember.id),
+    getMemberInventory(currentMember.id),
+    getRecentPointTransactions(currentMember.id),
+    getMemberProgress(currentMember.id),
+    getMemberBadges(currentMember.id)
+  ]);
+
+  const { savings, loans, walletTransactions, totalSavings } = financialsData;
+  const { winRate, totalBattles } = winRateData;
+
   const totalTransaksi = savings.length + loans.length + walletTransactions.length;
   const estimasiSHU = totalSavings > 0 ? Math.floor(totalSavings * 0.12) : 0;
-  
-  const { winRate, totalBattles } = await getWinRate(currentMember.id);
-
-  const activeLoan = await getActiveLoan(currentMember.id);
-  const inventory = await getMemberInventory(currentMember.id);
-  const activityLog = await getRecentPointTransactions(currentMember.id);
-  const progress = await getMemberProgress(currentMember.id);
-  const badges = await getMemberBadges(currentMember.id);
 
   const level = progress?.level || 1;
   const xp = progress?.xp || 0;

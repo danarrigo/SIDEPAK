@@ -41,10 +41,12 @@ export default async function DesktopDashboard() {
     );
   }
 
-  const dbData = await getDashboardData(currentMember.id);
-  const financials = await getFinancialsData(currentMember.id);
-  const activeQuests = await getActiveQuests(currentMember.id);
-  const koperasiStats = await getKoperasiStats(currentMember.cooperativeId as number);
+  const [dbData, financials, activeQuests, koperasiStats] = await Promise.all([
+    getDashboardData(currentMember.id),
+    getFinancialsData(currentMember.id),
+    getActiveQuests(currentMember.id),
+    getKoperasiStats(currentMember.cooperativeId as number)
+  ]);
   
 
   const points = dbData?.progress?.pointsBalance || 0;

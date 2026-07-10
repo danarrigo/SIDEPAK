@@ -1625,178 +1625,124 @@ class ProfileView extends StatelessWidget {
 
   void _showNotificationsSheet(
       BuildContext context, KoperasiProvider provider) {
-    void showSnackBar(String msg) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
-    }
+    bool notifIuran = true;
+    bool notifShu = true;
+    bool notifPromo = false;
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (sheetContext, setSheetState) {
-            final notifs = provider.listNotifications;
-            return DraggableScrollableSheet(
-              initialChildSize: 0.6,
-              minChildSize: 0.4,
-              maxChildSize: 0.9,
-              expand: false,
-              builder: (ctx, scrollController) {
-                return SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Notifikasi',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0F172A)),
-                            ),
-                            Row(
-                              children: [
-                                TextButton.icon(
-                                  onPressed: () async {
-                                    final res =
-                                        await provider.createTestNotification();
-                                    if (res == 'success') {
-                                      showSnackBar(
-                                          'Notifikasi tes berhasil dikirim!');
-                                      setSheetState(() {});
-                                    } else {
-                                      showSnackBar(res);
-                                    }
-                                  },
-                                  icon: const Icon(Icons.add_alert,
-                                      size: 14, color: Color(0xFF3B82F6)),
-                                  label: const Text(
-                                    'Kirim Tes',
-                                    style: TextStyle(
-                                        fontSize: 10,
-                                        color: Color(0xFF3B82F6),
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  style: TextButton.styleFrom(
-                                    minimumSize: Size.zero,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 4),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.pop(sheetContext);
-                                  },
-                                  child: const Text(
-                                    'Tutup',
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const Divider(height: 24),
-                        Expanded(
-                          child: notifs.isEmpty
-                              ? const Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.notifications_paused,
-                                        size: 56, color: Color(0xFFCBD5E1)),
-                                    SizedBox(height: 12),
-                                    Text(
-                                      'Belum ada notifikasi baru.',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                  ],
-                                )
-                              : ListView.separated(
-                                  controller: scrollController,
-                                  itemCount: notifs.length,
-                                  separatorBuilder: (_, __) =>
-                                      const Divider(height: 1),
-                                  itemBuilder: (ctx, index) {
-                                    final notif = notifs[index];
-                                    return ListTile(
-                                      contentPadding: EdgeInsets.zero,
-                                      leading: const CircleAvatar(
-                                        backgroundColor: Color(0xFFEFF6FF),
-                                        child: Icon(Icons.notifications,
-                                            color: Color(0xFF3B82F6), size: 20),
-                                      ),
-                                      title: Text(
-                                        notif['title'] ?? 'Notifikasi',
-                                        style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF1E293B)),
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            notif['message'] ?? '',
-                                            style: const TextStyle(
-                                                fontSize: 11,
-                                                color: Colors.grey),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            notif['createdAt'] != null
-                                                ? notif['createdAt']
-                                                    .toString()
-                                                    .split('T')[0]
-                                                : '',
-                                            style: const TextStyle(
-                                                fontSize: 9,
-                                                color: Colors.black26),
-                                          ),
-                                        ],
-                                      ),
-                                      trailing: IconButton(
-                                        icon: const Icon(Icons.delete_outline,
-                                            color: Colors.redAccent, size: 18),
-                                        onPressed: () async {
-                                          final res = await provider
-                                              .deleteNotification(notif['id']);
-                                          if (res == 'success') {
-                                            showSnackBar('Notifikasi dihapus.');
-                                            setSheetState(() {});
-                                          } else {
-                                            showSnackBar(res);
-                                          }
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ),
-                        ),
-                      ],
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                );
-              },
+                  const Row(
+                    children: [
+                      Icon(Icons.notifications_active,
+                          color: Color(0xFF0F172A), size: 24),
+                      SizedBox(width: 8),
+                      Text(
+                        'Notifikasi',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0F172A)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    title: const Text('Notifikasi Iuran',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E293B))),
+                    subtitle: const Text(
+                        'Terima pengingat saat mendekati jatuh tempo',
+                        style: TextStyle(fontSize: 10, color: Colors.grey)),
+                    value: notifIuran,
+                    activeColor: const Color(0xFF0F172A),
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (val) {
+                      setSheetState(() {
+                        notifIuran = val;
+                      });
+                    },
+                  ),
+                  const Divider(color: Color(0xFFF1F5F9)),
+                  SwitchListTile(
+                    title: const Text('Pencairan SHU',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E293B))),
+                    subtitle: const Text('Info saat SHU sudah bisa dicairkan',
+                        style: TextStyle(fontSize: 10, color: Colors.grey)),
+                    value: notifShu,
+                    activeColor: const Color(0xFF0F172A),
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (val) {
+                      setSheetState(() {
+                        notifShu = val;
+                      });
+                    },
+                  ),
+                  const Divider(color: Color(0xFFF1F5F9)),
+                  SwitchListTile(
+                    title: const Text('Promo Koperasi',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E293B))),
+                    subtitle: const Text(
+                        'Update item baru dan diskon di pasar poin',
+                        style: TextStyle(fontSize: 10, color: Colors.grey)),
+                    value: notifPromo,
+                    activeColor: const Color(0xFF0F172A),
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (val) {
+                      setSheetState(() {
+                        notifPromo = val;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(sheetContext),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F172A),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text('Selesai',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
             );
           },
         );

@@ -15,11 +15,11 @@ export default function AdminNavbar({ memberName }: { memberName?: string }) {
   ];
 
   return (
-    <nav className="w-full h-20 bg-[#0B1120] border-b border-white/5 shadow-xl flex items-center justify-between px-6 shrink-0 z-50">
+    <nav className="w-full h-20 bg-white border-b border-slate-200 shadow-sm flex items-center justify-between px-6 shrink-0 z-50">
       
       {/* Brand */}
       <div className="flex items-center gap-8">
-        <h1 className="font-headline-lg text-2xl text-rose-500 tracking-tighter drop-shadow-[0_0_12px_rgba(244,63,94,0.4)]">
+        <h1 className="font-headline-lg text-2xl text-slate-900 tracking-tighter">
           ADMIN SIDEPAK
         </h1>
 
@@ -31,7 +31,7 @@ export default function AdminNavbar({ memberName }: { memberName?: string }) {
               <Link 
                 key={link.href} 
                 href={link.href}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 ${isActive ? "bg-rose-500/10 text-rose-500 shadow-[0_3px_8px_rgba(244,63,94,0.18)]" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 ${isActive ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"}`}
               >
                 <span className="material-symbols-outlined text-[18px]" style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}>
                   {link.icon}
@@ -48,12 +48,12 @@ export default function AdminNavbar({ memberName }: { memberName?: string }) {
       {/* Profile & Logout */}
       <div className="flex items-center gap-4">
         <div className="hidden md:flex flex-col text-right">
-          <span className="text-sm font-black text-white">{memberName || "Pengurus"}</span>
-          <span className="text-[10px] uppercase tracking-wider font-bold text-rose-400">Super Admin</span>
+          <span className="text-sm font-black text-slate-900">{memberName || "Pengurus"}</span>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Super Admin</span>
         </div>
         
-        <Link href="/" className="flex items-center gap-2 p-2 px-4 rounded-xl bg-slate-800 text-white shadow-lg hover:bg-slate-700 transition-all duration-300">
-          <span className="material-symbols-outlined text-white/70 text-sm">exit_to_app</span>
+        <Link href="/" className="flex items-center gap-2 p-2 px-4 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all duration-300 border border-slate-200">
+          <span className="material-symbols-outlined text-slate-500 text-sm">exit_to_app</span>
           <span className="text-xs font-bold">Kembali ke Member</span>
         </Link>
       </div>

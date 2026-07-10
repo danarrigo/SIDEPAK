@@ -19,7 +19,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex flex-col h-screen w-full bg-[#0B1120] text-on-surface overflow-hidden">
+    <div className="flex flex-col h-screen w-full bg-slate-50 text-slate-900 overflow-hidden">
       <AdminNavbar memberName={memberData.namaLengkap} />
       
       <main className="flex-1 relative w-full h-full overflow-y-auto">

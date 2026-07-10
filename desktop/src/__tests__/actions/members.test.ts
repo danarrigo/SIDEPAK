@@ -68,7 +68,7 @@ describe('Members Actions', () => {
       };
       (createClient as jest.Mock).mockResolvedValue(mockSupabase);
       ((db as any).where as jest.Mock)
-        .mockResolvedValueOnce([{ id: 'user-1', role: 'member' }])
+        .mockResolvedValueOnce([{ role: 'member' }]) // Mock users query
         .mockResolvedValueOnce([]); // No member found
 
       const result = await getCurrentMember();
@@ -83,10 +83,9 @@ describe('Members Actions', () => {
       (createClient as jest.Mock).mockResolvedValue(mockSupabase);
       
       const mockMember = { id: 1, userId: 'user-1', cooperativeId: null };
-      const mockUserRecord = { id: 'user-1', role: 'member' };
       ((db as any).where as jest.Mock)
-        .mockResolvedValueOnce([mockUserRecord])
-        .mockResolvedValueOnce([mockMember]);
+        .mockResolvedValueOnce([{ role: 'member' }]) // Mock users query
+        .mockResolvedValueOnce([mockMember]); // Mock members query
 
       const result = await getCurrentMember();
       expect(result).toEqual({

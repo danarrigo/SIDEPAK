@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { battles, cooperativeMatches } from "@/db/schema/activities";
 import { members } from "@/db/schema/members";
 import { cooperatives } from "@/db/schema/cooperatives";
-import { or, eq, and, not, desc } from "drizzle-orm";
+import { or, eq, and, not, desc, lte, gte } from "drizzle-orm";
 import { memberProgress, pointTransactions, seasons } from "@/db/schema/gamification";
 import { memberQuests } from "@/db/schema/achievements";
 
@@ -20,6 +20,7 @@ export async function getArenaData(memberId: number = 1) {
 
     if (activeSeason) {
       // Check if cooperative has an ongoing Head-to-Head match
+      const now = new Date();
       const [match] = await db.select().from(cooperativeMatches).where(
         and(
           eq(cooperativeMatches.seasonId, activeSeason.id),
@@ -27,7 +28,8 @@ export async function getArenaData(memberId: number = 1) {
             eq(cooperativeMatches.cooperativeAId, currentMember.cooperativeId),
             eq(cooperativeMatches.cooperativeBId, currentMember.cooperativeId)
           ),
-          eq(cooperativeMatches.status, 'ongoing')
+          lte(cooperativeMatches.startDate, now),
+          gte(cooperativeMatches.endDate, now)
         )
       ).limit(1);
 
@@ -88,6 +90,7 @@ export async function matchmakeGuildWarBattle(memberId: number) {
     const [activeSeason] = await db.select().from(seasons).where(eq(seasons.isActive, true)).orderBy(desc(seasons.createdAt)).limit(1);
     if (!activeSeason) return { success: false, error: "Tidak ada musim yang sedang aktif." };
 
+    const now = new Date();
     const [match] = await db.select().from(cooperativeMatches).where(
       and(
         eq(cooperativeMatches.seasonId, activeSeason.id),
@@ -95,7 +98,8 @@ export async function matchmakeGuildWarBattle(memberId: number) {
           eq(cooperativeMatches.cooperativeAId, currentMember.cooperativeId),
           eq(cooperativeMatches.cooperativeBId, currentMember.cooperativeId)
         ),
-        eq(cooperativeMatches.status, 'ongoing')
+        lte(cooperativeMatches.startDate, now),
+        gte(cooperativeMatches.endDate, now)
       )
     ).limit(1);
 

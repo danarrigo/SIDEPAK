@@ -122,7 +122,7 @@ export async function updateMemberAdmin(memberId: number, data: Partial<typeof m
   }
 }
 
-export async function updateCurrentAdminProfile(data: { namaLengkap?: string, nik?: string, nomorHp?: string }) {
+export async function updateCurrentAdminProfile(data: { namaLengkap?: string, nik?: string, nomorHp?: string, password?: string }) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -135,6 +135,16 @@ export async function updateCurrentAdminProfile(data: { namaLengkap?: string, ni
 
     const [member] = await db.select().from(members).where(eq(members.userId, user.id));
     if (!member) return { success: false, error: "Member not found" };
+
+    // Update password if provided
+    if (data.password && data.password.trim() !== '') {
+      const { error: passwordError } = await supabase.auth.updateUser({
+        password: data.password
+      });
+      if (passwordError) {
+        return { success: false, error: "Gagal mengubah kata sandi: " + passwordError.message };
+      }
+    }
 
     await db.update(members).set({
       namaLengkap: data.namaLengkap !== undefined ? data.namaLengkap : member.namaLengkap,

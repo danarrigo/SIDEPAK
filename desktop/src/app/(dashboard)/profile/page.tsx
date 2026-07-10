@@ -5,8 +5,9 @@ import { getWinRate, getMemberInventory, getRecentPointTransactions, getMemberPr
 import { logout } from "@/actions/auth";
 import TopUpModal from "@/components/TopUpModal";
 import Link from "next/link";
-import ProfileSettings from "./ProfileSettings";
 import MobileSettingsMenu from "@/components/MobileSettingsMenu";
+import ProfileSettings from "./ProfileSettings";
+import PayLoanButton from "./PayLoanButton";
 import React from "react";
 import { revalidatePath } from "next/cache";
 import { calculateMembershipScore, getRankFromScore } from "@/actions/rank";
@@ -193,7 +194,9 @@ export default async function Page() {
                     <h3 className="font-headline-md text-headline-md">Status Pinjaman</h3>
                     <p className="font-body-sm text-on-surface-variant">Cicilan aktif bulan ini</p>
                   </div>
-                  <span className="px-3 py-1 bg-primary/20 text-primary rounded-full font-label-caps text-[10px] font-bold uppercase">Aktif</span>
+                  <span className={`px-3 py-1 rounded-full font-label-caps text-[10px] font-bold uppercase ${activeLoan.status === 'pending' ? 'bg-amber-500/20 text-amber-600' : 'bg-primary/20 text-primary'}`}>
+                    {activeLoan.status === 'pending' ? 'MENUNGGU' : 'AKTIF'}
+                  </span>
                 </div>
                 <div className="relative z-10 space-y-4">
                   <div className="flex justify-between items-end">
@@ -208,7 +211,11 @@ export default async function Page() {
                   </div>
                   <div className="pt-4 border-t border-outline-variant/30 flex justify-between items-center">
                     <p className="font-body-sm text-on-surface-variant">Jatuh tempo: <strong>{activeLoan.dueDate ? new Date(activeLoan.dueDate).toLocaleDateString('id-ID') : 'Belum ditentukan'}</strong></p>
-                    <button className="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-caps text-[10px] font-bold hover:bg-primary/90 transition-colors tracking-widest">BAYAR</button>
+                    {activeLoan.status === 'approved' ? (
+                      <PayLoanButton memberId={currentMember.id} loanId={activeLoan.id} />
+                    ) : (
+                      <span className="font-label-caps text-[10px] text-on-surface-variant uppercase">Belum dapat dibayar</span>
+                    )}
                   </div>
                 </div>
                 <div className="absolute top-0 right-0 opacity-5 pointer-events-none">

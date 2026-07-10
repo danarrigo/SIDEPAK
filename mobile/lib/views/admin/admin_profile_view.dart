@@ -158,7 +158,7 @@ class AdminProfileView extends StatelessWidget {
                           Icon(Icons.edit_rounded, size: 20),
                           SizedBox(width: 8),
                           Text(
-                            'Edit Profil (Segera)',
+                            'Edit Profil',
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold),
                           ),

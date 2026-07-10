@@ -23,10 +23,10 @@ class AdminDashboardView extends StatelessWidget {
     final provider = context.watch<KoperasiProvider>();
     final stats = provider.adminStats ?? {};
 
-    final totalMembers = stats['totalMembers'] ?? 0;
-    final activeMembers = stats['activeMembers'] ?? 0;
-    final totalActiveLoans = stats['totalActiveLoans'] ?? 0;
-    final totalAssets = stats['totalAssets'] ?? 0;
+    final totalMembers = (stats['totalMembers'] as num?)?.toInt() ?? 0;
+    final activeMembers = (stats['activeMembers'] as num?)?.toInt() ?? 0;
+    final totalActiveLoans = (stats['totalActiveLoans'] as num?)?.toInt() ?? 0;
+    final totalAssets = (stats['totalAssets'] as num?)?.toInt() ?? 0;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),

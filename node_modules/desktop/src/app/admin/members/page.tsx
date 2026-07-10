@@ -1,8 +1,8 @@
 import React from "react";
 import { getCurrentMember } from "@/actions/members";
 import { db } from "@/db";
-import { members } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { members, users } from "@/db/schema";
+import { eq, and, ne } from "drizzle-orm";
 import MembersTableClient from "./MembersTableClient";
 
 export const metadata = {
@@ -16,8 +16,17 @@ export default async function AdminMembersPage() {
     return <div>Error loading admin data</div>;
   }
 
-  // Fetch all members in this cooperative
-  const allMembers = await db.select().from(members).where(eq(members.cooperativeId, adminData.cooperativeId));
+  // Fetch all members in this cooperative excluding admins
+  const allMembersData = await db.select({ member: members })
+    .from(members)
+    .innerJoin(users, eq(members.userId, users.id))
+    .where(
+      and(
+        eq(members.cooperativeId, adminData.cooperativeId),
+        ne(users.role, 'admin')
+      )
+    );
+  const allMembers = allMembersData.map(d => d.member);
 
   return (
     <div className="w-full min-h-screen px-4 md:px-8 py-8 animate-fade-in text-slate-900">

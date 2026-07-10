@@ -1,8 +1,8 @@
 import React from "react";
 import { getCurrentMember } from "@/actions/members";
 import { db } from "@/db";
-import { members, cooperatives, loans, savings, dues } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { members, cooperatives, loans, savings, dues, users } from "@/db/schema";
+import { eq, sql, and, ne } from "drizzle-orm";
 
 export const metadata = {
   title: "Admin Dashboard",
@@ -21,7 +21,14 @@ export default async function AdminDashboard() {
   const [coopStats] = await db.select({
     totalMembers: sql<number>`count(${members.id})`,
     activeMembers: sql<number>`sum(case when ${members.statusAnggota} = 'active' then 1 else 0 end)`,
-  }).from(members).where(eq(members.cooperativeId, coopId));
+  }).from(members)
+    .innerJoin(users, eq(members.userId, users.id))
+    .where(
+      and(
+        eq(members.cooperativeId, coopId),
+        ne(users.role, 'admin')
+      )
+    );
 
   // Fetch active loans
   const [loanStats] = await db.select({

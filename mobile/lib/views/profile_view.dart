@@ -338,7 +338,7 @@ class ProfileView extends StatelessWidget {
 
                     // Active Loan Card (Phase 4c)
                     if (provider.activeLoan != null)
-                      _buildActiveLoanCard(provider.activeLoan!),
+                      _buildActiveLoanCard(context, provider.activeLoan!),
                     if (provider.activeLoan != null) const SizedBox(height: 16),
 
                     // Dampak Personal (DB-backed)
@@ -1046,7 +1046,7 @@ class ProfileView extends StatelessWidget {
         ));
   }
 
-  Widget _buildActiveLoanCard(Map<String, dynamic> loan) {
+  Widget _buildActiveLoanCard(BuildContext context, Map<String, dynamic> loan) {
     final amount = (loan['amount'] as num?)?.toInt() ?? 0;
     final interestRate = (loan['interestRate'] as num?)?.toInt() ?? 0;
     final status = (loan['status'] as String?)?.toUpperCase() ?? 'PENDING';
@@ -1175,6 +1175,7 @@ class ProfileView extends StatelessWidget {
                   onTap: () async {
                     if (loan['status'] == 'approved') {
                       final msg = await context.read<KoperasiProvider>().payLoan(loan['id'] as int);
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(msg == 'success' ? 'Pinjaman berhasil dilunasi!' : msg)),
                       );

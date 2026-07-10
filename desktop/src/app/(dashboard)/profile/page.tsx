@@ -119,6 +119,13 @@ export default async function Page() {
                 <div className="flex items-end gap-3">
                   <span className="font-headline-md text-2xl font-bold drop-shadow-md">{rankName}</span>
                   <span className="font-points-display text-lg opacity-90 mb-0.5">{xp.toLocaleString()} XP</span>
+                  
+                  <div className="bg-white/10 border border-white/10 rounded-full px-3 py-1 flex items-center gap-1.5 ml-2 mb-0.5">
+                    <span className="material-symbols-outlined text-orange-400 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>local_fire_department</span>
+                    <span className="text-white text-[10px] font-bold">
+                      {progress?.currentStreak || 1} Hari Streak {(progress?.currentStreak || 1) >= 7 ? '(x1.5)' : (progress?.currentStreak || 1) >= 3 ? '(x1.2)' : ''}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

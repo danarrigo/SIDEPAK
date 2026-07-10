@@ -425,10 +425,6 @@ export default async function Page() {
           </section>
 
 
-        </div>
-
-        <div className="grid grid-cols-1 gap-8 mb-8 mt-8">
-          {/* Voting History */}
           <section className="glass-card rounded-xl p-6">
             <h3 className="font-headline-md text-headline-md mb-6">
               Arsip Keputusan (History)

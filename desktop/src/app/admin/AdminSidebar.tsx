@@ -13,7 +13,6 @@ export default function AdminSidebar({ memberName }: { memberName?: string }) {
     { href: "/admin", icon: "dashboard", label: "Dashboard" },
     { href: "/admin/members", icon: "groups", label: "Anggota" },
     { href: "/admin/governance", icon: "article", label: "Tata Kelola & Event" },
-    { href: "/admin/profile", icon: "settings", label: "Pengaturan" },
   ];
 
   return (

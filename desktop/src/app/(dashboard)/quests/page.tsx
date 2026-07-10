@@ -181,7 +181,7 @@ export default async function Page() {
         </aside>
 
         <div className="col-span-12 xl:col-span-8 space-y-6 animate-slide-up delay-200">
-          <section className="glass-card rounded-2xl p-8 relative shadow-lg border border-white/10 bg-gradient-to-br from-surface to-surface-container-highest">
+          <section className="glass-card rounded-2xl p-8 relative z-50 shadow-lg border border-white/10 bg-gradient-to-br from-surface to-surface-container-highest">
             {/* Decorative Background Elements */}
             <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
               <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>

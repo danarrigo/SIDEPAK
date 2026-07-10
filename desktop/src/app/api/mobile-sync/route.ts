@@ -5,7 +5,7 @@ import { getFinancialsData } from "@/actions/financials";
 import { getActiveQuests } from "@/actions/quests";
 import { getGovernanceData, getKoperasiStats } from "@/actions/governance";
 import { getArenaData, getBattleHistory, getMemberStats } from "@/actions/arena";
-import { getMemberBadges, getWinRate, getStoreItems, getLeaderboard, getLeaderboardProvincial, getLeaderboardNational, getMemberInventory } from "@/actions/gamification";
+import { getMemberBadges, getWinRate, getStoreItems, getLeaderboard, getLeaderboardProvincial, getLeaderboardNational, getMemberInventory, getClaimedChests } from "@/actions/gamification";
 import { getMarketplaceItems } from "@/actions/shop";
 import { getEventsByCooperative, getMemberEventParticipations } from "@/actions/events";
 import { getActiveMembers } from "@/actions/members";
@@ -100,6 +100,7 @@ export async function GET() {
     const activeMembersData = cooperativeId ? await getActiveMembers(cooperativeId).catch(() => []) : [];
     const activeLoanData = await getActiveLoan(memberId).catch(() => null);
     const notificationsData = await getMemberNotifications(memberId);
+    const claimedChestsData = await getClaimedChests(memberId);
 
     return NextResponse.json({
       success: true,
@@ -110,6 +111,7 @@ export async function GET() {
         },
         financials: financialsData,
         quests: questsData,
+        claimedChests: claimedChestsData,
         governance: {
           ...governanceData,
           userVote,

@@ -143,6 +143,13 @@ export async function claimQuestReward(memberId: number, questId: number) {
     
     await awardPoints(memberId, quest.rewardPoints, 'quest', `Menyelesaikan misi: ${quest.title}`);
     
+    const { createNotification } = await import("./notifications");
+    await createNotification(
+      memberId,
+      "Quest Selesai",
+      `Selamat! Kamu telah menyelesaikan misi "${quest.title}" dan mendapatkan ${quest.rewardPoints} points.`
+    );
+
     return { success: true };
   } catch(error) {
     console.error("Claim Quest Error:", error);

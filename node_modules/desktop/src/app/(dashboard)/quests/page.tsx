@@ -7,6 +7,8 @@ import { items } from "@/db/schema/gamification";
 import { quests } from "@/db/schema/achievements";
 import MissionList from "@/components/MissionList";
 import { calculateMembershipScore, getRankBenefits } from "@/actions/rank";
+import { getClaimedChests } from "@/actions/gamification";
+import WeeklyChestsClient from "@/components/WeeklyChestsClient";
 
 export default async function Page() {
   const currentMember = await getCurrentMember();
@@ -85,6 +87,7 @@ export default async function Page() {
   const chestMilestones = [6, 12, 18, 24, 30];
   const maxMissions = 30;
   const chestPercent = Math.min(100, (completedMissionsCount / maxMissions) * 100);
+  const claimedChests = await getClaimedChests(currentMember.id);
 
   return (
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">
@@ -178,21 +181,37 @@ export default async function Page() {
         </aside>
 
         <div className="col-span-12 xl:col-span-8 space-y-6 animate-slide-up delay-200">
-          <section className="glass-card rounded-xl p-6 relative">
-            <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
-              <div className="absolute top-0 right-0 p-8 opacity-10">
-                <span className="material-symbols-outlined text-[120px]">
+          <section className="glass-card rounded-2xl p-8 relative z-50 shadow-lg border border-white/10 bg-gradient-to-br from-surface to-surface-container-highest">
+            {/* Decorative Background Elements */}
+            <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-tertiary/10 rounded-full blur-3xl"></div>
+              <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
+                <span className="material-symbols-outlined text-[140px] transform rotate-12">
                   account_balance
                 </span>
               </div>
             </div>
+
             <div className="relative z-10">
-              <h3 className="font-headline-md text-headline-md mb-8">
-                Peta Perjalanan Anggota
-              </h3>
-              <div className="flex items-center justify-between gap-4 relative">
-                <div className="absolute top-1/2 left-0 w-full h-1 bg-surface-container-highest -translate-y-1/2 z-0"></div>
-                <div className="absolute top-1/2 left-0 h-1 bg-gradient-to-r from-primary to-tertiary -translate-y-1/2 z-0 transition-all duration-1000" style={{ width: `${progressPercent}%` }}></div>
+              <div className="flex flex-col mb-12">
+                <h3 className="font-headline-md text-headline-md bg-gradient-to-r from-on-surface to-on-surface-variant bg-clip-text text-transparent">
+                  Peta Perjalanan Anggota
+                </h3>
+                <p className="text-sm text-on-surface-variant mt-1">
+                  Tingkatkan transaksi dan aktivitas Anda untuk mencapai peringkat tertinggi.
+                </p>
+              </div>
+              
+              <div className="flex items-center justify-between gap-4 relative pt-4 pb-8">
+                {/* Track Line Background */}
+                <div className="absolute top-1/2 left-0 w-full h-2 rounded-full bg-surface-container-highest border border-white/5 -translate-y-1/2 z-0 shadow-inner"></div>
+                
+                {/* Track Line Active */}
+                <div className="absolute top-1/2 left-0 h-2 rounded-full bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600 -translate-y-1/2 z-0 transition-all duration-1000 shadow-[0_0_15px_rgba(245,158,11,0.6)]" style={{ width: `${progressPercent}%` }}>
+                  {/* Glowing end point */}
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-[0_0_10px_#fff,0_0_20px_#f59e0b]"></div>
+                </div>
 
                 {ranks.map((r, idx) => {
                   const isActive = idx === currentRankIndex;
@@ -200,33 +219,71 @@ export default async function Page() {
                   const isFuture = idx > currentRankIndex;
                   const benefits = getRankBenefits(r.name);
                   
-                  let containerClass = "w-12 h-12 bg-surface-container-highest border-outline";
-                  if (isActive) containerClass = `w-20 h-20 border-4 ${r.border} ${r.bg} ${r.glow} transform scale-110`;
-                  else if (isPast) containerClass = `w-14 h-14 ${r.bg} ${r.border} ${r.glow}`;
+                  let containerClass = "w-12 h-12 bg-surface-container-highest border-outline shadow-inner";
+                  if (isActive) containerClass = `w-20 h-20 border-4 ${r.border} ${r.bg} ${r.glow} transform scale-110 backdrop-blur-md`;
+                  else if (isPast) containerClass = `w-14 h-14 ${r.bg} ${r.border} ${r.glow} backdrop-blur-md`;
 
                   let textClass = "text-on-surface-variant";
-                  if (isActive) textClass = `${r.color} text-label-caps font-black`;
+                  if (isActive) textClass = `${r.color} text-label-caps font-black drop-shadow-md`;
                   else if (isPast) textClass = `${r.color} font-bold`;
                   
                   return (
-                    <div key={r.name} className={`group flex flex-col items-center gap-3 relative z-10 hover:z-[100] transition-all duration-500 cursor-pointer ${isFuture ? 'opacity-40 grayscale' : ''} ${isActive ? '-mt-4' : ''}`}>
-                      <div className={`rounded-full flex items-center justify-center border-2 transition-all duration-500 ${containerClass}`}>
-                        <span className={`material-symbols-outlined transition-all duration-500 ${isActive || isPast ? r.color : ''} ${isActive ? 'text-4xl' : ''}`} style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                    <div key={r.name} className={`group flex flex-col items-center gap-3 relative z-10 hover:z-[100] transition-all duration-500 cursor-pointer ${isFuture ? 'opacity-50 grayscale hover:grayscale-0' : ''} ${isActive ? '-mt-4' : ''}`}>
+                      
+                      {/* Pulsing ring for active rank */}
+                      {isActive && (
+                        <div className={`absolute top-0 w-20 h-20 rounded-full border-2 ${r.border} animate-ping opacity-20`}></div>
+                      )}
+
+                      <div className={`relative rounded-full flex items-center justify-center border-2 transition-all duration-500 ${containerClass}`}>
+                        {/* Inner subtle gradient for 3D effect */}
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent pointer-events-none"></div>
+                        <span className={`relative z-10 material-symbols-outlined transition-all duration-500 ${isActive || isPast ? r.color : ''} ${isActive ? 'text-4xl drop-shadow-lg' : ''}`} style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
                           {r.icon}
                         </span>
                       </div>
                       <span className={`font-label-caps text-[10px] tracking-widest ${textClass}`}>{r.name.toUpperCase()}</span>
                       
-                      {/* Tooltip */}
-                      <div className={`absolute top-full mt-2 w-48 p-3 bg-surface-container-highest border border-outline-variant/30 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-left ${
+                      {/* Enhanced Tooltip */}
+                      <div className={`absolute top-full mt-4 w-56 p-4 backdrop-blur-xl bg-surface/95 border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-50 text-left ${
                         idx === 0 ? 'left-0' : idx === ranks.length - 1 ? 'right-0' : 'left-1/2 -translate-x-1/2'
                       }`}>
-                        <p className="text-xs font-bold mb-1 text-on-surface">Benefit {r.name}:</p>
-                        <ul className="text-[10px] space-y-1 text-on-surface-variant list-disc pl-3">
-                          <li>Bobot SHU {benefits.shuMultiplier}x</li>
-                          <li>Biaya layanan {benefits.serviceFee}%</li>
-                          <li>Prioritas layanan {r.name}</li>
-                        </ul>
+                        {/* Triangle pointer */}
+                        <div className={`absolute -top-2 w-4 h-4 backdrop-blur-xl bg-surface/95 border-t border-l border-white/10 transform rotate-45 ${
+                          idx === 0 ? 'left-8' : idx === ranks.length - 1 ? 'right-8' : 'left-1/2 -translate-x-1/2'
+                        }`}></div>
+                        
+                        <div className="relative z-10">
+                          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/5">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${r.bg} ${r.border} border`}>
+                              <span className={`material-symbols-outlined text-[16px] ${r.color}`} style={{ fontVariationSettings: "'FILL' 1" }}>{r.icon}</span>
+                            </div>
+                            <p className="text-sm font-bold text-on-surface">Benefit {r.name}</p>
+                          </div>
+                          <ul className="text-[11px] space-y-2 text-on-surface-variant font-medium">
+                            <li className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                Bobot SHU
+                              </div>
+                              <span className="font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded">{benefits.shuMultiplier}x</span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                Biaya Layanan
+                              </div>
+                              <span className="font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded">{benefits.serviceFee}%</span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                Prioritas
+                              </div>
+                              <span className="font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded capitalize">{r.name}</span>
+                            </li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   )
@@ -260,35 +317,12 @@ export default async function Page() {
               </p>
             </div>
             
-            <div className="relative pt-4 pb-2 px-2 z-10">
-              {/* Progress Bar Background */}
-              <div className="absolute left-6 right-6 top-9 h-2 bg-surface-container-highest rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(245,158,11,0.5)]" style={{ width: `${chestPercent}%` }}></div>
-              </div>
-              
-              {/* 5 Chests */}
-              <div className="relative flex justify-between">
-                {chestMilestones.map((target, index) => {
-                  const isUnlocked = completedMissionsCount >= target;
-                  return (
-                    <div key={target} className="flex flex-col items-center relative z-10 group cursor-pointer">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 ${isUnlocked ? 'bg-amber-100 border-amber-500 text-amber-500 gold-glow transform scale-110' : 'bg-surface-container-low border-outline-variant text-outline-variant'}`}>
-                        <span className="material-symbols-outlined text-[24px]" style={isUnlocked ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                          {isUnlocked ? 'redeem' : 'lock'}
-                        </span>
-                      </div>
-                      <span className={`text-[10px] font-bold mt-3 ${isUnlocked ? 'text-amber-600' : 'text-on-surface-variant'}`}>{target} Misi</span>
-                      
-                      {/* Tooltip */}
-                      <div className={`absolute bottom-full mb-2 w-32 p-2 bg-surface-container-highest border border-outline-variant/30 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-center left-1/2 -translate-x-1/2`}>
-                        <p className="text-xs font-bold text-on-surface mb-0.5">Peti Tier {index + 1}</p>
-                        <p className="text-[9px] text-on-surface-variant">{isUnlocked ? 'Telah Terbuka!' : `Selesaikan ${target - completedMissionsCount > 0 ? target - completedMissionsCount : 0} misi lagi`}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <WeeklyChestsClient 
+              completedMissionsCount={completedMissionsCount} 
+              initialClaimedChests={claimedChests} 
+              memberId={currentMember.id} 
+              isMobile={false} 
+            />
           </section>
         </div>
       </div>
@@ -382,29 +416,12 @@ export default async function Page() {
                 Selesaikan misi untuk membuka hingga 5 peti harta! ({completedMissionsCount} misi selesai)
               </p>
               
-              <div className="relative w-full px-2 pb-2">
-                {/* Progress Bar Background */}
-                <div className="absolute left-4 right-4 top-[14px] h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#F59E0B] rounded-full transition-all duration-1000" style={{ width: `${chestPercent}%` }}></div>
-                </div>
-                
-                {/* 5 Chests */}
-                <div className="relative flex justify-between">
-                  {chestMilestones.map((target, index) => {
-                    const isUnlocked = completedMissionsCount >= target;
-                    return (
-                      <div key={target} className="flex flex-col items-center relative z-10">
-                        <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center border-2 transition-all duration-500 ${isUnlocked ? 'bg-[#FEF3C7] border-[#F59E0B] text-[#F59E0B]' : 'bg-white border-slate-200 text-slate-300'}`}>
-                          <span className="material-symbols-outlined text-[16px]" style={isUnlocked ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                            {isUnlocked ? 'redeem' : 'lock'}
-                          </span>
-                        </div>
-                        <span className={`text-[8px] font-bold mt-1.5 ${isUnlocked ? 'text-[#D97706]' : 'text-slate-400'}`}>{target}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <WeeklyChestsClient 
+                completedMissionsCount={completedMissionsCount} 
+                initialClaimedChests={claimedChests} 
+                memberId={currentMember.id} 
+                isMobile={true} 
+              />
             </div>
           </div>
         </div>

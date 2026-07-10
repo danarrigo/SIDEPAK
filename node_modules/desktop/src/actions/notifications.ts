@@ -43,3 +43,18 @@ export async function createTestNotification(memberId: number) {
     return { success: false, error: "Failed to create test notification" };
   }
 }
+
+export async function createNotification(memberId: number, title: string, message: string) {
+  try {
+    await db.insert(notifications).values({
+      memberId,
+      title,
+      message,
+    });
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Create Notification Error:", error);
+    return { success: false, error: "Failed to create notification" };
+  }
+}

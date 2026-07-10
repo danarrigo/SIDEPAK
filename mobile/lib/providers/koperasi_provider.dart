@@ -97,6 +97,7 @@ class KoperasiProvider extends ChangeNotifier {
 
   // Missions
   List<Mission> missions = [];
+  List<int> claimedChests = [];
 
   // Shop Items (DB-backed)
   List<ShopItem> shopItems = [];
@@ -470,6 +471,12 @@ class KoperasiProvider extends ChangeNotifier {
           }).toList();
         }
 
+        if (data['claimedChests'] != null && data['claimedChests'] is List) {
+          claimedChests = (data['claimedChests'] as List).map((e) => (e as num).toInt()).toList();
+        } else {
+          claimedChests = [];
+        }
+
         final kopStats = data['koperasiStats'];
         if (kopStats != null) {
           kopTransaksi = (kopStats['transaksi'] as num?)?.toInt() ?? 0;
@@ -675,6 +682,25 @@ class KoperasiProvider extends ChangeNotifier {
           'Gagal klaim misi (mungkin belum selesai).';
     } catch (e) {
       print('Claim mission error: $e');
+      return 'Gagal menyimpan ke server.';
+    }
+  }
+
+  Future<String> claimWeeklyChest(int chestIndex) async {
+    try {
+      final body = await _postAction({
+        'action': 'claim-chest',
+        'memberId': memberId,
+        'chestIndex': chestIndex,
+      });
+      if (body['success'] == true) {
+        await fetchData();
+        final reward = body['rewardPoints'] ?? 0;
+        return 'Peti Harta Terbuka! +$reward Poin';
+      }
+      return body['error']?.toString() ?? 'Gagal klaim peti harta.';
+    } catch (e) {
+      print('Claim chest error: $e');
       return 'Gagal menyimpan ke server.';
     }
   }

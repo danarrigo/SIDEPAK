@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { castVote, submitProposal } from "@/actions/governance";
 import { claimQuestReward } from "@/actions/quests";
 import { buyShopItem, listMarketplaceItem, buyMarketplaceItem } from "@/actions/shop";
-import { useItem as applyItem } from "@/actions/gamification";
+import { useItem as applyItem, claimWeeklyChest } from "@/actions/gamification";
 import { createTopUpInvoice, verifyInvoicePayment, verifyAndPaySimpananPokok } from "@/actions/wallet";
 import { payDuesFromWallet, depositSavingsFromWallet, addLoan } from "@/actions/financials";
 import { joinEvent, createEvent } from "@/actions/events";
@@ -58,6 +58,9 @@ export async function POST(request: Request) {
     } else if (action === 'toggle-quest') {
       const { questId } = body;
       result = await claimQuestReward(memberId, questId);
+    } else if (action === 'claim-chest') {
+      const { chestIndex } = body;
+      result = await claimWeeklyChest(memberId, Number(chestIndex));
     } else if (action === 'buy-item') {
       const { itemId } = body;
       result = await buyShopItem(memberId, itemId);

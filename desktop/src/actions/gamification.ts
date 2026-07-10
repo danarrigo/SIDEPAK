@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/db";
 import { memberProgress, items, pointTransactions, memberItems } from "@/db/schema/gamification";
-import { memberBadges, badges } from "@/db/schema/achievements";
+import { memberBadges, badges, memberWeeklyChests, memberQuests } from "@/db/schema/achievements";
 import { battles } from "@/db/schema/activities";
 import { members } from "@/db/schema/members";
 import { cooperatives } from "@/db/schema/cooperatives";
@@ -370,6 +370,84 @@ export async function resolveWeeklyBattles() {
   } catch (error) {
     console.error("Resolve Battles Error:", error);
     return { success: false, error: "Gagal menyelesaikan battle mingguan." };
+  }
+}
+
+export async function getClaimedChests(memberId: number) {
+  try {
+    const today = new Date();
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+    const weekStartDate = new Date(today.setDate(diff));
+    weekStartDate.setHours(0, 0, 0, 0);
+
+    const claimed = await db.select()
+      .from(memberWeeklyChests)
+      .where(
+        and(
+          eq(memberWeeklyChests.memberId, memberId),
+          sql`${memberWeeklyChests.weekStartDate} >= ${weekStartDate}`
+        )
+      );
+    return claimed.map(c => c.chestIndex);
+  } catch (error) {
+    console.error("Get Claimed Chests Error:", error);
+    return [];
+  }
+}
+
+export async function claimWeeklyChest(memberId: number, chestIndex: number) {
+  try {
+    // 1. Get completed missions count
+    const completed = await db.select().from(memberQuests).where(
+      and(
+        eq(memberQuests.memberId, memberId),
+        eq(memberQuests.isCompleted, true)
+      )
+    );
+    const completedCount = completed.length;
+
+    const chestMilestones = [6, 12, 18, 24, 30];
+    const target = chestMilestones[chestIndex];
+    if (target === undefined || completedCount < target) {
+      return { success: false, error: "Misi belum cukup untuk membuka peti ini." };
+    }
+
+    // 2. Check if already claimed this week
+    const today = new Date();
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+    const weekStartDate = new Date(today.setDate(diff));
+    weekStartDate.setHours(0, 0, 0, 0);
+
+    const existing = await db.select().from(memberWeeklyChests).where(
+      and(
+        eq(memberWeeklyChests.memberId, memberId),
+        eq(memberWeeklyChests.chestIndex, chestIndex),
+        sql`${memberWeeklyChests.weekStartDate} >= ${weekStartDate}`
+      )
+    );
+
+    if (existing.length > 0) {
+      return { success: false, error: "Peti ini sudah diklaim minggu ini." };
+    }
+
+    // 3. Insert claim
+    await db.insert(memberWeeklyChests).values({
+      memberId,
+      chestIndex,
+      weekStartDate
+    });
+
+    // 4. Award points based on chest tier
+    const rewards = [100, 250, 500, 1000, 2500];
+    const rewardPoints = rewards[chestIndex] || 100;
+    await awardPoints(memberId, rewardPoints, 'chest', `Hadiah Peti Harta ke-${chestIndex + 1}`);
+
+    return { success: true, rewardPoints };
+  } catch (error) {
+    console.error("Claim Weekly Chest Error:", error);
+    return { success: false, error: "Gagal klaim peti." };
   }
 }
 

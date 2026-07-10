@@ -217,6 +217,13 @@ export async function payDuesFromWallet(memberId: number, type: 'initial' | 'mon
     // Update statusAnggota in members
     await getFinancialsData(memberId);
 
+    const { createNotification } = await import("./notifications");
+    await createNotification(
+      memberId, 
+      "Pembayaran Berhasil", 
+      `Terima kasih! Pembayaran ${type === 'initial' ? 'Simpanan Pokok' : 'Simpanan Wajib'} sebesar Rp ${amount.toLocaleString("id-ID")} telah berhasil.`
+    );
+
     return { success: true };
   } catch (error) {
     console.error("payDuesFromWallet Error:", error);
@@ -259,6 +266,13 @@ export async function depositSavingsFromWallet(memberId: number, amount: number,
 
     // Award points
     await awardPoints(memberId, 100, 'saving', 'Simpanan Sukarela');
+
+    const { createNotification } = await import("./notifications");
+    await createNotification(
+      memberId, 
+      "Menabung Berhasil", 
+      `Simpanan Sukarela sebesar Rp ${amount.toLocaleString("id-ID")} telah berhasil ditambahkan.`
+    );
 
     return { success: true };
   } catch (error) {

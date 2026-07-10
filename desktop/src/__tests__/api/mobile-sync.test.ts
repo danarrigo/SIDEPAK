@@ -111,6 +111,7 @@ jest.mock('@/actions/gamification', () => ({
   getLeaderboardProvincial: jest.fn().mockResolvedValue([]),
   getLeaderboardNational: jest.fn().mockResolvedValue([]),
   getMemberInventory: jest.fn().mockResolvedValue([]),
+  getClaimedChests: jest.fn().mockResolvedValue([]),
 }));
 
  

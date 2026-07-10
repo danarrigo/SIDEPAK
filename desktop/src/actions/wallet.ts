@@ -116,6 +116,9 @@ export async function verifyInvoicePayment(memberId: number, invoiceId: string) 
         })
         .where(eq(memberProgress.memberId, memberId));
 
+      const { createNotification } = await import("./notifications");
+      await createNotification(memberId, "Top Up Berhasil", `Saldo dompet kamu telah bertambah sebesar Rp ${tx.amount.toLocaleString("id-ID")}.`);
+
       return { success: true, status: "paid", walletBalance: newBalance };
     }
 

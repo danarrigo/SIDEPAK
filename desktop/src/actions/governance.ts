@@ -112,6 +112,14 @@ export async function submitProposal(memberId: number, title: string, descriptio
       endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
       cooperativeId: member.cooperativeId,
     }).returning();
+
+    const { createNotification } = await import("./notifications");
+    await createNotification(
+      memberId,
+      "Proposal Berhasil Dibuat",
+      `Proposal "${title}" telah berhasil disubmit untuk voting.`
+    );
+
     return { success: true, proposal };
   } catch (error) {
     console.error("Submit Proposal Error:", error);

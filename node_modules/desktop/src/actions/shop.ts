@@ -53,6 +53,13 @@ export async function buyShopItem(memberId: number, itemId: number) {
 
     await awardPoints(memberId, 25, 'shop', 'Membeli barang di koperasi');
 
+    const { createNotification } = await import("./notifications");
+    await createNotification(
+      memberId,
+      "Pembelian Berhasil",
+      `Kamu telah berhasil membeli item "${item.name}".`
+    );
+
     return { success: true, updatedPoints: progress[0].pointsBalance - price + 25 };
   } catch (error) {
     console.error("Buy Shop Item DB Error:", error);
@@ -171,6 +178,18 @@ export async function buyMarketplaceItem(buyerId: number, itemId: number) {
     });
 
     await awardPoints(buyerId, 50, 'marketplace', 'Membeli barang dari member lain');
+
+    const { createNotification } = await import("./notifications");
+    await createNotification(
+      buyerId,
+      "Pembelian Berhasil",
+      `Kamu telah berhasil membeli item "${item.name}" dari pasar anggota.`
+    );
+    await createNotification(
+      item.sellerId,
+      "Item Terjual!",
+      `Hore! Item "${item.name}" milikmu telah terjual.`
+    );
 
     return { success: true, updatedPoints: buyerProgress.pointsBalance - price + 50 };
   } catch (error) {

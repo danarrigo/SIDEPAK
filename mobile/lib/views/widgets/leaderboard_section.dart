@@ -93,8 +93,7 @@ class _LeaderboardSectionState extends State<LeaderboardSection> {
                         m['namaLengkap'] ?? 'Anggota',
                         style: TextStyle(
                           fontSize: 13,
-                          fontWeight:
-                              isMe ? FontWeight.w900 : FontWeight.bold,
+                          fontWeight: isMe ? FontWeight.w900 : FontWeight.bold,
                           color: const Color(0xFF1E293B),
                         ),
                         overflow: TextOverflow.ellipsis,

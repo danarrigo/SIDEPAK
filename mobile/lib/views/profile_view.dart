@@ -1015,8 +1015,8 @@ class ProfileView extends StatelessWidget {
                           ),
                           const Divider(color: Colors.white10, height: 1),
                           _buildSettingsTile(
-                            'Pusat Bantuan',
-                            onTap: () => _showHelpCenterDialog(context),
+                            'Profil & Kontak',
+                            onTap: () => _showProfileContactDialog(context),
                           ),
                         ],
                       ),
@@ -1476,7 +1476,7 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  void _showHelpCenterDialog(BuildContext context) {
+  void _showProfileContactDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -1506,7 +1506,7 @@ class ProfileView extends StatelessWidget {
                 Icon(Icons.help, color: Color(0xFF0F172A), size: 24),
                 SizedBox(width: 8),
                 Text(
-                  'Pusat Bantuan',
+                  'Profil & Kontak',
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

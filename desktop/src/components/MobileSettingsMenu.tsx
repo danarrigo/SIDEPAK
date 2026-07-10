@@ -50,7 +50,7 @@ export default function MobileSettingsMenu({ logoutAction }: MobileSettingsMenuP
           {[
             { id: "security", label: "Keamanan & Password" },
             { id: "notifications", label: "Notifikasi" },
-            { id: "help", label: "Pusat Bantuan" },
+            { id: "help", label: "Profil & Kontak" },
           ].map((item) => (
             <div
               key={item.id}
@@ -228,7 +228,7 @@ export default function MobileSettingsMenu({ logoutAction }: MobileSettingsMenuP
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-[#0F172A]">
                   <span className="material-symbols-outlined">help</span>
-                  <h4 className="font-bold text-base">Pusat Bantuan</h4>
+                  <h4 className="font-bold text-base">Profil & Kontak</h4>
                 </div>
                 <p className="text-[10px] text-slate-500 leading-relaxed">
                   Butuh bantuan lebih lanjut terkait keanggotaan, simpanan, atau poin koperasi Anda? Silakan hubungi kontak koperasi daerah resmi di bawah ini:

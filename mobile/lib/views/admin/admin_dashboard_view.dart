@@ -6,6 +6,13 @@ import '../../providers/koperasi_provider.dart';
 class AdminDashboardView extends StatelessWidget {
   const AdminDashboardView({super.key});
 
+  int _toInt(dynamic val) {
+    if (val == null) return 0;
+    if (val is num) return val.toInt();
+    if (val is String) return int.tryParse(val) ?? 0;
+    return 0;
+  }
+
   String _formatRupiah(int amount) {
     String res = amount.toString();
     String formatted = '';
@@ -23,10 +30,10 @@ class AdminDashboardView extends StatelessWidget {
     final provider = context.watch<KoperasiProvider>();
     final stats = provider.adminStats ?? {};
 
-    final totalMembers = (stats['totalMembers'] as num?)?.toInt() ?? 0;
-    final activeMembers = (stats['activeMembers'] as num?)?.toInt() ?? 0;
-    final totalActiveLoans = (stats['totalActiveLoans'] as num?)?.toInt() ?? 0;
-    final totalAssets = (stats['totalAssets'] as num?)?.toInt() ?? 0;
+    final totalMembers = _toInt(stats['totalMembers']);
+    final activeMembers = _toInt(stats['activeMembers']);
+    final totalActiveLoans = _toInt(stats['totalActiveLoans']);
+    final totalAssets = _toInt(stats['totalAssets']);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
@@ -560,7 +567,7 @@ class AdminDashboardView extends StatelessWidget {
           const Text('Pengajuan Pinjaman', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
           const SizedBox(height: 8),
           ...pendingLoans.map((item) => _buildApprovalCard(
-            title: _formatMoney((item['amount'] as num?)?.toInt() ?? 0),
+            title: _formatMoney(_toInt(item['amount'])),
             subtitle: 'Pemohon: ${item['memberName'] ?? 'Anggota'}',
             date: _formatDate(item['createdAt']),
             icon: Icons.payments_rounded,

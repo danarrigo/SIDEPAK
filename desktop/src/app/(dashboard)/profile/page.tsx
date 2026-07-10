@@ -615,22 +615,9 @@ export default async function Page() {
           </div>
 
           {/* Pengaturan */}
-          <div className="space-y-2">
+          <div className="space-y-4">
             <h3 className="text-sm font-bold text-[#475569]">Pengaturan</h3>
-            <div className="bg-[#718096] rounded-[20px] overflow-hidden text-white shadow-sm flex flex-col">
-              {[
-                'Profil & Nomor Handphone',
-                'Keamanan & Password',
-                'Notifikasi',
-                'Metode Pembayaran',
-                'Pusat Bantuan'
-              ].map((item) => (
-                <div key={item} className="flex justify-between items-center px-5 py-4 cursor-pointer hover:bg-white/5 active:bg-white/10 transition-all border-b border-white/10 last:border-0">
-                  <span className="text-xs font-bold">{item}</span>
-                  <span className="material-symbols-outlined text-white/50 text-sm">chevron_right</span>
-                </div>
-              ))}
-            </div>
+            <ProfileSettings currentPhone={currentMember.nomorHp} />
           </div>
 
           {/* Logout Button */}

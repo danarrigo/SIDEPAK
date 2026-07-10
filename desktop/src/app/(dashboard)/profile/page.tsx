@@ -1,5 +1,5 @@
 import { getFinancialsData, getActiveLoan } from "@/actions/financials";
-import { getCurrentMember } from "@/actions/members";
+import { getCurrentMember, updateCurrentMemberPhone } from "@/actions/members";
 import { redirect } from "next/navigation";
 import { getWinRate, getMemberInventory, getRecentPointTransactions, getMemberProgress, getMemberBadges, useItem as applyInventoryItem } from "@/actions/gamification";
 import { logout } from "@/actions/auth";
@@ -597,10 +597,19 @@ export default async function Page() {
           </div>
 
           {/* Pengaturan & Keluar */}
-          <MobileSettingsMenu logoutAction={async () => {
-            "use server";
-            await logout();
-          }} />
+          <MobileSettingsMenu
+            currentPhone={currentMember.nomorHp}
+            onUpdatePhone={async (phone: string) => {
+              "use server";
+              const res = await updateCurrentMemberPhone(phone);
+              revalidatePath("/profile");
+              return res;
+            }}
+            logoutAction={async () => {
+              "use server";
+              await logout();
+            }}
+          />
         </div>
       </div>
     </main>

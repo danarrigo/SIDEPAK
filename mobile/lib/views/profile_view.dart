@@ -1016,7 +1016,8 @@ class ProfileView extends StatelessWidget {
                           const Divider(color: Colors.white10, height: 1),
                           _buildSettingsTile(
                             'Profil & Kontak',
-                            onTap: () => _showProfileContactDialog(context),
+                            onTap: () =>
+                                _showProfileContactDialog(context, provider),
                           ),
                         ],
                       ),
@@ -1476,91 +1477,207 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  void _showProfileContactDialog(BuildContext context) {
+  void _showProfileContactDialog(
+      BuildContext context, KoperasiProvider provider) {
+    final TextEditingController phoneCtrl = TextEditingController();
+    bool obscurePhone = true;
+    bool isLoading = false;
+
+    String getObscuredPhone(String? phone) {
+      if (phone == null || phone.isEmpty) return "-";
+      if (phone.length <= 4) return phone;
+      return "••••••••${phone.substring(phone.length - 4)}";
+    }
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (sheetContext, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+              ),
               child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const Row(
+                      children: [
+                        Icon(Icons.person, color: Color(0xFF0F172A), size: 24),
+                        SizedBox(width: 8),
+                        Text(
+                          'Profil & Kontak',
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0F172A)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Ganti Nomor Handphone',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1E293B)),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Nomor Handphone Saat Ini',
+                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            obscurePhone
+                                ? getObscuredPhone(provider.phoneNumber)
+                                : (provider.phoneNumber ?? '-'),
+                            style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1E293B)),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setSheetState(() {
+                                obscurePhone = !obscurePhone;
+                              });
+                            },
+                            child: Icon(
+                              obscurePhone
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Colors.grey,
+                              size: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Nomor Handphone Baru',
+                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    TextField(
+                      controller: phoneCtrl,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        hintText: '6281234567890',
+                        hintStyle:
+                            const TextStyle(color: Colors.grey, fontSize: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                      ),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: isLoading
+                          ? null
+                          : () async {
+                              final newPhoneVal = phoneCtrl.text.trim();
+                              if (newPhoneVal.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Nomor handphone tidak boleh kosong!')),
+                                );
+                                return;
+                              }
+                              if (newPhoneVal.length < 9) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Nomor telepon tidak valid.')),
+                                );
+                                return;
+                              }
+                              setSheetState(() {
+                                isLoading = true;
+                              });
+                              final res =
+                                  await provider.updatePhone(newPhoneVal);
+                              setSheetState(() {
+                                isLoading = false;
+                              });
+                              if (res == 'success') {
+                                Navigator.pop(sheetContext);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Nomor handphone berhasil diperbarui.'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(res)),
+                                );
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0F172A),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2))
+                          : const Text(
+                              'Simpan Nomor',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                 ),
               ),
-            ),
-            const Row(
-              children: [
-                Icon(Icons.help, color: Color(0xFF0F172A), size: 24),
-                SizedBox(width: 8),
-                Text(
-                  'Profil & Kontak',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Butuh bantuan lebih lanjut terkait keanggotaan, simpanan, atau poin koperasi Anda? Silakan hubungi kontak koperasi daerah resmi di bawah ini:',
-              style: TextStyle(fontSize: 11, color: Colors.grey, height: 1.4),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                final url = Uri.parse('https://wa.me/628123456789');
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                }
-              },
-              icon: const Icon(Icons.chat, color: Color(0xFF10B981), size: 18),
-              label: const Text('WhatsApp Koperasi Desa',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Color(0xFF475569))),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                final url = Uri.parse('mailto:support@simkopdes.go.id');
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                }
-              },
-              icon: const Icon(Icons.mail, color: Color(0xFF3B82F6), size: 18),
-              label: const Text('Email: support@simkopdes.go.id',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Color(0xFF475569))),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 

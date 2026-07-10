@@ -1,13 +1,13 @@
-# KopDes — Gamified Village Cooperative Platform
+# SIDEPAK — Gamified Village Cooperative Platform
 
-> HackathonKopdes — Digital cooperative management for Indonesian *Koperasi Merah Putih Desa* (village cooperatives).
+> SIDEPAK — Digital cooperative management for Indonesian *Koperasi Merah Putih Desa* (village cooperatives).
 > A monorepo with **two apps sharing one Supabase (PostgreSQL) backend**: a Next.js admin dashboard and a Flutter web/mobile app for members.
 
 ---
 
 ## Table of Contents
 
-- [What is KopDes?](#what-is-kopdes)
+- [What is SIDEPAK?](#what-is-SIDEPAK)
 - [Key Features](#key-features)
 - [Tech Stack](#tech-stack)
 - [Repository Structure](#repository-structure)
@@ -26,9 +26,9 @@
 
 ---
 
-## What is KopDes?
+## What is SIDEPAK?
 
-**KopDes (Koperasi Digital)** is a modern Indonesian village cooperative platform that integrates traditional financial services with **gamification**, a **member-to-member marketplace**, and **community engagement**. It is built to make cooperative participation feel as engaging as a mobile game, while keeping all the rigour of real accounting, savings, loans, and member governance.
+**SIDEPAK (Koperasi Digital)** is a modern Indonesian village cooperative platform that integrates traditional financial services with **gamification**, a **member-to-member marketplace**, and **community engagement**. It is built to make cooperative participation feel as engaging as a mobile game, while keeping all the rigour of real accounting, savings, loans, and member governance.
 
 The platform targets *Koperasi Merah Putih Desa* — the village-level cooperatives that are the backbone of rural Indonesian community finance. Two clients share the same Supabase (PostgreSQL) backend:
 
@@ -46,7 +46,7 @@ See per-app guides for setup details:
 ## Key Features
 
 - **Digital financial services** — Savings (*Simpanan Pokok, Wajib, Sukarela*) and Loans (*Pinjaman*) tracked with full audit trail.
-- **KopDes Arena — gamification layer**
+- **SIDEPAK Arena — gamification layer**
   - Complete **Daily Quests** to earn points.
   - Maintain a **Login Streak** for bonus rewards.
   - Compete in **Weekly Arena Battles** against other members (auto-matched).
@@ -76,7 +76,7 @@ See per-app guides for setup details:
 ## Repository Structure
 
 ```
-HackathonKopdes/
+SIDEPAK/
 ├── desktop/                          # Next.js admin dashboard
 │   ├── src/
 │   │   ├── actions/                  # Server-side DB actions (no raw SQL in components)
@@ -413,8 +413,8 @@ All four API routes export an `OPTIONS()` handler that returns 204 with the requ
 ### Clone & install
 
 ```bash
-git clone https://github.com/danarrigo/HackathonKopdes
-cd HackathonKopdes
+git clone https://github.com/danarrigo/SIDEPAK
+cd SIDEPAK
 npm install                       # installs root workspace (desktop only)
 ```
 
@@ -479,7 +479,7 @@ Two GitHub Actions workflows run on every push to `main`:
 | `desktop-ci.yml` | Push to `main`, PRs touching `desktop/` | `npm ci` → `npm run lint` → `tsc --noEmit` → `jest` |
 | `mobile-ci.yml` | Push to `main`, PRs touching `mobile/` | `flutter pub get` → `dart format --set-exit-if-changed` → `flutter analyze` → `flutter test` |
 
-Vercel auto-deploys `desktop/` on every push to `main`. The Flutter web build is also deployed to Vercel at `https://hackathon-kopdes.vercel.app`.
+Vercel auto-deploys `desktop/` on every push to `main`. The Flutter web build is also deployed to Vercel at `https://hackathon-SIDEPAK.vercel.app`.
 
 ---
 

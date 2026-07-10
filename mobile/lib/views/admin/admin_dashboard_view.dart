@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../../providers/koperasi_provider.dart';
 
 class AdminDashboardView extends StatelessWidget {
@@ -150,6 +151,12 @@ class AdminDashboardView extends StatelessWidget {
                     color: Colors.blue,
                   ),
                   const SizedBox(height: 24),
+                  if (stats['loansByStatus'] != null) ...[
+                    _buildLoansPieChart(stats['loansByStatus']),
+                    const SizedBox(height: 24),
+                  ],
+                  _buildCashFlowBarChart(totalAssets, totalActiveLoans),
+                  const SizedBox(height: 24),
                   const Text(
                     'Menunggu Persetujuan',
                     style: TextStyle(
@@ -268,6 +275,234 @@ class AdminDashboardView extends StatelessWidget {
                 ),
               ],
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoansPieChart(List<dynamic> loansData) {
+    if (loansData.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    int totalPending = 0;
+    int totalApproved = 0;
+    int totalPaid = 0;
+    int totalDefaulted = 0;
+
+    for (var loan in loansData) {
+      final status = loan['status'];
+      final count = loan['count'] ?? 0;
+      if (status == 'pending')
+        totalPending += count as int;
+      else if (status == 'approved')
+        totalApproved += count as int;
+      else if (status == 'paid')
+        totalPaid += count as int;
+      else if (status == 'defaulted') totalDefaulted += count as int;
+    }
+
+    final total = totalPending + totalApproved + totalPaid + totalDefaulted;
+    if (total == 0) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Status Pinjaman (Jumlah)',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            height: 200,
+            child: PieChart(
+              PieChartData(
+                sectionsSpace: 2,
+                centerSpaceRadius: 40,
+                sections: [
+                  if (totalApproved > 0)
+                    PieChartSectionData(
+                      color: Colors.amber,
+                      value: totalApproved.toDouble(),
+                      title:
+                          '${(totalApproved / total * 100).toStringAsFixed(0)}%',
+                      radius: 50,
+                      titleStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                  if (totalPaid > 0)
+                    PieChartSectionData(
+                      color: Colors.teal,
+                      value: totalPaid.toDouble(),
+                      title: '${(totalPaid / total * 100).toStringAsFixed(0)}%',
+                      radius: 50,
+                      titleStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                  if (totalPending > 0)
+                    PieChartSectionData(
+                      color: Colors.grey,
+                      value: totalPending.toDouble(),
+                      title:
+                          '${(totalPending / total * 100).toStringAsFixed(0)}%',
+                      radius: 50,
+                      titleStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                  if (totalDefaulted > 0)
+                    PieChartSectionData(
+                      color: Colors.redAccent,
+                      value: totalDefaulted.toDouble(),
+                      title:
+                          '${(totalDefaulted / total * 100).toStringAsFixed(0)}%',
+                      radius: 50,
+                      titleStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              if (totalApproved > 0)
+                _buildLegend(Colors.amber, 'Aktif ($totalApproved)'),
+              if (totalPaid > 0)
+                _buildLegend(Colors.teal, 'Lunas ($totalPaid)'),
+              if (totalPending > 0)
+                _buildLegend(Colors.grey, 'Menunggu ($totalPending)'),
+              if (totalDefaulted > 0)
+                _buildLegend(Colors.redAccent, 'Macet ($totalDefaulted)'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegend(Color color, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 4),
+        Text(text, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+      ],
+    );
+  }
+
+  Widget _buildCashFlowBarChart(int totalAssets, int totalLoans) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Komposisi Kas (Aset vs Pinjaman)',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            height: 200,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: (totalAssets > totalLoans ? totalAssets : totalLoans)
+                        .toDouble() *
+                    1.2,
+                barTouchData: BarTouchData(enabled: false),
+                titlesData: FlTitlesData(
+                  show: true,
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            value.toInt() == 0
+                                ? 'Aset Total'
+                                : 'Pinjaman Aktif',
+                            style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                ),
+                gridData: const FlGridData(show: false),
+                borderData: FlBorderData(show: false),
+                barGroups: [
+                  BarChartGroupData(
+                    x: 0,
+                    barRods: [
+                      BarChartRodData(
+                        toY: totalAssets.toDouble(),
+                        color: Colors.blue,
+                        width: 40,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ],
+                  ),
+                  BarChartGroupData(
+                    x: 1,
+                    barRods: [
+                      BarChartRodData(
+                        toY: totalLoans.toDouble(),
+                        color: Colors.amber,
+                        width: 40,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

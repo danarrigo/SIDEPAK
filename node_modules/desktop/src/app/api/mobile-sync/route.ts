@@ -105,6 +105,16 @@ export async function GET() {
       .innerJoin(members, eq(dues.memberId, members.id))
       .where(eq(members.cooperativeId, coopId));
 
+      const loansByStatus = await db.select({
+        status: loans.status,
+        count: sql<number>`count(${loans.id})`,
+        totalAmount: sql<number>`sum(${loans.amount})`,
+      })
+      .from(loans)
+      .innerJoin(members, eq(loans.memberId, members.id))
+      .where(eq(members.cooperativeId, coopId))
+      .groupBy(loans.status);
+
       const activeLoansAmount = Number(loanStats?.totalActiveLoans) || 0;
       const netSavings = (Number(savingStats?.totalDeposits) || 0) - (Number(savingStats?.totalWithdrawals) || 0);
       const totalDuesPaid = Number(dueStats?.totalDues) || 0;
@@ -115,6 +125,7 @@ export async function GET() {
         activeMembers: coopStats?.activeMembers || 0,
         totalActiveLoans: activeLoansAmount,
         totalAssets: totalAssetsAmount,
+        loansByStatus: loansByStatus,
       };
     }
 

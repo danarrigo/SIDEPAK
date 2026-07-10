@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { logout } from "@/actions/auth";
 
 export default function AdminNavbar({ memberName }: { memberName?: string }) {
   const pathname = usePathname();
@@ -52,10 +53,12 @@ export default function AdminNavbar({ memberName }: { memberName?: string }) {
           <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Super Admin</span>
         </div>
         
-        <Link href="/" className="flex items-center gap-2 p-2 px-4 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all duration-300 border border-slate-200">
-          <span className="material-symbols-outlined text-slate-500 text-sm">exit_to_app</span>
-          <span className="text-xs font-bold">Kembali ke Member</span>
-        </Link>
+        <form action={logout}>
+          <button type="submit" className="flex items-center gap-2 p-2 px-4 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all duration-300 border border-slate-200">
+            <span className="material-symbols-outlined text-slate-500 text-sm">logout</span>
+            <span className="text-xs font-bold">Keluar</span>
+          </button>
+        </form>
       </div>
     </nav>
   );

@@ -1,4 +1,5 @@
 import React from "react";
+import { redirect } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
@@ -16,6 +17,10 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const currentMember = await getCurrentMember();
+  
+  if (currentMember?.user?.role === 'admin') {
+    redirect("/admin");
+  }
   let activeEffect = null;
   let isPokokPaid = true;
   if (currentMember) {

@@ -24,6 +24,8 @@ export const getCurrentMember = cache(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
+    const [userRecord] = await db.select().from(users).where(eq(users.id, user.id));
+
     const [member] = await db.select().from(members).where(eq(members.userId, user.id));
     if (!member) return null;
 
@@ -39,7 +41,8 @@ export const getCurrentMember = cache(async () => {
       ...member,
       koperasi: cooperativeName,
       user: {
-        email: user.email
+        email: user.email,
+        role: userRecord?.role || 'member'
       }
     };
   } catch (error) {

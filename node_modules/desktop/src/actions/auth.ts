@@ -21,7 +21,13 @@ export async function login(prevState: unknown, formData: FormData) {
     return { error: error.message };
   }
 
+  let isAdmin = false;
   if (authData.user) {
+    const [userRec] = await db.select().from(users).where(eq(users.id, authData.user.id));
+    if (userRec?.role === 'admin') {
+      isAdmin = true;
+    }
+
     const [member] = await db.select().from(members).where(eq(members.userId, authData.user.id));
     if (!member) {
       await supabase.auth.signOut();
@@ -30,7 +36,11 @@ export async function login(prevState: unknown, formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  if (isAdmin) {
+    redirect("/admin");
+  } else {
+    redirect("/");
+  }
 }
 
 export async function signup(prevState: unknown, formData: FormData) {

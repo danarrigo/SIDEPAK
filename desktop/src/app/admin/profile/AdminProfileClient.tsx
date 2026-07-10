@@ -10,14 +10,22 @@ export default function AdminProfileClient({ adminData }: { adminData: any }) {
     namaLengkap: adminData.namaLengkap || "",
     nik: adminData.nik || "",
     nomorHp: adminData.nomorHp || "",
+    password: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     startTransition(async () => {
-      const res = await updateCurrentAdminProfile(formData);
+      // Only send password if it's filled
+      const dataToSubmit = { ...formData };
+      if (!dataToSubmit.password) {
+        delete (dataToSubmit as any).password;
+      }
+      
+      const res = await updateCurrentAdminProfile(dataToSubmit);
       if (res.success) {
         setIsEditing(false);
+        setFormData(prev => ({ ...prev, password: "" })); // reset password field
       } else {
         alert(res.error || "Gagal mengupdate profil.");
       }
@@ -98,6 +106,18 @@ export default function AdminProfileClient({ adminData }: { adminData: any }) {
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900" 
               />
             </div>
+
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kata Sandi Baru (Opsional)</label>
+              <input 
+                type="password" 
+                placeholder="Kosongkan jika tidak ingin mengubah kata sandi"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900" 
+              />
+              <p className="text-[10px] text-slate-400">Minimal 6 karakter jika ingin diubah.</p>
+            </div>
           </div>
 
           <div className="pt-4 flex gap-3 justify-end">
@@ -109,6 +129,7 @@ export default function AdminProfileClient({ adminData }: { adminData: any }) {
                   namaLengkap: adminData.namaLengkap || "",
                   nik: adminData.nik || "",
                   nomorHp: adminData.nomorHp || "",
+                  password: "",
                 });
               }}
               className="px-6 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors"

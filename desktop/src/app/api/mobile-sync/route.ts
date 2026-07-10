@@ -7,7 +7,7 @@ import { getGovernanceData, getKoperasiStats } from "@/actions/governance";
 import { getArenaData, getBattleHistory, getMemberStats } from "@/actions/arena";
 import { getMemberBadges, getWinRate, getStoreItems, getLeaderboard, getLeaderboardProvincial, getLeaderboardNational, getMemberInventory, getClaimedChests } from "@/actions/gamification";
 import { getMarketplaceItems } from "@/actions/shop";
-import { getEventsByCooperative, getMemberEventParticipations } from "@/actions/events";
+
 import { getActiveMembers } from "@/actions/members";
 import { getActiveLoan } from "@/actions/financials";
 import { updateStreakOnActivity } from "@/actions/dashboard";
@@ -93,8 +93,7 @@ export async function GET() {
     const leaderboardData = await getLeaderboard(cooperativeId);
     const inventoryData = await getMemberInventory(memberId);
     const marketplaceData = await getMarketplaceItems(cooperativeId !== -1 ? cooperativeId : undefined);
-    const eventsData = await getEventsByCooperative(cooperativeId);
-    const eventParticipationsData = await getMemberEventParticipations(memberId);
+
     const leaderboardByProvinsi = currentProvinsi ? await getLeaderboardProvincial(currentProvinsi).catch(() => []) : [];
     const leaderboardByNasional = await getLeaderboardNational().catch(() => []);
     const activeMembersData = cooperativeId ? await getActiveMembers(cooperativeId).catch(() => []) : [];
@@ -129,8 +128,7 @@ export async function GET() {
         leaderboard: leaderboardData,
         inventory: inventoryData,
         marketplaceItems: marketplaceData,
-        events: (eventsData as any)?.events || [],
-        joinedEventIds: ((eventParticipationsData as any)?.participations || []).map((p: any) => p?.event?.id).filter((id: any) => id != null),
+
         leaderboardByProvinsi,
         leaderboardByNasional: leaderboardByNasional,
         activeMembers: activeMembersData,

@@ -35,11 +35,16 @@ export default function MissionList({ initialQuests = [], memberId, frequency = 
                   {isCompleted ? "task_alt" : canClaim ? "star" : "pending_actions"}
                 </span>
               </div>
-              <div>
-                <span className={`text-xs font-semibold ${isCompleted ? "text-on-surface-variant line-through" : "text-on-surface"}`}>
+              <div className="flex-1 pr-2">
+                <span className={`text-xs font-semibold block ${isCompleted ? "text-on-surface-variant line-through" : "text-on-surface"}`}>
                   {quest.title}
                 </span>
-                <div className="text-[10px] text-on-surface-variant mt-0.5">
+                {quest.description && (
+                  <span className={`text-[10px] block mt-0.5 leading-tight ${isCompleted ? "text-on-surface-variant/50" : "text-on-surface-variant"}`}>
+                    {quest.description}
+                  </span>
+                )}
+                <div className="text-[10px] text-on-surface-variant font-medium mt-1">
                   Progres: {currentProgress} / {target}
                 </div>
               </div>

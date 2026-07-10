@@ -9,54 +9,73 @@ import ProfileSettings from "./ProfileSettings";
 import MobileSettingsMenu from "@/components/MobileSettingsMenu";
 import React from "react";
 import { revalidatePath } from "next/cache";
-
+import { calculateMembershipScore, getRankFromScore } from "@/actions/rank";
 export default async function Page() {
   const currentMember = await getCurrentMember();
   if (!currentMember) redirect("/login");
 
-  const { savings, loans, walletTransactions, totalSavings } = await getFinancialsData(currentMember.id);
+  const [
+    financialsData,
+    winRateData,
+    activeLoan,
+    inventory,
+    activityLog,
+    progress,
+    badges
+  ] = await Promise.all([
+    getFinancialsData(currentMember.id),
+    getWinRate(currentMember.id),
+    getActiveLoan(currentMember.id),
+    getMemberInventory(currentMember.id),
+    getRecentPointTransactions(currentMember.id),
+    getMemberProgress(currentMember.id),
+    getMemberBadges(currentMember.id)
+  ]);
+
+  const { savings, loans, walletTransactions, totalSavings } = financialsData;
+  const { winRate, totalBattles } = winRateData;
+
   const totalTransaksi = savings.length + loans.length + walletTransactions.length;
   const estimasiSHU = totalSavings > 0 ? Math.floor(totalSavings * 0.12) : 0;
-  
-  const { winRate, totalBattles } = await getWinRate(currentMember.id);
-
-  const activeLoan = await getActiveLoan(currentMember.id);
-  const inventory = await getMemberInventory(currentMember.id);
-  const activityLog = await getRecentPointTransactions(currentMember.id);
-  const progress = await getMemberProgress(currentMember.id);
-  const badges = await getMemberBadges(currentMember.id);
 
   const level = progress?.level || 1;
   const xp = progress?.xp || 0;
   
+  const membershipScoreValue = calculateMembershipScore(
+    progress?.level ?? 1, 
+    progress?.walletBalance ?? 0, 
+    progress?.creditScore ?? 0
+  );
+  const actualRank = getRankFromScore(membershipScoreValue);
+
   let rankName = "BRONZE";
   let rankColor = "from-amber-700 to-amber-900";
   let badgeIcon = "eco";
   let mobileRankName = "Perunggu";
   let mobileColors = ["bg-[#B45309]", "from-[#B45309] to-[#78350F]"];
   
-  if (level >= 10 && level < 20) { 
+  if (actualRank === "Perak") { 
     rankName = "SILVER"; 
     rankColor = "from-slate-400 to-slate-600"; 
     badgeIcon = "military_tech"; 
     mobileRankName = "Perak";
     mobileColors = ["bg-[#94A3B8]", "from-[#94A3B8] to-[#475569]"];
   }
-  else if (level >= 20 && level < 30) { 
+  else if (actualRank === "Emas") { 
     rankName = "GOLD"; 
     rankColor = "from-yellow-400 to-amber-600"; 
     badgeIcon = "crown"; 
     mobileRankName = "Emas";
     mobileColors = ["bg-[#FBBF24]", "from-[#FBBF24] to-[#B45309]"];
   }
-  else if (level >= 30 && level < 40) { 
+  else if (actualRank === "Platinum") { 
     rankName = "PLATINUM"; 
     rankColor = "from-cyan-400 to-blue-600"; 
     badgeIcon = "diamond"; 
     mobileRankName = "Platinum";
     mobileColors = ["bg-[#22D3EE]", "from-[#22D3EE] to-[#2563EB]"];
   }
-  else if (level >= 40) { 
+  else if (actualRank === "Legenda") { 
     rankName = "LEGEND"; 
     rankColor = "from-purple-500 to-fuchsia-700"; 
     badgeIcon = "auto_awesome"; 

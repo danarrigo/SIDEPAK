@@ -93,7 +93,7 @@ export default async function Page() {
     <main className="flex-1 flex flex-col min-h-screen bg-background pb-24 md:pb-0">
       {/* Desktop View */}
       <div className="hidden md:grid grid-cols-12 gap-6 px-6 py-10 w-full">
-        <aside className="col-span-12 xl:col-span-4 space-y-6 animate-slide-up">
+        <aside className="col-span-12 xl:col-span-4 flex flex-col gap-6 animate-slide-up h-full">
           <section className="glass-card rounded-xl p-6 relative overflow-hidden">
             <div className="relative z-10">
               <div className="flex justify-between items-start mb-6">
@@ -166,7 +166,7 @@ export default async function Page() {
           </section>
 
           {/* Daily Missions */}
-          <section className="glass-card rounded-xl p-6 flex flex-col h-fit animate-slide-up delay-150">
+          <section className="glass-card rounded-xl p-6 flex flex-col flex-1 animate-slide-up delay-150">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-headline-md text-headline-md">Misi Harian</h3>
               <div className="bg-amber-500/10 px-3 py-1 rounded-full flex items-center gap-1 border border-amber-500/30">

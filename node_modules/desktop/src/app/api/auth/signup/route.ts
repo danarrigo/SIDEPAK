@@ -69,9 +69,18 @@ export async function POST(request: Request) {
         memberId: member.id,
         level: 1,
         xp: 0,
-        pointsBalance: 0,
+        pointsBalance: 50,
         currentStreak: 0,
         longestStreak: 0
+      });
+
+      // Log the welcome bonus transaction
+      const { pointTransactions } = await import('@/db/schema/gamification');
+      await db.insert(pointTransactions).values({
+        memberId: member.id,
+        amount: 50,
+        source: 'bonus',
+        description: 'Bonus Pendaftaran Anggota Baru',
       });
     }
 

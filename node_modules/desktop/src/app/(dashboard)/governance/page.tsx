@@ -2,8 +2,7 @@ import Link from "next/link";
 import { getGovernanceData, submitProposal, castVote, getKoperasiStats } from "@/actions/governance";
 import { getCurrentMember } from "@/actions/members";
 import { getLeaderboard, getMemberProgress, getCooperativeLeaderboard } from "@/actions/gamification";
-import { getEventsByCooperative, getMemberEventParticipations } from "@/actions/events";
-import EventCard from "@/components/EventCard";
+
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import CooperativeLoanForm from "@/components/CooperativeLoanForm";
@@ -60,9 +59,6 @@ export default async function Page() {
 
   const topContributors = await getCooperativeLeaderboard();
 
-  const { events: coopEvents } = await getEventsByCooperative(currentMember.cooperativeId as number);
-  const { participations } = await getMemberEventParticipations(currentMember.id);
-  const joinedEventIds = new Set(participations?.map(p => p.event.id) || []);
 
   const kasPercent = totalAsetDesa > 0 ? Math.round((asetKas / totalAsetDesa) * 100) : 0;
   const pinjamanPercent = totalAsetDesa > 0 ? Math.round((asetPinjaman / totalAsetDesa) * 100) : 0;
@@ -77,18 +73,7 @@ export default async function Page() {
     revalidatePath("/governance");
   };
 
-  const handleCreateEventAction = async (formData: FormData) => {
-    "use server";
-    if (!currentMember) return;
-    const { createEvent } = await import("@/actions/events");
-    const name = formData.get("name") as string;
-    const desc = formData.get("description") as string;
-    const startDateStr = formData.get("startDate") as string;
-    const endDateStr = formData.get("endDate") as string;
-    
-    await createEvent(currentMember.id, name, desc, new Date(startDateStr), new Date(endDateStr));
-    revalidatePath("/governance");
-  };
+
 
   const endDate = mainProposal ? new Date(mainProposal.endDate) : new Date();
   const now = new Date();
@@ -266,29 +251,7 @@ export default async function Page() {
           )}
         </section>
 
-        {/* Events Section */}
-        <div className="grid grid-cols-1 gap-8 mb-8 mt-8">
-          <section className="glass-card rounded-xl p-6">
-            <h3 className="font-headline-md text-headline-md mb-6">Event Koperasi Mendatang</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {coopEvents && coopEvents.length > 0 ? (
-                coopEvents.map(event => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    isJoined={joinedEventIds.has(event.id)}
-                    memberId={currentMember.id}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full py-8 text-center text-on-surface-variant bg-surface-container rounded-xl border border-dashed border-outline">
-                  <span className="material-symbols-outlined text-5xl mb-4 opacity-50">event_busy</span>
-                  <p>Belum ada event yang diselenggarakan oleh koperasimu.</p>
-                </div>
-              )}
-            </div>
-          </section>
-        </div>
+
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 mt-8">
           {/* Financial Breakdown */}
@@ -461,98 +424,7 @@ export default async function Page() {
             </div>
           </section>
 
-          {/* Create Event Form */}
-          <section className="glass-card rounded-xl p-6 relative overflow-hidden">
-            <h3 className="font-headline-md text-headline-md mb-2">
-              Buat Event Koperasi
-            </h3>
-            <p className="font-body-md text-body-md text-on-surface-variant mb-6">
-              Ajak anggota lain berpartisipasi dalam kegiatan baru.
-            </p>
 
-            {canSubmit ? (
-              <form
-                action={handleCreateEventAction}
-                className="space-y-4 relative z-10"
-              >
-                <div>
-                  <label className="font-label-caps text-label-caps text-on-surface-variant block mb-2">
-                    Nama Event
-                  </label>
-                  <input
-                    name="name"
-                    required
-                    placeholder="Contoh: Senam Pagi Bersama"
-                    className="w-full bg-surface-container-highest border border-outline-variant rounded-lg p-3 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary"
-                  />
-                </div>
-                <div>
-                  <label className="font-label-caps text-label-caps text-on-surface-variant block mb-2">
-                    Deskripsi Event
-                  </label>
-                  <textarea
-                    name="description"
-                    required
-                    rows={2}
-                    placeholder="Jelaskan detail kegiatan..."
-                    className="w-full bg-surface-container-highest border border-outline-variant rounded-lg p-3 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary resize-none"
-                  ></textarea>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="font-label-caps text-label-caps text-on-surface-variant block mb-2">
-                      Mulai
-                    </label>
-                    <input
-                      type="datetime-local"
-                      name="startDate"
-                      required
-                      className="w-full bg-surface-container-highest border border-outline-variant rounded-lg p-3 text-on-surface focus:outline-none focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-label-caps text-label-caps text-on-surface-variant block mb-2">
-                      Selesai
-                    </label>
-                    <input
-                      type="datetime-local"
-                      name="endDate"
-                      required
-                      className="w-full bg-surface-container-highest border border-outline-variant rounded-lg p-3 text-on-surface focus:outline-none focus:border-primary"
-                    />
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full py-3 bg-tertiary text-on-tertiary font-label-caps text-label-caps rounded-lg hover:bg-tertiary/90 transition-colors mt-2"
-                >
-                  BUAT EVENT
-                </button>
-              </form>
-            ) : (
-              <div className="bg-surface-container-highest p-6 rounded-xl border border-outline-variant/30 text-center relative z-10">
-                <span className="material-symbols-outlined text-4xl text-outline mb-2">
-                  lock
-                </span>
-                <p className="font-body-md text-body-md">
-                  Fitur pembuatan event hanya tersedia untuk anggota{" "}
-                  <strong>Level 20 (GOLD)</strong> ke atas.
-                </p>
-                <p className="font-body-sm text-body-sm text-on-surface-variant mt-2">
-                  Tingkatkan rank Anda untuk mengadakan acara komunitas!
-                </p>
-              </div>
-            )}
-            <div className="absolute -bottom-10 -right-10 opacity-5 pointer-events-none">
-              <span className="material-symbols-outlined text-[200px]">
-                event
-              </span>
-            </div>
-          </section>
-        </div>
-
-        <div className="grid grid-cols-1 gap-8 mb-8 mt-8">
-          {/* Voting History */}
           <section className="glass-card rounded-xl p-6">
             <h3 className="font-headline-md text-headline-md mb-6">
               Arsip Keputusan (History)

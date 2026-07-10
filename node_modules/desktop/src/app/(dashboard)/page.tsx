@@ -5,11 +5,11 @@ import { getCurrentMember } from "@/actions/members";
 import { getFinancialsData } from "@/actions/financials";
 import { getActiveQuests } from "@/actions/quests";
 import { getKoperasiStats } from "@/actions/governance";
-import { getEventsByCooperative, getMemberEventParticipations } from "@/actions/events";
+
 import { redirect } from "next/navigation";
 import MissionList from "@/components/MissionList";
 import Leaderboard from "@/components/Leaderboard";
-import WeeklyCalendar from "@/components/WeeklyCalendar";
+
 import { calculateMembershipScore, getRankFromScore, getNextRankRequirement, getRankBenefits } from "@/actions/rank";
 import { createClient } from "@/utils/supabase/server";
 import StreakIndicator from "@/components/StreakIndicator";
@@ -46,10 +46,7 @@ export default async function DesktopDashboard() {
   const activeQuests = await getActiveQuests(currentMember.id);
   const koperasiStats = await getKoperasiStats(currentMember.cooperativeId as number);
   
-  const { events: coopEvents } = await getEventsByCooperative(currentMember.cooperativeId as number);
-  const { participations } = await getMemberEventParticipations(currentMember.id);
-  const joinedEventIds = participations?.map(p => p.event.id) || [];
-  
+
   const points = dbData?.progress?.pointsBalance || 0;
   const streak = Math.max(1, dbData?.progress?.currentStreak ?? 1);
   const level = dbData?.progress?.level || 1;
@@ -229,14 +226,7 @@ export default async function DesktopDashboard() {
           </div>
         </div>
 
-        {/* Row 4: Weekly Calendar */}
-        <div className="grid grid-cols-1 gap-6">
-          <WeeklyCalendar 
-            events={coopEvents || []} 
-            joinedEventIds={joinedEventIds} 
-            memberId={currentMember.id} 
-          />
-        </div>
+
       </div>
 
       {/* Mobile View (1-to-1 with Flutter app) */}
@@ -341,12 +331,7 @@ export default async function DesktopDashboard() {
             </div>
           </div>
 
-          {/* Weekly Event Calendar */}
-          <WeeklyCalendar 
-            events={coopEvents || []} 
-            joinedEventIds={joinedEventIds} 
-            memberId={currentMember.id} 
-          />
+
 
           {/* Misi Hari Ini Card */}
           <div className="bg-white rounded-[24px] border border-slate-100 p-5 shadow-sm">

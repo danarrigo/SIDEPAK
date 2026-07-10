@@ -14,7 +14,6 @@ export default function Sidebar({ memberName }: { memberName?: string }) {
     { href: "/quests", icon: "assignment", label: "Misi" },
     { href: "/arena", icon: "emoji_events", label: "Bertanding" },
     { href: "/marketplace", icon: "storefront", label: "Marketplace" },
-    { href: "/events", icon: "event", label: "Event" },
     { href: "/governance", icon: "account_balance", label: "Koperasi" },
   ];
 

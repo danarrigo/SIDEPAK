@@ -5,7 +5,7 @@ import { buyShopItem, listMarketplaceItem, buyMarketplaceItem } from "@/actions/
 import { useItem as applyItem, claimWeeklyChest } from "@/actions/gamification";
 import { createTopUpInvoice, verifyInvoicePayment, verifyAndPaySimpananPokok } from "@/actions/wallet";
 import { payDuesFromWallet, depositSavingsFromWallet, addLoan } from "@/actions/financials";
-import { joinEvent, createEvent } from "@/actions/events";
+
 import { matchmakeWeeklyBattle } from "@/actions/arena";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
@@ -97,12 +97,7 @@ export async function POST(request: Request) {
     } else if (action === 'buy-marketplace-item') {
       const { itemId } = body;
       result = await buyMarketplaceItem(memberId, Number(itemId));
-    } else if (action === 'join-event') {
-      const { eventId } = body;
-      result = await joinEvent(memberId, Number(eventId));
-    } else if (action === 'create-event') {
-      const { name, description, startDate, endDate } = body;
-      result = await createEvent(memberId, name || '', description || '', new Date(startDate), new Date(endDate));
+
     } else if (action === 'matchmake-battle') {
       result = await matchmakeWeeklyBattle(memberId);
     } else if (action === 'withdraw-wallet') {

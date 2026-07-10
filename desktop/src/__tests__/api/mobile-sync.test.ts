@@ -125,17 +125,6 @@ jest.mock('@/actions/shop', () => {
 });
 
  
-jest.mock('@/actions/events', () => {
-  const getEventsByCooperative = jest.fn().mockResolvedValue({
-    events: [{ id: 1, name: 'E', startDate: new Date(), endDate: new Date(), cooperativeId: 1 }],
- 
-  });
-  const getMemberEventParticipations = jest.fn().mockResolvedValue({
-    participations: [{ event: { id: 1 } }],
-  });
-  Object.assign((globalThis as any), { getEventsByCooperative, getMemberEventParticipations });
-  return { getEventsByCooperative, getMemberEventParticipations };
-});
 
  
 jest.mock('@/actions/members', () => {
@@ -186,8 +175,6 @@ describe('GET /api/mobile-sync', () => {
 
     // All Phase 1-4 fields must be present in the response payload
     expect(json.data).toHaveProperty('marketplaceItems');
-    expect(json.data).toHaveProperty('events');
-    expect(json.data).toHaveProperty('joinedEventIds');
     expect(json.data).toHaveProperty('leaderboardByProvinsi');
     expect(json.data).toHaveProperty('leaderboardByNasional');
     expect(json.data).toHaveProperty('activeMembers');
@@ -198,8 +185,6 @@ describe('GET /api/mobile-sync', () => {
     expect((globalThis as any).__mockGetMarketplaceItems).toHaveBeenCalled();
     expect(json.data.marketplaceItems).toHaveLength(1);
     expect(json.data.marketplaceItems[0].name).toBe('X');
-    expect(json.data.events).toHaveLength(1);
-    expect(json.data.joinedEventIds).toEqual([1]);
     expect(json.data.activeMembers).toHaveLength(1);
     expect(json.data.activeMembers[0].namaLengkap).toBe('Andi');
   });

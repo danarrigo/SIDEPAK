@@ -13,6 +13,8 @@ import 'views/widgets/prank_overlay.dart';
 import 'views/widgets/onboarding_paywall.dart';
 import 'views/simpanan_view.dart';
 
+import 'views/admin/admin_navigation_wrapper.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -39,9 +41,15 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         home: Consumer<KoperasiProvider>(
-          builder: (context, provider, _) => provider.isLoggedIn
-              ? const MainNavigationWrapper()
-              : const LoginView(),
+          builder: (context, provider, _) {
+            if (!provider.isLoggedIn) {
+              return const LoginView();
+            }
+            if (provider.role == 'admin') {
+              return const AdminNavigationWrapper();
+            }
+            return const MainNavigationWrapper();
+          },
         ),
       ),
     );

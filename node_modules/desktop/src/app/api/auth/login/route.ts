@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
-import { members } from '@/db/schema';
+import { members, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function POST(request: Request) {
@@ -18,6 +18,7 @@ export async function POST(request: Request) {
     }
 
     const user = data.user;
+    const [userRecord] = await db.select().from(users).where(eq(users.id, user.id));
     const [member] = await db.select().from(members).where(eq(members.userId, user.id));
 
     return NextResponse.json({
@@ -25,7 +26,8 @@ export async function POST(request: Request) {
       token: data.session?.access_token,
       memberId: member?.id || 1,
       email: user.email,
-      fullName: member?.namaLengkap || 'Anggota Koperasi'
+      fullName: member?.namaLengkap || 'Anggota Koperasi',
+      role: userRecord?.role || 'member'
     }, {
       headers: {
         'Access-Control-Allow-Origin': '*',

@@ -2,8 +2,8 @@
 import { db } from "@/db";
 import { proposals, votes } from "@/db/schema/governance";
 import { members } from "@/db/schema/members";
-import { eq, and, desc, count, sum, ne } from "drizzle-orm";
-import { savings, loans } from "@/db/schema/financials";
+import { eq, and, desc, count, sum, ne, sql } from "drizzle-orm";
+import { savings, loans, dues } from "@/db/schema/financials";
 
 export async function getGovernanceData(cooperativeId: number) {
   try {
@@ -17,11 +17,24 @@ export async function getGovernanceData(cooperativeId: number) {
       .where(and(eq(members.cooperativeId, cooperativeId), eq(members.statusAnggota, 'active')));
     const totalMembers = totalMembersRes[0].value;
 
-    const totalSavingsRes = await db.select({ value: sum(savings.amount) })
-      .from(savings)
-      .innerJoin(members, eq(savings.memberId, members.id))
-      .where(eq(members.cooperativeId, cooperativeId));
-    const totalAsetDesa = Number(totalSavingsRes[0].value || 0);
+    const [savingStats] = await db.select({
+      totalDeposits: sql<number>`sum(case when ${savings.type} = 'deposit' then ${savings.amount} else 0 end)`,
+      totalWithdrawals: sql<number>`sum(case when ${savings.type} = 'withdrawal' then ${savings.amount} else 0 end)`
+    })
+    .from(savings)
+    .innerJoin(members, eq(savings.memberId, members.id))
+    .where(eq(members.cooperativeId, cooperativeId));
+
+    const [dueStats] = await db.select({
+      totalDues: sql<number>`sum(case when ${dues.status} = 'paid' then ${dues.amount} else 0 end)`
+    })
+    .from(dues)
+    .innerJoin(members, eq(dues.memberId, members.id))
+    .where(eq(members.cooperativeId, cooperativeId));
+
+    const netSavings = (Number(savingStats?.totalDeposits) || 0) - (Number(savingStats?.totalWithdrawals) || 0);
+    const totalDuesPaid = Number(dueStats?.totalDues) || 0;
+    const totalAsetDesa = netSavings + totalDuesPaid;
 
     const totalLoansRes = await db.select({ value: sum(loans.amount) })
       .from(loans)

@@ -14,10 +14,9 @@ import { updateStreakOnActivity } from "@/actions/dashboard";
 import { getMemberNotifications } from "@/actions/notifications";
 import { createSupabaseClient } from '@/utils/supabase/client-api';
 import { db } from '@/db';
-import { members } from '@/db/schema';
+import { users, members, loans, savings, dues } from '@/db/schema';
 import { votes } from '@/db/schema/governance';
-import { and as dbAnd } from 'drizzle-orm';
-import { eq } from 'drizzle-orm';
+import { eq, sql, and, ne, and as dbAnd } from 'drizzle-orm';
 import { headers } from 'next/headers';
 
 export const dynamic = "force-dynamic";
@@ -27,6 +26,7 @@ export async function GET() {
     let memberId = -1;
     let cooperativeId = -1;
     let currentProvinsi: string | null = null;
+    let userRole = 'member';
 
     const headerList = await headers();
     const authHeader = headerList.get('authorization');
@@ -45,6 +45,10 @@ export async function GET() {
         { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } }
       );
     }
+    
+    const [userRecord] = await db.select().from(users).where(eq(users.id, user.id));
+    if (userRecord) userRole = userRecord.role || 'member';
+
     const [member] = await db.select().from(members).where(eq(members.userId, user.id));
     if (!member) {
       return NextResponse.json(
@@ -62,6 +66,57 @@ export async function GET() {
     //   yesterday -> streak += 1
     //   older/null -> streak = 1
     await updateStreakOnActivity(memberId);
+
+    // Fetch Admin Stats if user is an admin
+    let adminStats: any = null;
+    if (userRole === 'admin' && cooperativeId !== -1) {
+      const coopId = cooperativeId;
+      const [coopStats] = await db.select({
+        totalMembers: sql<number>`count(${members.id})`,
+        activeMembers: sql<number>`sum(case when ${members.statusAnggota} = 'active' then 1 else 0 end)`,
+      }).from(members)
+        .innerJoin(users, eq(members.userId, users.id))
+        .where(
+          and(
+            eq(members.cooperativeId, coopId),
+            ne(users.role, 'admin')
+          )
+        );
+
+      const [loanStats] = await db.select({
+        totalActiveLoans: sql<number>`sum(case when ${loans.status} = 'approved' then ${loans.amount} else 0 end)`
+      })
+      .from(loans)
+      .innerJoin(members, eq(loans.memberId, members.id))
+      .where(eq(members.cooperativeId, coopId));
+
+      const [savingStats] = await db.select({
+        totalDeposits: sql<number>`sum(case when ${savings.type} = 'deposit' then ${savings.amount} else 0 end)`,
+        totalWithdrawals: sql<number>`sum(case when ${savings.type} = 'withdrawal' then ${savings.amount} else 0 end)`
+      })
+      .from(savings)
+      .innerJoin(members, eq(savings.memberId, members.id))
+      .where(eq(members.cooperativeId, coopId));
+
+      const [dueStats] = await db.select({
+        totalDues: sql<number>`sum(case when ${dues.status} = 'paid' then ${dues.amount} else 0 end)`
+      })
+      .from(dues)
+      .innerJoin(members, eq(dues.memberId, members.id))
+      .where(eq(members.cooperativeId, coopId));
+
+      const activeLoansAmount = Number(loanStats?.totalActiveLoans) || 0;
+      const netSavings = (Number(savingStats?.totalDeposits) || 0) - (Number(savingStats?.totalWithdrawals) || 0);
+      const totalDuesPaid = Number(dueStats?.totalDues) || 0;
+      const totalAssetsAmount = netSavings + totalDuesPaid;
+
+      adminStats = {
+        totalMembers: coopStats?.totalMembers || 0,
+        activeMembers: coopStats?.activeMembers || 0,
+        totalActiveLoans: activeLoansAmount,
+        totalAssets: totalAssetsAmount,
+      };
+    }
 
     // Fetch data sequentially to prevent connection pool exhaustion (max 15 connections)
     const dashboardData = await getDashboardData(memberId);
@@ -128,6 +183,7 @@ export async function GET() {
         leaderboard: leaderboardData,
         inventory: inventoryData,
         marketplaceItems: marketplaceData,
+        adminStats,
 
         leaderboardByProvinsi,
         leaderboardByNasional: leaderboardByNasional,
@@ -146,6 +202,7 @@ export async function GET() {
           desa: member.desa,
           pekerjaan: member.pekerjaan,
           cooperativeId: member.cooperativeId,
+          role: userRole,
         },
       }
     }, {

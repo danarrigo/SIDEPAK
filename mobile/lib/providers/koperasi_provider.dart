@@ -20,9 +20,11 @@ class KoperasiProvider extends ChangeNotifier {
   int? memberId;
   String? email;
   String? fullName;
+  String? role;
   bool isLoggedIn = false;
 
   // Global State
+  Map<String, dynamic>? adminStats;
   int points = 0;
   int xp = 0;
   int streak = 0;
@@ -218,6 +220,7 @@ class KoperasiProvider extends ChangeNotifier {
       memberId = prefs.getInt('member_id');
       email = prefs.getString('email');
       fullName = prefs.getString('full_name');
+      role = prefs.getString('role');
       if (token != null) {
         isLoggedIn = true;
         fetchData();
@@ -247,6 +250,7 @@ class KoperasiProvider extends ChangeNotifier {
           memberId = res['memberId'];
           email = res['email'];
           fullName = res['fullName'];
+          role = res['role'];
           isLoggedIn = true;
           sessionExpired = false;
           lastFetchError = null;
@@ -256,6 +260,7 @@ class KoperasiProvider extends ChangeNotifier {
           await prefs.setInt('member_id', memberId!);
           await prefs.setString('email', email!);
           await prefs.setString('full_name', fullName!);
+          if (role != null) await prefs.setString('role', role!);
 
           await fetchData();
           return null;
@@ -334,17 +339,20 @@ class KoperasiProvider extends ChangeNotifier {
     memberId = null;
     email = null;
     fullName = null;
+    role = null;
     isLoggedIn = false;
     sessionExpired = false;
     lastFetchError = null;
     activeEffect = null;
     activeLoan = null;
+    adminStats = null;
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
     await prefs.remove('member_id');
     await prefs.remove('email');
     await prefs.remove('full_name');
+    await prefs.remove('role');
 
     notifyListeners();
   }
@@ -407,6 +415,11 @@ class KoperasiProvider extends ChangeNotifier {
       if (jsonResponse['success'] == true) {
         final data = jsonResponse['data'];
 
+        // Sync admin stats if provided
+        if (data['adminStats'] != null) {
+          adminStats = data['adminStats'] as Map<String, dynamic>?;
+        }
+
         final progress = data['dashboard']?['progress'];
         if (progress != null) {
           points = (progress['pointsBalance'] as num?)?.toInt() ?? points;
@@ -430,6 +443,10 @@ class KoperasiProvider extends ChangeNotifier {
         // Sync notifications and profile data
         listNotifications = data['notifications'] ?? [];
         phoneNumber = data['profile']?['nomorHp'] ?? phoneNumber;
+        
+        if (data['profile']?['role'] != null) {
+          role = data['profile']?['role'];
+        }
 
         // Phase 4c: active loan
         activeLoan = data['activeLoan'] as Map<String, dynamic>?;

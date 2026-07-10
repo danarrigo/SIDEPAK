@@ -7,6 +7,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { savings, loans, dues } from "@/db/schema/financials";
 import { memberProgress } from "@/db/schema/gamification";
 import { events, eventParticipants } from "@/db/schema/activities";
+import { incrementQuestProgress } from "@/actions/quests";
 
 export async function getGovernanceData(cooperativeId: number) {
   try {
@@ -248,6 +249,10 @@ export async function castVote(memberId: number, proposalId: number, voteType: s
         voteType
       });
     }
+
+    // Trigger vote_governance quest
+    await incrementQuestProgress(memberId, 'vote_governance', 1);
+
     return { success: true };
   } catch (error) {
     console.error("Cast Vote DB Error:", error);

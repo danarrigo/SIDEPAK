@@ -2,6 +2,7 @@
 import { db } from "@/db";
 import { memberProgress, pointTransactions } from "@/db/schema/gamification";
 import { eq, desc } from "drizzle-orm";
+import { incrementQuestProgress } from "@/actions/quests";
 
 export async function getDashboardData(memberId: number) {
   try {
@@ -12,6 +13,9 @@ export async function getDashboardData(memberId: number) {
       .where(eq(pointTransactions.memberId, memberId))
       .orderBy(desc(pointTransactions.createdAt))
       .limit(5);
+
+    // Trigger check_balance quest
+    await incrementQuestProgress(memberId, 'check_balance', 1);
 
     return { progress, transactions };
   } catch (error) {

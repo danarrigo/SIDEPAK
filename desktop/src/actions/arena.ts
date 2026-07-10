@@ -6,6 +6,7 @@ import { cooperatives } from "@/db/schema/cooperatives";
 import { or, eq, and, not, desc, lte, gte } from "drizzle-orm";
 import { memberProgress, pointTransactions, seasons } from "@/db/schema/gamification";
 import { memberQuests } from "@/db/schema/achievements";
+import { incrementQuestProgress } from "@/actions/quests";
 
 export async function getArenaData(memberId: number = 1) {
   try {
@@ -186,6 +187,12 @@ export async function finishBattle(battleId: number, memberId: number, won: bool
     const [winnerProgress] = await db.select().from(memberProgress).where(eq(memberProgress.memberId, winnerId));
     if (winnerProgress) {
       await db.update(memberProgress).set({ xp: winnerProgress.xp + 100 }).where(eq(memberProgress.id, winnerProgress.id));
+    }
+
+    // Trigger play_arena quest for both players
+    await incrementQuestProgress(memberId, 'play_arena', 1);
+    if (opponentId !== memberId) {
+      await incrementQuestProgress(opponentId, 'play_arena', 1);
     }
 
     return { success: true };

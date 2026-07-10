@@ -4,6 +4,7 @@ import { items, memberItems, memberProgress, marketplaceItems, marketplaceTransa
 import { members } from "@/db/schema/members";
 import { eq, and, desc } from "drizzle-orm";
 import { awardPoints } from "@/actions/gamification";
+import { incrementQuestProgress } from "@/actions/quests";
 
 export async function buyShopItem(memberId: number, itemId: number) {
   try {
@@ -59,6 +60,9 @@ export async function buyShopItem(memberId: number, itemId: number) {
       "Pembelian Berhasil",
       `Kamu telah berhasil membeli item "${item.name}".`
     );
+
+    // Trigger visit_shop quest
+    await incrementQuestProgress(memberId, 'visit_shop', 1);
 
     return { success: true, updatedPoints: progress[0].pointsBalance - price + 25 };
   } catch (error) {

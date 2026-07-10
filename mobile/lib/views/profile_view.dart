@@ -998,12 +998,15 @@ class ProfileView extends StatelessWidget {
                             color: Color(0xFF475569))),
                     const SizedBox(height: 8),
                     Card(
-                      color: const Color(0xFF718096),
+                      color: const Color(0xFF6D7D91),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20)),
                       child: Column(
                         children: [
-                          _buildSettingsTile('Keamanan & Password'),
+                          _buildSettingsTile(
+                            'Keamanan & Password',
+                            onTap: () => _showSecurityDialog(context),
+                          ),
                           const Divider(color: Colors.white10, height: 1),
                           _buildSettingsTile(
                             'Notifikasi',
@@ -1011,7 +1014,10 @@ class ProfileView extends StatelessWidget {
                                 _showNotificationsSheet(context, provider),
                           ),
                           const Divider(color: Colors.white10, height: 1),
-                          _buildSettingsTile('Pusat Bantuan'),
+                          _buildSettingsTile(
+                            'Pusat Bantuan',
+                            onTap: () => _showHelpCenterDialog(context),
+                          ),
                         ],
                       ),
                     ),
@@ -1365,6 +1371,196 @@ class ProfileView extends StatelessWidget {
               color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
       trailing: const Icon(Icons.chevron_right, color: Colors.white70),
       onTap: onTap,
+    );
+  }
+
+  void _showSecurityDialog(BuildContext context) {
+    final TextEditingController currentPassCtrl = TextEditingController();
+    final TextEditingController newPassCtrl = TextEditingController();
+    final TextEditingController confirmPassCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Ganti Password',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: currentPassCtrl,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password Saat Ini',
+                    labelStyle: const TextStyle(fontSize: 13),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: newPassCtrl,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password Baru',
+                    labelStyle: const TextStyle(fontSize: 13),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: confirmPassCtrl,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Konfirmasi Password Baru',
+                    labelStyle: const TextStyle(fontSize: 13),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final currentPass = currentPassCtrl.text.trim();
+                final newPass = newPassCtrl.text.trim();
+                final confirmPass = confirmPassCtrl.text.trim();
+
+                if (currentPass.isEmpty ||
+                    newPass.isEmpty ||
+                    confirmPass.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Semua field wajib diisi.')),
+                  );
+                  return;
+                }
+
+                if (newPass != confirmPass) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Password baru tidak cocok.')),
+                  );
+                  return;
+                }
+
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Password berhasil diperbarui.'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0F172A),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Simpan',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showHelpCenterDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const Row(
+              children: [
+                Icon(Icons.help, color: Color(0xFF0F172A), size: 24),
+                SizedBox(width: 8),
+                Text(
+                  'Pusat Bantuan',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0F172A)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Butuh bantuan lebih lanjut terkait keanggotaan, simpanan, atau poin koperasi Anda? Silakan hubungi kontak koperasi daerah resmi di bawah ini:',
+              style: TextStyle(fontSize: 11, color: Colors.grey, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                final url = Uri.parse('https://wa.me/628123456789');
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                }
+              },
+              icon: const Icon(Icons.chat, color: Color(0xFF10B981), size: 18),
+              label: const Text('WhatsApp Koperasi Desa',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Color(0xFF475569))),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                final url = Uri.parse('mailto:support@simkopdes.go.id');
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                }
+              },
+              icon: const Icon(Icons.mail, color: Color(0xFF3B82F6), size: 18),
+              label: const Text('Email: support@simkopdes.go.id',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Color(0xFF475569))),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
     );
   }
 

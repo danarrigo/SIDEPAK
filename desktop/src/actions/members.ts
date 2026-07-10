@@ -81,3 +81,43 @@ export async function updateCurrentMemberPhone(newPhone: string) {
     return { success: false, error: "Internal Server Error" };
   }
 }
+
+export async function updateMemberAdmin(memberId: number, data: Partial<typeof members.$inferInsert>) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated" };
+
+    // Verify current user is admin
+    const [userRecord] = await db.select().from(users).where(eq(users.id, user.id));
+    if (userRecord?.role !== 'admin') {
+      return { success: false, error: "Unauthorized: Admin only" };
+    }
+
+    // Verify target member belongs to the admin's cooperative
+    const [adminMember] = await db.select().from(members).where(eq(members.userId, user.id));
+    if (!adminMember || !adminMember.cooperativeId) {
+      return { success: false, error: "Admin has no cooperative assigned" };
+    }
+
+    const [targetMember] = await db.select().from(members).where(eq(members.id, memberId));
+    if (!targetMember || targetMember.cooperativeId !== adminMember.cooperativeId) {
+      return { success: false, error: "Member not found or not in your cooperative" };
+    }
+
+    // Update
+    await db.update(members).set({ 
+      namaLengkap: data.namaLengkap,
+      nomorHp: data.nomorHp,
+      statusAnggota: data.statusAnggota,
+    }).where(eq(members.id, memberId));
+
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/admin/members");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Update Member Admin Error:", error);
+    return { success: false, error: "Internal Server Error" };
+  }
+}

@@ -180,7 +180,8 @@ class ProfileView extends StatelessWidget {
                       children: [
                         _buildTopBadge(
                             Icons.local_fire_department,
-                            '${provider.streak} Hari Streak',
+                            '${provider.streak} Hari Streak ${provider.streak >= 7 ? '(x1.5)' : provider.streak >= 3 ? '(x1.2)' : ''}'
+                                .trim(),
                             Colors.white,
                             Colors.white12,
                             iconColor: Colors.orange),
@@ -1049,7 +1050,14 @@ class ProfileView extends StatelessWidget {
   Widget _buildActiveLoanCard(BuildContext context, Map<String, dynamic> loan) {
     final amount = (loan['amount'] as num?)?.toInt() ?? 0;
     final interestRate = (loan['interestRate'] as num?)?.toInt() ?? 0;
-    final status = (loan['status'] as String?)?.toUpperCase() ?? 'PENDING';
+    final rawStatus = (loan['status'] as String?)?.toLowerCase() ?? 'pending';
+    final status = rawStatus == 'pending'
+        ? 'MENUNGGU'
+        : rawStatus == 'approved'
+            ? 'AKTIF'
+            : rawStatus == 'paid'
+                ? 'LUNAS'
+                : 'DITOLAK';
     final dueDate = loan['dueDate'] != null
         ? DateTime.tryParse(loan['dueDate'].toString())
         : null;
@@ -1057,11 +1065,13 @@ class ProfileView extends StatelessWidget {
         ? '${dueDate.day.toString().padLeft(2, '0')}/${dueDate.month.toString().padLeft(2, '0')}/${dueDate.year}'
         : 'Belum ditentukan';
 
-    final statusColor = status == 'APPROVED'
+    final statusColor = status == 'AKTIF'
         ? const Color(0xFF3B82F6)
-        : status == 'PAID'
+        : status == 'LUNAS'
             ? const Color(0xFF16A34A)
-            : const Color(0xFFF59E0B);
+            : status == 'DITOLAK'
+                ? const Color(0xFFDC2626)
+                : const Color(0xFFF59E0B);
 
     String fmtMoney(int v) =>
         'Rp ${v.toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}';

@@ -38,7 +38,16 @@ export default function StreakIndicator({ streak }: { streak: number }) {
 
         <div className="text-6xl mb-4 mt-2">🔥</div>
         <h3 className="font-headline-md text-2xl font-black text-on-surface mb-2">{streak} Hari Streak Beruntun!</h3>
-        <p className="text-sm text-on-surface-variant mb-6">Pertahankan streak Anda dengan login setiap hari untuk mendapatkan reward tambahan dan mempercepat kenaikan level Anda.</p>
+        <p className="text-sm text-on-surface-variant mb-4">Pertahankan streak Anda dengan login setiap hari untuk mendapatkan reward tambahan dan mempercepat kenaikan level Anda.</p>
+        
+        {streak >= 3 && (
+          <div className="bg-tertiary/20 border border-tertiary/40 rounded-xl p-3 mb-6 text-center animate-pulse-subtle">
+            <p className="text-tertiary font-bold text-sm flex items-center justify-center gap-1.5">
+              <span className="material-symbols-outlined text-[16px]">stars</span>
+              Status Aktif: Bonus Poin x{streak >= 7 ? '1.5' : '1.2'}
+            </p>
+          </div>
+        )}
         
         <div className="flex justify-between items-center mb-8 px-2">
           {days.map((day, idx) => (

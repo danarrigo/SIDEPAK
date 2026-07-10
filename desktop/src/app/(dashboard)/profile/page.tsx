@@ -329,7 +329,9 @@ export default async function Page() {
           <div className="flex justify-center gap-2 mt-1">
             <div className="bg-white/10 border border-white/10 rounded-full px-3 py-1 flex items-center gap-1.5">
               <span className="material-symbols-outlined text-orange-500 text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>local_fire_department</span>
-              <span className="text-white text-[10px] font-bold">{progress?.currentStreak || 1} Hari Streak</span>
+              <span className="text-white text-[10px] font-bold">
+                {progress?.currentStreak || 1} Hari Streak {(progress?.currentStreak || 1) >= 7 ? '(x1.5)' : (progress?.currentStreak || 1) >= 3 ? '(x1.2)' : ''}
+              </span>
             </div>
             <div className="bg-white/10 border border-white/10 rounded-full px-3 py-1 flex items-center gap-1.5">
               <span className="material-symbols-outlined text-[#FACC15] text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>

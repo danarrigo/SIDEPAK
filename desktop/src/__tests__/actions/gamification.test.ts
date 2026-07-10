@@ -77,7 +77,10 @@ describe('Gamification Actions', () => {
       mockDb.where.mockResolvedValueOnce([]); 
       // 3. insert new memberProgress
       mockDb.returning.mockResolvedValueOnce([{ memberId: 1, xp: 0, pointsBalance: 0, level: 1 }]);
-      // 4. update memberProgress -> handled by mock
+      // 4. select memberData
+      mockDb.where.mockResolvedValueOnce([{ id: 1, cooperativeId: 1 }]);
+      // 5. select activeBattles
+      mockDb.where.mockResolvedValueOnce([]);
 
       const result = await awardPoints(1, 1500, 'Quest');
 
@@ -94,6 +97,10 @@ describe('Gamification Actions', () => {
       // 1. insert pointTransactions
       // 2. select memberProgress -> return existing
       mockDb.where.mockResolvedValueOnce([{ memberId: 1, xp: 200, pointsBalance: 200, level: 1 }]);
+      // 3. select memberData
+      mockDb.where.mockResolvedValueOnce([{ id: 1, cooperativeId: 1 }]);
+      // 4. select activeBattles
+      mockDb.where.mockResolvedValueOnce([]);
       
       // Awarding 500 points (total 700 XP -> still level 1)
       const result = await awardPoints(1, 500, 'Daily Login');

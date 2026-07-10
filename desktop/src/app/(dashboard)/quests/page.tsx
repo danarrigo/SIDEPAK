@@ -181,14 +181,16 @@ export default async function Page() {
         </aside>
 
         <div className="col-span-12 xl:col-span-8 space-y-6 animate-slide-up delay-200">
-          <section className="glass-card rounded-2xl p-8 relative overflow-hidden shadow-lg border border-white/10 bg-gradient-to-br from-surface to-surface-container-highest">
+          <section className="glass-card rounded-2xl p-8 relative shadow-lg border border-white/10 bg-gradient-to-br from-surface to-surface-container-highest">
             {/* Decorative Background Elements */}
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-tertiary/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
-              <span className="material-symbols-outlined text-[140px] transform rotate-12">
-                account_balance
-              </span>
+            <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-tertiary/10 rounded-full blur-3xl"></div>
+              <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
+                <span className="material-symbols-outlined text-[140px] transform rotate-12">
+                  account_balance
+                </span>
+              </div>
             </div>
 
             <div className="relative z-10">

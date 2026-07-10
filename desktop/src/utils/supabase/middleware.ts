@@ -35,7 +35,7 @@ export async function updateSession(request: NextRequest) {
   } catch (error) {
     console.error("Supabase network or auth error:", error);
   }
-  const isAuthRoute = request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/onboarding';
+  const isAuthRoute = request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/onboarding' || request.nextUrl.pathname === '/secret-admin-register';
   
   // Protect all routes except login and signup
   if (!user && !isAuthRoute) {

@@ -13,6 +13,7 @@ export default function NotificationBell({ memberId }: { memberId?: number }) {
     if (memberId) {
       loadNotifications();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memberId, open]);
 
   async function loadNotifications() {

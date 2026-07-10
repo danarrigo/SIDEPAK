@@ -37,7 +37,7 @@ export async function addXpToKoperasi(koperasiId: number, xpAmount: number) {
   const activeSeason = await getCurrentSeason();
   if (!activeSeason) return;
   
-  let [score] = await db
+  const [score] = await db
     .select()
     .from(koperasiSeasonScores)
     .where(and(

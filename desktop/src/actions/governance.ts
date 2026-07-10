@@ -314,3 +314,49 @@ export async function editProposal(proposalId: number, title: string, descriptio
     return { success: false, error: "Gagal mengedit proposal." };
   }
 }
+
+export async function submitProposal(memberId: number, title: string, description: string) {
+  try {
+    const [member] = await db.select().from(members).where(eq(members.id, memberId)).limit(1);
+    if (!member) return { success: false, error: "Member not found" };
+
+    await db.insert(proposals).values({
+      title,
+      description,
+      status: 'active', // For hackathon purposes, immediately active
+      creatorId: memberId,
+      cooperativeId: member.cooperativeId,
+      targetQuorumPercentage: 50,
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Submit Proposal Error:", error);
+    return { success: false, error: "Failed to submit proposal" };
+  }
+}
+
+export async function castVote(memberId: number, proposalId: number, voteType: string) {
+  try {
+    // Check if vote already exists
+    const existing = await db.select().from(votes).where(
+      and(eq(votes.memberId, memberId), eq(votes.proposalId, proposalId))
+    ).limit(1);
+
+    if (existing.length > 0) {
+      // Update vote
+      await db.update(votes).set({ voteType }).where(eq(votes.id, existing[0].id));
+    } else {
+      // Insert vote
+      await db.insert(votes).values({
+        memberId,
+        proposalId,
+        voteType,
+      });
+    }
+    return { success: true };
+  } catch (error) {
+    console.error("Cast Vote Error:", error);
+    return { success: false, error: "Failed to cast vote" };
+  }
+}

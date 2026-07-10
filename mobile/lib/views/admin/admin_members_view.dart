@@ -79,10 +79,10 @@ class _AdminMembersViewState extends State<AdminMembersView> {
                             children: [
                               CircleAvatar(
                                 radius: 24,
-                                backgroundColor: isActif ? Colors.emerald.shade100 : Colors.amber.shade100,
+                                backgroundColor: isActif ? Colors.teal.shade100 : Colors.amber.shade100,
                                 child: Icon(
                                   Icons.person,
-                                  color: isActif ? Colors.emerald.shade600 : Colors.amber.shade600,
+                                  color: isActif ? Colors.teal.shade600 : Colors.amber.shade600,
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -110,7 +110,7 @@ class _AdminMembersViewState extends State<AdminMembersView> {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: isActif ? Colors.emerald.shade50 : Colors.amber.shade50,
+                                        color: isActif ? Colors.teal.shade50 : Colors.amber.shade50,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
@@ -118,7 +118,7 @@ class _AdminMembersViewState extends State<AdminMembersView> {
                                         style: TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.bold,
-                                          color: isActif ? Colors.emerald.shade700 : Colors.amber.shade700,
+                                          color: isActif ? Colors.teal.shade700 : Colors.amber.shade700,
                                         ),
                                       ),
                                     ),

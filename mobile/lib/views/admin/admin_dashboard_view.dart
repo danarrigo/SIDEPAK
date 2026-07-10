@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../../providers/koperasi_provider.dart';
 
 class AdminDashboardView extends StatelessWidget {
   const AdminDashboardView({super.key});
 
   String _formatRupiah(int amount) {
-    return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0)
-        .format(amount);
+    String res = amount.toString();
+    String formatted = '';
+    for (int i = 0; i < res.length; i++) {
+      if (i > 0 && i % 3 == 0) {
+        formatted = '.$formatted';
+      }
+      formatted = res[res.length - 1 - i] + formatted;
+    }
+    return 'Rp $formatted';
   }
 
   @override
@@ -128,7 +134,7 @@ class AdminDashboardView extends StatelessWidget {
                     subtitle: 'Lunas Simpanan Pokok',
                     value: activeMembers.toString(),
                     icon: Icons.verified_user_rounded,
-                    color: Colors.emerald,
+                    color: Colors.teal,
                   ),
                   const SizedBox(height: 12),
 

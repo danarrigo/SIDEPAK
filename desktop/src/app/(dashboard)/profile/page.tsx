@@ -6,6 +6,7 @@ import { logout } from "@/actions/auth";
 import TopUpModal from "@/components/TopUpModal";
 import Link from "next/link";
 import ProfileSettings from "./ProfileSettings";
+import MobileSettingsMenu from "@/components/MobileSettingsMenu";
 import React from "react";
 import { revalidatePath } from "next/cache";
 
@@ -595,32 +596,11 @@ export default async function Page() {
             </div>
           </div>
 
-          {/* Pengaturan */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-bold text-[#475569]">Pengaturan</h3>
-            <div className="bg-[#718096] rounded-[20px] overflow-hidden text-white shadow-sm flex flex-col">
-              {[
-                'Profil & Nomor Handphone',
-                'Keamanan & Password',
-                'Notifikasi',
-                'Metode Pembayaran',
-                'Pusat Bantuan'
-              ].map((item) => (
-                <div key={item} className="flex justify-between items-center px-5 py-4 cursor-pointer hover:bg-white/5 active:bg-white/10 transition-all border-b border-white/10 last:border-0">
-                  <span className="text-xs font-bold">{item}</span>
-                  <span className="material-symbols-outlined text-white/50 text-sm">chevron_right</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Logout Button */}
-          <form action={logout} className="pt-2">
-            <button type="submit" className="flex items-center justify-center gap-2 py-3 bg-[#0F172A] text-white hover:bg-slate-800 rounded-xl transition-all w-full font-bold text-xs cursor-pointer">
-              <span className="material-symbols-outlined text-base">logout</span>
-              <span>Keluar dari Aplikasi</span>
-            </button>
-          </form>
+          {/* Pengaturan & Keluar */}
+          <MobileSettingsMenu logoutAction={async () => {
+            "use server";
+            await logout();
+          }} />
         </div>
       </div>
     </main>

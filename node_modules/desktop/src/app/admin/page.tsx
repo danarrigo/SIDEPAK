@@ -1,7 +1,7 @@
 import React from "react";
 import { getCurrentMember } from "@/actions/members";
 import { db } from "@/db";
-import { members, cooperatives } from "@/db/schema";
+import { members, cooperatives, loans, savings, dues } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 export const metadata = {
@@ -22,6 +22,44 @@ export default async function AdminDashboard() {
     totalMembers: sql<number>`count(${members.id})`,
     activeMembers: sql<number>`sum(case when ${members.statusAnggota} = 'active' then 1 else 0 end)`,
   }).from(members).where(eq(members.cooperativeId, coopId));
+
+  // Fetch active loans
+  const [loanStats] = await db.select({
+    totalActiveLoans: sql<number>`sum(case when ${loans.status} = 'approved' then ${loans.amount} else 0 end)`
+  })
+  .from(loans)
+  .innerJoin(members, eq(loans.memberId, members.id))
+  .where(eq(members.cooperativeId, coopId));
+
+  // Fetch savings
+  const [savingStats] = await db.select({
+    totalDeposits: sql<number>`sum(case when ${savings.type} = 'deposit' then ${savings.amount} else 0 end)`,
+    totalWithdrawals: sql<number>`sum(case when ${savings.type} = 'withdrawal' then ${savings.amount} else 0 end)`
+  })
+  .from(savings)
+  .innerJoin(members, eq(savings.memberId, members.id))
+  .where(eq(members.cooperativeId, coopId));
+
+  // Fetch dues
+  const [dueStats] = await db.select({
+    totalDues: sql<number>`sum(case when ${dues.status} = 'paid' then ${dues.amount} else 0 end)`
+  })
+  .from(dues)
+  .innerJoin(members, eq(dues.memberId, members.id))
+  .where(eq(members.cooperativeId, coopId));
+
+  const activeLoans = Number(loanStats?.totalActiveLoans) || 0;
+  const netSavings = (Number(savingStats?.totalDeposits) || 0) - (Number(savingStats?.totalWithdrawals) || 0);
+  const totalDuesPaid = Number(dueStats?.totalDues) || 0;
+  const totalAssets = netSavings + totalDuesPaid;
+
+  const formatRupiah = (amount: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
 
   return (
     <div className="w-full min-h-screen px-4 md:px-8 py-8 animate-fade-in text-slate-900">
@@ -79,7 +117,7 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        {/* Total Loan Value (Mocked for now) */}
+        {/* Total Loan Value */}
         <div className="bg-white shadow-sm p-6 rounded-3xl border border-slate-200 relative overflow-hidden group hover:border-amber-500/50 transition-colors">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all" />
           <div className="flex justify-between items-start mb-4 relative z-10">
@@ -88,12 +126,12 @@ export default async function AdminDashboard() {
             </div>
           </div>
           <div className="relative z-10">
-            <h3 className="font-headline-md text-3xl font-black text-slate-900">Rp 25.4Jt</h3>
+            <h3 className="font-headline-md text-2xl md:text-3xl font-black text-slate-900">{formatRupiah(activeLoans)}</h3>
             <p className="text-slate-500 text-sm font-bold mt-1">Pinjaman Aktif</p>
           </div>
         </div>
 
-        {/* Total Assets (Mocked for now) */}
+        {/* Total Assets */}
         <div className="bg-white shadow-sm p-6 rounded-3xl border border-slate-200 relative overflow-hidden group hover:border-blue-500/50 transition-colors">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all" />
           <div className="flex justify-between items-start mb-4 relative z-10">
@@ -102,7 +140,7 @@ export default async function AdminDashboard() {
             </div>
           </div>
           <div className="relative z-10">
-            <h3 className="font-headline-md text-3xl font-black text-slate-900">Rp 120.5Jt</h3>
+            <h3 className="font-headline-md text-2xl md:text-3xl font-black text-slate-900">{formatRupiah(totalAssets)}</h3>
             <p className="text-slate-500 text-sm font-bold mt-1">Total Aset Koperasi</p>
           </div>
         </div>

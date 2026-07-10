@@ -279,12 +279,12 @@ class AdminDashboardView extends StatelessWidget {
       final status = loan['status'];
       final count = loan['count'] ?? 0;
       if (status == 'pending')
-        totalPending += count as int;
+        totalPending += _toInt(count);
       else if (status == 'approved')
-        totalApproved += count as int;
+        totalApproved += _toInt(count);
       else if (status == 'paid')
-        totalPaid += count as int;
-      else if (status == 'defaulted') totalDefaulted += count as int;
+        totalPaid += _toInt(count);
+      else if (status == 'defaulted') totalDefaulted += _toInt(count);
     }
 
     final total = totalPending + totalApproved + totalPaid + totalDefaulted;

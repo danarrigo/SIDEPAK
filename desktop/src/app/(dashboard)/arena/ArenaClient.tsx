@@ -3,7 +3,7 @@ import { getMemberInventory } from "@/actions/gamification";
 import UseItemClient from "@/components/UseItemClient";
 import AutoMatchmake from "@/components/AutoMatchmake";
 
-export default async function ArenaClient({ memberId, initialBattles }: { memberId: number, initialBattles: any[] }) {
+export default async function ArenaClient({ memberId, initialBattles, myKoperasiName, rivalKoperasiName }: { memberId: number, initialBattles: any[], myKoperasiName?: string, rivalKoperasiName?: string }) {
   const { pastBattles } = await getBattleHistory(memberId);
   const battle = initialBattles[0];
   
@@ -46,6 +46,7 @@ export default async function ArenaClient({ memberId, initialBattles }: { member
             </div>
           </div>
           <h3 className="font-headline-md text-headline-md text-on-surface mb-1">{myName}</h3>
+          {myKoperasiName && <span className="font-label-caps text-label-caps text-primary mb-1 block text-[10px]">{myKoperasiName}</span>}
           <span className="font-label-caps text-label-caps text-on-surface-variant mb-6">Anda</span>
           <UseItemClient currentMemberId={memberId} targetMemberId={battle?.opponent?.id} inventory={inventory} />
           <div className="w-full space-y-6">
@@ -78,6 +79,7 @@ export default async function ArenaClient({ memberId, initialBattles }: { member
             </div>
           </div>
           <h3 className="font-headline-md text-headline-md text-on-surface mb-1">{opponentName}</h3>
+          {rivalKoperasiName && <span className="font-label-caps text-label-caps text-tertiary mb-1 block text-[10px]">{rivalKoperasiName}</span>}
           <span className="font-label-caps text-label-caps text-on-surface-variant mb-6">Lawan</span>
           <div className="w-full space-y-6 text-right">
             <div>

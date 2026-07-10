@@ -75,7 +75,12 @@ export default async function Page() {
         ) : null}
 
         {/* 1v1 Arena Client for Battles */}
-        <ArenaClient memberId={currentMember.id} initialBattles={activeBattles} />
+        <ArenaClient 
+          memberId={currentMember.id} 
+          initialBattles={activeBattles} 
+          myKoperasiName={myKoperasiScore?.koperasiName || "Koperasi Anda"} 
+          rivalKoperasiName={rivalCooperative?.name || "Koperasi Rival"} 
+        />
 
         <section className="glass-card rounded-xl overflow-hidden animate-slide-up delay-100 mt-12">
           <div className="p-6 border-b border-outline-variant bg-surface-container-low">

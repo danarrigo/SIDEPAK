@@ -6,6 +6,8 @@ import { getLeaderboard, getMemberProgress, getCooperativeLeaderboard } from "@/
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import CooperativeLoanForm from "@/components/CooperativeLoanForm";
+import EventCard from "@/components/EventCard";
+import MobileEventCard from "@/components/MobileEventCard";
 
 export default async function Page() {
   const currentMember = await getCurrentMember();
@@ -375,11 +377,7 @@ export default async function Page() {
                 <p className="text-on-surface-variant text-sm">Belum ada event aktif.</p>
               ) : (
                 activeEvents.map(event => (
-                  <div key={event.id} className="p-4 bg-surface-container-highest rounded-lg border border-outline-variant/30">
-                    <h4 className="font-bold">{event.name}</h4>
-                    <p className="text-xs text-on-surface-variant mt-1">{event.description}</p>
-                    <p className="text-[10px] mt-2 font-bold text-primary">Berakhir: {new Date(event.endDate).toLocaleDateString("id-ID")}</p>
-                  </div>
+                  <EventCard key={event.id} event={event} currentMemberId={currentMember.id} />
                 ))
               )}
             </div>
@@ -642,11 +640,7 @@ export default async function Page() {
                 <p className="text-slate-400 text-xs">Belum ada event aktif.</p>
               ) : (
                 activeEvents.map(event => (
-                  <div key={event.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <h4 className="font-bold text-[#1E293B] text-xs">{event.name}</h4>
-                    <p className="text-[10px] text-slate-500 mt-1">{event.description}</p>
-                    <p className="text-[9px] mt-2 font-bold text-[#3B82F6]">Berakhir: {new Date(event.endDate).toLocaleDateString("id-ID")}</p>
-                  </div>
+                  <MobileEventCard key={event.id} event={event} currentMemberId={currentMember.id} />
                 ))
               )}
             </div>

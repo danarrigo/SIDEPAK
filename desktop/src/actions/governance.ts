@@ -5,7 +5,7 @@ import { members } from "@/db/schema/members";
 import { eq, and, desc, count, sum, ne, sql } from "drizzle-orm";
 import { savings, loans, dues } from "@/db/schema/financials";
 import { memberProgress } from "@/db/schema/gamification";
-import { events } from "@/db/schema/activities";
+import { events, eventParticipants } from "@/db/schema/activities";
 
 export async function getGovernanceData(cooperativeId: number) {
   try {
@@ -15,12 +15,57 @@ export async function getGovernanceData(cooperativeId: number) {
       .where(and(ne(proposals.status, 'active'), eq(proposals.cooperativeId, cooperativeId)))
       .orderBy(desc(proposals.endDate)).limit(5);
 
-    const activeEvents = await db.select().from(events)
-      .where(and(eq(events.status, 'active'), eq(events.cooperativeId, cooperativeId)));
+    const activeEventsRaw = await db.select({
+      event: events,
+      creator: members,
+      participant: eventParticipants
+    })
+    .from(events)
+    .leftJoin(members, eq(events.creatorId, members.id))
+    .leftJoin(eventParticipants, eq(events.id, eventParticipants.eventId))
+    .where(and(eq(events.status, 'active'), eq(events.cooperativeId, cooperativeId)));
+
+    const activeEventsMap = new Map<number, any>();
+    activeEventsRaw.forEach(row => {
+      if (!activeEventsMap.has(row.event.id)) {
+        activeEventsMap.set(row.event.id, {
+          ...row.event,
+          creatorName: row.creator ? row.creator.namaLengkap : 'Admin',
+          participants: []
+        });
+      }
+      if (row.participant) {
+        activeEventsMap.get(row.event.id).participants.push(row.participant.memberId);
+      }
+    });
+    const activeEvents = Array.from(activeEventsMap.values());
       
-    const pastEvents = await db.select().from(events)
-      .where(and(ne(events.status, 'active'), eq(events.cooperativeId, cooperativeId)))
-      .orderBy(desc(events.endDate)).limit(5);
+    const pastEventsRaw = await db.select({
+      event: events,
+      creator: members,
+      participant: eventParticipants
+    })
+    .from(events)
+    .leftJoin(members, eq(events.creatorId, members.id))
+    .leftJoin(eventParticipants, eq(events.id, eventParticipants.eventId))
+    .where(and(ne(events.status, 'active'), eq(events.cooperativeId, cooperativeId)))
+    .orderBy(desc(events.endDate))
+    .limit(50); // increased limit to ensure grouping works well
+
+    const pastEventsMap = new Map<number, any>();
+    pastEventsRaw.forEach(row => {
+      if (!pastEventsMap.has(row.event.id)) {
+        pastEventsMap.set(row.event.id, {
+          ...row.event,
+          creatorName: row.creator ? row.creator.namaLengkap : 'Admin',
+          participants: []
+        });
+      }
+      if (row.participant) {
+        pastEventsMap.get(row.event.id).participants.push(row.participant.memberId);
+      }
+    });
+    const pastEvents = Array.from(pastEventsMap.values()).slice(0, 5);
     
     const totalMembersRes = await db.select({ value: count() }).from(members)
       .where(and(eq(members.cooperativeId, cooperativeId), eq(members.statusAnggota, 'active')));

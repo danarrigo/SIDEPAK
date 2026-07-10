@@ -1,9 +1,26 @@
 "use server";
 import { db } from "@/db";
-import { events } from "@/db/schema/activities";
+import { events, eventParticipants } from "@/db/schema/activities";
 import { members } from "@/db/schema/members";
 import { memberProgress } from "@/db/schema/gamification";
 import { eq, and } from "drizzle-orm";
+
+export async function joinEvent(memberId: number, eventId: number) {
+  try {
+    const existing = await db.select().from(eventParticipants).where(and(eq(eventParticipants.eventId, eventId), eq(eventParticipants.memberId, memberId)));
+    if (existing.length > 0) return { success: false, error: "Sudah terdaftar di event ini." };
+    
+    await db.insert(eventParticipants).values({
+      eventId,
+      memberId,
+      status: 'registered'
+    });
+    return { success: true };
+  } catch (err) {
+    console.error("Join Event Error:", err);
+    return { success: false, error: "Gagal mendaftar event." };
+  }
+}
 
 export async function submitEvent(memberId: number, name: string, description: string, startDate: Date, endDate: Date) {
   try {

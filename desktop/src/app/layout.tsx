@@ -1,5 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import PwaSetup from "@/components/PwaSetup";
+
+export const viewport: Viewport = {
+  themeColor: "#0B1120",
+};
 
 export const metadata: Metadata = {
   title: {
@@ -26,7 +31,13 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-  }
+  },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "SIDEPAK",
+  },
 };
 
 export default function RootLayout({
@@ -45,6 +56,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet" />
       </head>
       <body className="h-screen w-full flex overflow-hidden">
+        <PwaSetup />
         {children}
       </body>
     </html>

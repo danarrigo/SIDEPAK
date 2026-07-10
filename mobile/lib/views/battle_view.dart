@@ -97,32 +97,17 @@ class BattleView extends StatelessWidget {
                                         fontWeight: FontWeight.bold,
                                         fontStyle: FontStyle.italic)),
                                 _buildPlayerCol(
-                                  provider.activeBattle!['challengerId'] ==
-                                          provider.memberId
-                                      ? (provider.activeBattle!['opponent']
-                                                  ?['namaLengkap']
-                                              ?.toString()
-                                              .substring(0, 1)
-                                              .toUpperCase() ??
-                                          'L')
-                                      : (provider.activeBattle!['challenger']
-                                                  ?['namaLengkap']
-                                              ?.toString()
-                                              .substring(0, 1)
-                                              .toUpperCase() ??
-                                          'L'),
-                                  provider.activeBattle!['challengerId'] ==
-                                          provider.memberId
-                                      ? (provider.activeBattle!['opponent']
-                                                  ?['namaLengkap']
-                                              ?.toString()
-                                              .split(' ')[0] ??
-                                          'Lawan')
-                                      : (provider.activeBattle!['challenger']
-                                                  ?['namaLengkap']
-                                              ?.toString()
-                                              .split(' ')[0] ??
-                                          'Lawan'),
+                                  provider.activeBattle!['opponent']
+                                              ?['namaLengkap']
+                                          ?.toString()
+                                          .substring(0, 1)
+                                          .toUpperCase() ??
+                                      'L',
+                                  provider.activeBattle!['opponent']
+                                              ?['namaLengkap']
+                                          ?.toString()
+                                          .split(' ')[0] ??
+                                      'Lawan',
                                   '$p2 XP',
                                 ),
                               ],

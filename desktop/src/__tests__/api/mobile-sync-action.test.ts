@@ -65,15 +65,6 @@ jest.mock('@/actions/gamification', () => {
 });
 
  
-jest.mock('@/actions/events', () => {
-  const fns = {
-    joinEvent: jest.fn().mockResolvedValue({ success: true }),
-    createEvent: jest.fn().mockResolvedValue({ success: true }),
-  };
-  Object.assign((globalThis as any), fns);
-  return fns;
- 
-});
 
  
 jest.mock('@/actions/arena', () => {
@@ -196,34 +187,6 @@ describe('POST /api/mobile-sync/action', () => {
     });
   });
 
-  describe('Event actions (Phase 2)', () => {
-    it('join-event forwards to joinEvent with eventId', async () => {
-      setupAuth();
-      const res = await POST(makeRequest({ action: 'join-event', memberId: 1, eventId: 42 }));
-      expect(res.status).toBe(200);
-      expect((globalThis as any).joinEvent).toHaveBeenCalledWith(expect.anything(), 42);
-    });
-
-    it('create-event forwards to createEvent with parsed Date objects', async () => {
-      setupAuth();
-      const res = await POST(makeRequest({
-        action: 'create-event',
-        memberId: 1,
-        name: 'Senam',
-        description: 'Olahraga',
-        startDate: '2026-08-01T07:00:00.000Z',
-        endDate: '2026-08-01T09:00:00.000Z',
-      }));
-      const json = await res.json();
-      expect(json.success).toBe(true);
-      expect((globalThis as any).createEvent).toHaveBeenCalled();
-      const callArgs = (globalThis as any).createEvent.mock.calls[0];
-      expect(callArgs[1]).toBe('Senam');
-      expect(callArgs[2]).toBe('Olahraga');
-      expect(callArgs[3]).toBeInstanceOf(Date);
-      expect(callArgs[4]).toBeInstanceOf(Date);
-    });
-  });
 
   describe('Matchmake action (Phase 4d)', () => {
     it('matchmake-battle forwards to matchmakeWeeklyBattle', async () => {
@@ -301,7 +264,7 @@ describe('POST /api/mobile-sync/action', () => {
 
   it('returns 401 when Authorization header is missing', async () => {
     ((globalThis as any).__mockHeadersGet as jest.Mock).mockReturnValue(null);
-    const res = await POST(makeRequest({ action: 'join-event', memberId: 1, eventId: 1 }));
+    const res = await POST(makeRequest({ action: 'buy-marketplace-item', memberId: 1, itemId: 1 }));
     expect(res.status).toBe(401);
     const json = await res.json();
     expect(json.success).toBe(false);
@@ -314,7 +277,7 @@ describe('POST /api/mobile-sync/action', () => {
       data: { user: null },
       error: { message: 'Invalid token', name: 'AuthError', status: 401 },
     });
-    const res = await POST(makeRequest({ action: 'join-event', memberId: 1, eventId: 1 }));
+    const res = await POST(makeRequest({ action: 'buy-marketplace-item', memberId: 1, itemId: 1 }));
     expect(res.status).toBe(401);
   });
 
@@ -323,22 +286,22 @@ describe('POST /api/mobile-sync/action', () => {
     // but their token only resolves to member 1.
     setupAuth();
     const res = await POST(
-      makeRequest({ action: 'join-event', memberId: 99, eventId: 1 })
+      makeRequest({ action: 'buy-marketplace-item', memberId: 99, itemId: 1 })
     );
-    // The joinEvent action should be called with memberId=1 (from token),
+    // The action should be called with memberId=1 (from token),
     // NOT memberId=99 (from body).
-    expect((globalThis as any).joinEvent).toHaveBeenCalledWith(1, 1);
+    expect((globalThis as any).buyMarketplaceItem).toHaveBeenCalledWith(1, 1);
   });
 
   it('returns 401 for action POST when auth header is malformed', async () => {
     ((globalThis as any).__mockHeadersGet as jest.Mock).mockReturnValue('Token abc');
-    const res = await POST(makeRequest({ action: 'join-event', memberId: 1, eventId: 1 }));
+    const res = await POST(makeRequest({ action: 'buy-marketplace-item', memberId: 1, itemId: 1 }));
     expect(res.status).toBe(401);
   });
 
   it('returns success payload on a valid request', async () => {
     setupAuth();
-    const res = await POST(makeRequest({ action: 'join-event', memberId: 1, eventId: 1 }));
+    const res = await POST(makeRequest({ action: 'buy-marketplace-item', memberId: 1, itemId: 1 }));
     const json = await res.json();
     expect(res.status).toBe(200);
     expect(json.success).toBe(true);

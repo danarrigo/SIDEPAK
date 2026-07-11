@@ -1,143 +1,152 @@
-# KopDes — Web Dashboard & Backend API 💻
+# KopDes — Dashboard Web & Backend API 💻
 
-This is the **Next.js admin dashboard** (used by cooperative operators and staff) **plus the REST API** consumed by the Flutter mobile app. Both clients share the same Supabase (PostgreSQL) backend.
+Aplikasi ini adalah **dashboard admin Next.js** (digunakan oleh pengurus dan staf koperasi) **ditambah dengan API REST** yang dikonsumsi oleh aplikasi mobile Flutter. Kedua klien menggunakan backend Supabase (PostgreSQL) yang sama.
 
-For the project overview, see the [root README](../README.md). For the Flutter client, see [mobile/README.md](../mobile/README.md).
+Untuk gambaran umum proyek, silakan merujuk pada [README utama di root](../README.md). Untuk aplikasi mobile Flutter, lihat [mobile/README.md](../mobile/README.md).
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack (Teknologi)
 
 - **Framework**: [Next.js 15](https://nextjs.org/) (App Router, React Server Components)
-- **Language**: TypeScript (strict)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) with custom *Dark Slate & Yellow* theme
-- **Database**: PostgreSQL hosted on [Supabase](https://supabase.com/)
+- **Bahasa**: TypeScript (strict)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) dengan tema kustom *Dark Slate & Yellow*
+- **Database**: PostgreSQL yang di-host di [Supabase](https://supabase.com/)
 - **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
-- **Authentication**: Supabase Auth (server-side session refresh + JWT for API routes)
-- **Deployment**: Vercel (auto-deploy on push to `main`)
+- **Autentikasi**: Supabase Auth (penyegaran sesi sisi server + verifikasi token JWT untuk rute API)
+- **Deployment**: Vercel (auto-deploy saat melakukan push ke `main`)
 
 ---
 
-## ✨ Features
+## ✨ Fitur
 
-- **Web Dashboard**: monitor savings balances, complete daily quests, manage the P2P marketplace, and participate in the weekly **KopDes Arena** battles.
-- **REST API for mobile**: provides JSON endpoints (`/api/auth/*`, `/api/mobile-sync/*`) consumed by the Flutter app via JWT bearer tokens. The API runs all DB queries server-side through Drizzle — no client-side Supabase credentials leak to the mobile app.
+- **Dashboard Web Anggota**: Memantau saldo simpanan, menyelesaikan misi harian, berbelanja di marketplace P2P, dan ikut bersaing di pertarungan **KopDes Arena** 1v1 mingguan.
+- **Dashboard Web Admin**: Panel khusus pengurus untuk mengelola anggota koperasi, menyetujui penarikan/simpanan saldo dompet digital, membuat proposal tata kelola E-RAT, dan menganalisis statistik kesehatan koperasi menggunakan visualisasi Skor Kesehatan Koperasi SIDEPAK.
+- **REST API untuk Mobile**: Menyediakan endpoint JSON (`/api/auth/*`, `/api/mobile-sync/*`, `/api/withdraw`, dll.) yang dikonsumsi oleh aplikasi Flutter melalui autentikasi token JWT. API menjalankan semua kueri database di sisi server menggunakan Drizzle — tidak ada kredensial sensitif Supabase yang bocor ke sisi klien mobile.
 
 ---
 
-## 📂 Source structure
+## 📂 Struktur Kode Sumber
 
 ```
 desktop/src/
-├── actions/              # Server-side DB actions (called by RSC pages)
-│   ├── arena.ts          # Active battles, history
-│   ├── auth.ts           # Supabase auth helpers
-│   ├── dashboard.ts      # Member progress, point transactions
-│   ├── events.ts         # Events & attendance
-│   ├── financials.ts     # Savings, loans, dues
-│   ├── gamification.ts   # Items, win rate, badges, leaderboards
-│   ├── governance.ts     # Proposals, votes, koperasi stats
-│   ├── members.ts        # Member profile lookups
-│   ├── quests.ts         # Quests and per-member progress
-│   └── shop.ts           # Item purchase, marketplace listings
+├── actions/              # Logika DB server-side (dipanggil oleh halaman RSC)
+│   ├── arena.ts          # Battle arena, riwayat PvP
+│   ├── auth.ts           # Pembantu auth Supabase
+│   ├── dashboard.ts      # Kemajuan anggota, transaksi poin
+│   ├── events.ts         # Kegiatan & kehadiran anggota
+│   ├── financials.ts     # Tabungan, pinjaman, iuran wajib
+│   ├── gamification.ts   # Papan peringkat, win rate, lencana
+│   ├── governance.ts     # Pembuatan proposal E-RAT, suara, statistik
+│   ├── members.ts        # Detail profil anggota
+│   ├── quests.ts         # Misi & status pengerjaan anggota
+│   └── shop.ts           # Pembelian barang, marketplace
 ├── app/
-│   ├── (auth)/           # Public: /signin, /signup
-│   ├── (dashboard)/      # Authenticated pages (see below)
-│   └── api/              # REST API for the Flutter app
+│   ├── (auth)/           # Publik: /signin, /signup
+│   ├── (dashboard)/      # Halaman terproteksi (dashboard anggota & admin)
+│   └── api/              # API REST untuk aplikasi Flutter
 │       ├── auth/
 │       │   ├── login/route.ts        # POST  /api/auth/login
 │       │   └── signup/route.ts       # POST  /api/auth/signup
+│       ├── admin-member/
+│       │   └── route.ts              # POST  /api/admin-member (edit profil anggota oleh admin)
+│       ├── withdraw/
+│       │   └── route.ts              # POST  /api/withdraw (tarik saldo dompet digital)
+│       ├── webhooks/
+│       │   └── xendit/route.ts       # POST  /api/webhooks/xendit (webhook status pembayaran)
+│       ├── delete-admin/
+│       │   └── route.ts              # GET   /api/delete-admin (utilitas pembersih)
 │       └── mobile-sync/
 │           ├── route.ts              # GET   /api/mobile-sync
 │           └── action/route.ts       # POST  /api/mobile-sync/action
-├── components/           # Shared UI (Sidebar, BottomNav, MissionList, AutoMatchmake, ...)
-├── db/schema/            # Drizzle table definitions
-├── utils/supabase/       # Supabase server/client helpers
-└── proxy.ts              # Next.js middleware: auth guard (excludes /api/*)
+├── components/           # Komponen UI bersama (Sidebar, BottomNav, MissionList, ...)
+├── db/schema/            # Definisi tabel Drizzle ORM
+├── utils/supabase/       # Helper Supabase server/klien
+└── proxy.ts              # Middleware Next.js: auth guard (mengecualikan /api/*)
 ```
 
 ---
 
-## 🗺️ Pages (App Router)
+## 🗺️ Halaman (App Router)
 
-| Route | Auth | Role | Purpose |
+| Rute | Auth | Peran | Tujuan |
 |---|---|---|---|
-| `/signin` | Public | All | Email/password sign-in |
-| `/signup` | Public | All | New member registration |
-| `/` | Required | Member | Home dashboard (savings, points, rank, missions) |
-| `/quests` | Required | Member | Mission center + item shop |
-| `/arena` | Required | Member | Active battle, history, auto-matchmake |
-| `/governance` | Required | Member | E-RAT voting, proposal timeline, koperasi stats |
-| `/governance/members` | Required | Member | Member directory |
-| `/marketplace` | Required | Member | P2P marketplace admin view |
-| `/savings` | Required | Member | Savings, loans, dues detail |
-| `/profile` | Required | Member | Member card, progress stats, badges |
-| `/admin` | Required | Admin | Admin landing, financial statistics, pending cash-out approvals |
-| `/admin/members` | Required | Admin | Cooperative member directory, approval logs, and member status editor |
-| `/admin/governance` | Required | Admin | E-RAT Proposal creation and management panel |
-| `/admin/health` | Required | Admin | SIDEPAK Health Score visual dashboard and dimension details |
-| `/admin/health/methodology` | Required | Admin | Scientific explanation and methodology description for the Health Score model |
-| `/admin/profile` | Required | Admin | Admin profile details and personal credentials management |
+| `/signin` | Publik | Semua | Masuk akun email/password |
+| `/signup` | Publik | Semua | Pendaftaran anggota baru |
+| `/` | Wajib | Anggota | Beranda dashboard anggota (simpanan, poin, peringkat, misi) |
+| `/quests` | Wajib | Anggota | Pusat misi harian/mingguan & toko item |
+| `/arena` | Wajib | Anggota | Battle arena 1v1 aktif, riwayat pertarungan, cari lawan |
+| `/governance` | Wajib | Anggota | Voting proposal E-RAT, linimasa kebijakan, statistik koperasi |
+| `/governance/members` | Wajib | Anggota | Daftar anggota koperasi |
+| `/marketplace` | Wajib | Anggota | Pasar P2P antar-anggota |
+| `/savings` | Wajib | Anggota | Rincian simpanan, pinjaman, dan iuran wajib |
+| `/profile` | Wajib | Anggota | Tampilan kartu anggota, XP/level, koleksi lencana |
+| `/admin` | Wajib | Admin | Beranda dashboard admin, bagan kas, persetujuan penarikan saldo |
+| `/admin/members` | Wajib | Admin | Direktori anggota koperasi, rekam pendaftaran, ubah data anggota |
+| `/admin/governance` | Wajib | Admin | Panel pembuatan proposal kebijakan E-RAT |
+| `/admin/health` | Wajib | Admin | Visualisasi Skor Kesehatan Koperasi SIDEPAK |
+| `/admin/health/methodology` | Wajib | Admin | Panduan dan penjelasan metodologi 5 dimensi Skor Kesehatan Koperasi |
+| `/admin/profile` | Wajib | Admin | Profil admin & kredensial pengurus |
 
 ---
 
-## 🚀 Running locally
+## 🚀 Menjalankan Secara Lokal
 
-### 1. Environment variables
+### 1. Variabel Lingkungan (Env Vars)
 
-Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
+Salin `.env.example` ke `.env.local` dan lengkapi dengan kredensial Supabase Anda:
 
 ```bash
 cp .env.example .env.local
 ```
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-DATABASE_URL=postgresql://postgres:password@db.your-project-id.supabase.co:6543/postgres
+NEXT_PUBLIC_SUPABASE_URL=https://project-id-anda.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=anon-key-anda
+SUPABASE_SERVICE_ROLE_KEY=service-role-key-anda
+DATABASE_URL=postgresql://postgres:password@db.project-id-anda.supabase.co:6543/postgres
 ```
 
-| Variable | Used by | Notes |
+| Variabel | Digunakan oleh | Catatan |
 |---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Client + server | Public; safe to expose |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client + server | Public; safe to expose |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server only (API routes, server actions) | Bypasses RLS — keep secret |
-| `DATABASE_URL` | Drizzle (server only) | Direct Postgres connection string |
+| `NEXT_PUBLIC_SUPABASE_URL` | Klien & Server | Publik; aman dipublikasikan |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Klien & Server | Publik; aman dipublikasikan |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server saja (API, Server Actions) | Melewati kebijakan RLS — jaga kerahasiaannya |
+| `DATABASE_URL` | Drizzle (Server saja) | URL koneksi langsung ke PostgreSQL Supabase |
 
-### 2. Install dependencies
+### 2. Instalasi Dependensi
 
 ```bash
 npm install
 ```
 
-### 3. Sync the database schema (optional)
+### 3. Sinkronisasi Skema Database (Opsional)
 
-If you need to push the Drizzle schema to your Supabase Postgres:
+Jika Anda perlu memperbarui skema database Supabase PostgreSQL sesuai Drizzle schema:
 
 ```bash
 npx drizzle-kit push
 ```
 
-To insert dummy data (seed):
+Untuk memasukkan data tiruan (seeding) untuk keperluan demo:
 
 ```bash
 npx tsx scripts/seed-quests.ts
 ```
 
-> Seeding will wipe and refill certain tables — existing login sessions may be invalidated.
+> **Catatan:** Seeding akan menghapus dan mengisi ulang data pada tabel tertentu — sesi masuk akun saat ini mungkin tidak valid lagi.
 
-### 4. Start the dev server
+### 4. Mulai Server Pengembangan (Dev Server)
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Buka halaman [http://localhost:3000](http://localhost:3000) pada browser Anda.
 
-### 5. (Optional) Run the mobile app in parallel
+### 5. Menjalankan Aplikasi Mobile Flutter Secara Bersamaan
 
-In a second terminal, run the Flutter app on port 3001:
+Di terminal terpisah, jalankan aplikasi Flutter pada port 3001:
 
 ```bash
 cd ../mobile
@@ -145,54 +154,47 @@ flutter pub get
 flutter run -d chrome --web-port 3001 --web-hostname localhost
 ```
 
-The Flutter app calls the Next.js API at `http://localhost:3000/api/...` so both must be running.
+Aplikasi Flutter akan memanggil API REST Next.js di `http://localhost:3000/api/...`, sehingga kedua aplikasi ini harus berjalan bersamaan.
 
 ---
 
-## 🔌 API reference
+## 🔌 Referensi API
 
-The Flutter app talks to the Next.js backend REST API. All return JSON and set CORS headers so a Flutter web build (on a different port) can call them. See the [root README § API Reference](../README.md#api-reference) for full request/response shapes.
+Aplikasi Flutter berkomunikasi dengan backend Next.js melalui API REST. Seluruh rute mengembalikan respons JSON dan menyetel CORS header agar dapat dipanggil dari port yang berbeda. Lihat [README Utama § Referensi API](../README.md#referensi-api) untuk contoh struktur JSON lengkap.
 
-| Endpoint | Method | Auth | Purpose |
+| Endpoint | Metode | Auth | Tujuan |
 |---|---|---|---|
-| `/api/auth/login` | POST | — | Email/password sign-in → returns Supabase JWT + member profile |
-| `/api/auth/signup` | POST | — | Register a new member → returns Supabase JWT + member profile |
-| `/api/mobile-sync` | GET | `Bearer <token>` | Single bundle of all member data (9 parallel Drizzle queries) |
-| `/api/mobile-sync/action` | POST | `Bearer <token>` | Write endpoint with discriminated `action` field |
-| `/api/admin-member` | POST | `Bearer <token>` (Admin) | Updates a member's profile details (Admin role only) |
-| `/api/withdraw` | POST | `Bearer <token>` | Initiates a digital wallet withdrawal request and creates Xendit payout |
-| `/api/webhooks/xendit` | POST | — | Callback webhook receiver to update status of payouts from Xendit |
-| `/api/delete-admin` | GET | — | Development utility endpoint to wipe admin profiles and progress |
+| `/api/auth/login` | POST | — | Masuk akun email/password → mengembalikan JWT Supabase + profil |
+| `/api/auth/signup` | POST | — | Pendaftaran anggota baru → mengembalikan JWT Supabase + profil |
+| `/api/mobile-sync` | GET | `Bearer <token>` | Bundle kueri data keanggotaan (9 kueri database paralel via Drizzle) |
+| `/api/mobile-sync/action` | POST | `Bearer <token>` | Transaksi tulis berdasarkan parameter `action` |
+| `/api/admin-member` | POST | `Bearer <token>` (Admin) | Memperbarui detail profil anggota (Hanya untuk Admin) |
+| `/api/withdraw` | POST | `Bearer <token>` | Mengajukan transaksi penarikan dompet digital melalui Xendit Payouts |
+| `/api/webhooks/xendit` | POST | — | Menerima webhook status transfer uang dari Xendit |
+| `/api/delete-admin` | GET | — | Menghapus akun admin untuk keperluan pengujian lokal |
 
-### CORS handling
+### Penanganan CORS
 
-Every route exports an `OPTIONS()` handler that returns 204 with the required preflight headers. The Next.js middleware (`src/proxy.ts`) intentionally **excludes `/api/*`** from its auth-redirect matcher so that preflight requests are answered by the Route Handler rather than redirected to `/signin` (which would cause `Redirect is not allowed for a preflight request` errors).
-
----
-
-## 🛡️ Auth guard (`src/proxy.ts`)
-
-This is the Next.js middleware (using this version's `proxy` convention instead of `middleware.ts`):
-
-- Refreshes the Supabase auth session cookie on every request.
-- Redirects unauthenticated users to `/signin`.
-- Redirects already-authenticated users away from `/signin` and `/signup`.
-- Excludes `/api/*` (CORS preflight must be answered by the route, not redirected).
-
-The matcher uses a negative lookahead:
-
-```ts
-'/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'
-```
+Semua rute API mengekspor penangan `OPTIONS()` yang mengembalikan respons 204 beserta headers preflight yang dibutuhkan. Middleware Next.js (`src/proxy.ts`) secara khusus **mengecualikan rute `/api/*`** dari pemeriksaan alihan auth, agar kueri preflight dijawab langsung oleh rute API tanpa terlempar ke halaman `/signin`.
 
 ---
 
-## 🧪 Testing
+## 🛡️ Pengaman Autentikasi Middleware (`src/proxy.ts`)
+
+Menggunakan middleware Next.js (konvensi berkas `proxy` untuk versi ini):
+- Menyegarkan sesi autentikasi Supabase cookie pada setiap permintaan halaman.
+- Mengalihkan pengguna yang belum login ke `/signin`.
+- Mengalihkan pengguna yang sudah login menjauhi rute `/signin` dan `/signup`.
+- Mengecualikan rute `/api/*` dari alihan otomatis agar kueri preflight CORS tidak terganggu.
+
+---
+
+## 🧪 Pengujian (Testing)
 
 ```bash
-npm test              # 50 Jest + React Testing Library tests
+npm test              # Menjalankan 50 pengujian unit Jest + React Testing Library
 npm run lint          # ESLint
-npx tsc --noEmit      # TypeScript strict check
+npx tsc --noEmit      # Pemeriksaan tipe TypeScript strict
 ```
 
-All three must pass before a PR can be merged. CI runs them on every push to `main` (see `.github/workflows/desktop-ci.yml`).
+Semua pemeriksaan harus sukses sebelum perubahan digabungkan ke branch utama (`main`). Pemeriksaan berjalan otomatis di pipeline CI GitHub Actions (`.github/workflows/desktop-ci.yml`).

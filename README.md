@@ -1,202 +1,209 @@
-# SIDEPAK — Gamified Village Cooperative Platform
+# SIDEPAK — Platform Koperasi Desa Tergamifikasi
 
-> SIDEPAK — Digital cooperative management for Indonesian *Koperasi Merah Putih Desa* (village cooperatives).
-> A monorepo with **two apps sharing one Supabase (PostgreSQL) backend**: a Next.js admin dashboard and a Flutter web/mobile app for members.
+> **TL;DR — 3 Fitur Utama SIDEPAK:**
+> 1. **Gamifikasi & Sistem Battle PvP:** Mengubah aktivitas koperasi (seperti menabung dan menghadiri kegiatan) menjadi poin dan XP. Anggota secara otomatis dipasangkan dalam pertempuran 1v1 mingguan (KopDes/SIDEPAK Arena) untuk bersaing mendapatkan bonus poin.
+> 2. **Otomatisasi WhatsApp (n8n):** Alur pesan dua arah otomatis terintegrasi AI (DeepSeek) via WhatsApp untuk melayani pertanyaan anggota secara mandiri (inbound) dan menyiarkan pengumuman proposal rapat maupun event koperasi (outbound).
+> 3. **Panel Admin Skor Kesehatan Koperasi:** Dashboard khusus pengurus untuk memantau "Cooperative Health Score" (0-100) secara real-time yang dihitung secara ilmiah berdasarkan 5 dimensi: Kepatuhan Iuran, Penetrasi Digital, Partisipasi Governance (E-RAT), Kesehatan Kredit, dan Engagement Gamifikasi.
 
 ---
 
-## Table of Contents
+> SIDEPAK — Manajemen koperasi digital untuk *Koperasi Merah Putih Desa*.
+> A monorepo dengan **dua aplikasi yang berbagi satu backend Supabase (PostgreSQL)**: dashboard admin berbasis Next.js dan aplikasi web/mobile Flutter untuk anggota.
 
-- [What is SIDEPAK?](#what-is-SIDEPAK)
-- [Key Features](#key-features)
-- [Tech Stack](#tech-stack)
-- [Repository Structure](#repository-structure)
-- [The Two Apps](#the-two-apps)
-- [Architecture](#architecture)
-- [WhatsApp Automation (n8n)](#whatsapp-automation-n8n)
-- [Core Domain Model](#core-domain-model)
-- [Database Schema](#database-schema)
-- [API Reference](#api-reference)
-- [Quick Start](#quick-start)
-- [Building the Mobile APK](#building-the-mobile-apk)
+---
+
+## Daftar Isi
+
+- [Apa itu SIDEPAK?](#apa-itu-sidepak)
+- [Fitur Utama](#fitur-utama)
+- [Tech Stack (Teknologi)](#tech-stack-teknologi)
+- [Struktur Repositori](#struktur-repositori)
+- [Dua Aplikasi](#dua-aplikasi)
+- [Arsitektur](#arsitektur)
+- [Otomatisasi WhatsApp (n8n)](#otomatisasi-whatsapp-n8n)
+- [Model Domain Utama](#model-domain-utama)
+- [Skema Database](#skema-database)
+- [Referensi API](#referensi-api)
+- [Quick Start (Panduan Memulai)](#quick-start-panduan-memulai)
+- [Membangun APK Mobile](#membangun-apk-mobile)
 - [CI/CD](#cicd)
-- [Testing](#testing)
-- [Project Scripts](#project-scripts)
-- [Known Limitations](#known-limitations)
-- [Contributing](#contributing)
+- [Pengujian (Testing)](#pengujian-testing)
+- [Script Proyek](#script-proyek)
+- [Batasan Diketahui](#batasan-diketahui)
+- [Kontribusi](#kontribusi)
 
 ---
 
-## What is SIDEPAK?
+## Apa itu SIDEPAK?
 
-**SIDEPAK (Koperasi Digital)** is a modern Indonesian village cooperative platform that integrates traditional financial services with **gamification**, a **member-to-member marketplace**, and **community engagement**. It is built to make cooperative participation feel as engaging as a mobile game, while keeping all the rigour of real accounting, savings, loans, and member governance.
+**SIDEPAK (Koperasi Digital)** adalah platform manajemen koperasi pedesaan modern yang mengintegrasikan layanan keuangan tradisional dengan **gamifikasi**, **pasar (marketplace) anggota-ke-anggota (P2P)**, dan **partisipasi komunitas**. Sistem ini dirancang untuk membuat partisipasi koperasi semenarik game seluler, sembari mempertahankan ketelitian akuntansi riil, tabungan, pinjaman, dan tata kelola anggota.
 
-The platform targets *Koperasi Merah Putih Desa* — the village-level cooperatives that are the backbone of rural Indonesian community finance. Two clients share the same Supabase (PostgreSQL) backend:
+Platform ini menargetkan *Koperasi Merah Putih Desa* — koperasi tingkat desa yang menjadi tulang punggung keuangan masyarakat pedesaan di Indonesia. Dua aplikasi klien berbagi backend Supabase (PostgreSQL) yang sama:
 
-| Client | Audience | Purpose |
+| Klien | Pengguna | Tujuan |
 |---|---|---|
-| **Desktop Admin Dashboard** (`desktop/`) | Cooperative operators, staff | Manage members, view transactions, create events, monitor governance, see analytics |
-| **Member Web/Mobile App** (`mobile/`) | Cooperative members | View their savings, points, missions, marketplace, battles, profile |
+| **Dashboard Admin Desktop** (`desktop/`) | Pengurus, Staf Koperasi | Mengelola anggota, memantau transaksi, membuat event, memantau tata kelola & kesehatan koperasi |
+| **Aplikasi Web/Mobile Anggota** (`mobile/`) | Anggota Koperasi | Melihat tabungan, poin, misi harian, berbelanja di marketplace, mengikuti arena battle, mengedit profil |
 
-See per-app guides for setup details:
-- [Desktop Web Dashboard & API guide](./desktop/README.md)
-- [Mobile (Flutter) guide](./mobile/README.md)
-
----
-
-## Key Features
-
-- **Digital financial services** — Savings (*Simpanan Pokok, Wajib, Sukarela*) and Loans (*Pinjaman*) tracked with full audit trail.
-- **SIDEPAK Health Score** — Deterministic health scoring engine measuring cooperative health based on 5 weighted dimensions (Dues compliance, digital penetration, governance, credit health, and gamification engagement).
-- **Wallet & Xendit Disbursements** — In-app wallet functionality with integrated payout services via Xendit for digital withdrawal requests.
-- **SIDEPAK Arena — gamification layer**
-  - Complete **Daily Quests** to earn points (fully integrated with real app actions like savings, logins, and events).
-  - Maintain a **Login Streak** for bonus rewards.
-  - Compete in **Weekly Arena Battles** against other members (auto-matched).
-- **Member-to-member marketplace** — Spend points to list and buy items in a P2P marketplace with optional item effects (e.g. `freeze_streak`, `prank`).
-- **Cooperative governance (E-RAT)** — Members vote on proposals (*Setuju / Tolak / Abstain*); proposals resolve by quorum.
-- **Multi-platform & Multi-Role** — Admin and member portals across both Next.js (desktop) and Flutter (mobile/web).
+Panduan setup aplikasi:
+- [Panduan Dashboard Web Desktop & API](./desktop/README.md)
+- [Panduan Mobile (Flutter)](./mobile/README.md)
 
 ---
 
-## Tech Stack
+## Fitur Utama
 
-| Layer | Technology |
+- **Layanan Keuangan Digital** — Tabungan (*Simpanan Pokok, Wajib, Sukarela*) dan Pinjaman (*Pinjaman*) yang tercatat dengan jejak audit lengkap.
+- **SIDEPAK Health Score** — Mesin penilaian kesehatan koperasi deterministik yang mengukur kesehatan koperasi berdasarkan 5 dimensi terbobot (Kepatuhan iuran, penetrasi digital, partisipasi tata kelola/E-RAT, kesehatan kredit, dan keterlibatan gamifikasi).
+- **Dompet Digital & Pencairan Xendit** — Fungsionalitas dompet dalam aplikasi yang terintegrasi dengan Xendit Payouts untuk memproses penarikan saldo secara digital langsung ke rekening bank anggota.
+- **SIDEPAK Arena — Lapisan Gamifikasi**
+  - **Misi Harian & Mingguan** untuk mendapatkan poin (terintegrasi dengan aksi riil aplikasi seperti menabung, login harian, dan ikut event).
+  - **Streak Login** harian untuk mendapatkan bonus poin.
+  - **Battle Arena Mingguan** 1v1 melawan anggota lain (dipasangkan otomatis oleh sistem).
+- **Marketplace Antar-Anggota (P2P)** — Membelanjakan poin untuk mendaftarkan dan membeli barang dari sesama anggota, lengkap dengan efek item opsional (seperti `freeze_streak`, `prank`).
+- **Tata Kelola Koperasi (E-RAT)** — Anggota memberikan suara pada proposal kebijakan (*Setuju / Tolak / Abstain*) secara digital; proposal diselesaikan berdasarkan kuorum.
+- **Multi-platform & Multi-Role** — Portal khusus Admin dan Anggota yang tersedia di Next.js (desktop) dan Flutter (mobile/web).
+
+---
+
+## Tech Stack (Teknologi)
+
+| Lapisan | Teknologi |
 |---|---|
-| Desktop dashboard | Next.js 15 (App Router), TypeScript, Tailwind CSS |
-| Member app | Flutter, Dart 3.6 (web + Android + iOS) |
-| Mobile state | `provider` (ChangeNotifier pattern) |
+| Dashboard Desktop | Next.js 15 (App Router), TypeScript, Tailwind CSS |
+| Aplikasi Anggota | Flutter, Dart 3.6 (web + Android + iOS) |
+| State Mobile | `provider` (pola ChangeNotifier) |
 | Database | PostgreSQL via Supabase |
 | ORM | Drizzle ORM |
-| Auth | Supabase Auth (email/password, JWT) |
-| API style | Next.js Server Actions (web) + REST Route Handlers (mobile) |
+| Autentikasi | Supabase Auth (email/password, JWT) |
+| Gaya API | Next.js Server Actions (web) + REST Route Handlers (mobile) |
 | Deployment | Google Cloud Run (Next.js) + Vercel (Flutter web) |
-| Mobile packaging | Gradle / Android SDK (APK), Xcode (iOS) |
-| CI | GitHub Actions |
+| Packaging Mobile | Gradle / Android SDK (APK), Xcode (iOS) |
+| CI (Integrasi Kontinu) | GitHub Actions |
 
 ---
 
-## Repository Structure
+## Struktur Repositori
 
 ```
 SIDEPAK/
-├── desktop/                          # Next.js admin dashboard
+├── desktop/                          # Dashboard admin & backend API Next.js
 │   ├── src/
-│   │   ├── actions/                  # Server-side DB actions (no raw SQL in components)
-│   │   │   ├── arena.ts              # Battles: active + history
-│   │   │   ├── auth.ts               # Supabase auth helpers
-│   │   │   ├── dashboard.ts          # Member progress, point transactions
-│   │   │   ├── events.ts             # Events & attendance
-│   │   │   ├── financials.ts         # Savings, loans, dues
-│   │   │   ├── gamification.ts       # Shop items, win rate, badges, leaderboards
-│   │   │   ├── governance.ts         # Proposals, votes, koperasi stats
-│   │   │   ├── members.ts            # Member profile lookups
-│   │   │   ├── quests.ts             # Quests and member progress
-│   │   │   └── shop.ts               # Item purchase, marketplace listings
+│   │   ├── actions/                  # Logika server-side DB (tidak ada SQL mentah di komponen UI)
+│   │   │   ├── arena.ts              # Battle arena: aktif & riwayat
+│   │   │   ├── auth.ts               # Pembantu auth Supabase
+│   │   │   ├── dashboard.ts          # Kemajuan anggota, transaksi poin
+│   │   │   ├── events.ts             # Manajemen event & kehadiran
+│   │   │   ├── financials.ts         # Tabungan, pinjaman, iuran
+│   │   │   ├── gamification.ts       # Item toko, tingkat kemenangan, lencana, papan peringkat
+│   │   │   ├── governance.ts         # Proposal, suara (voting), statistik koperasi
+│   │   │   ├── members.ts            # Pencarian profil anggota
+│   │   │   ├── quests.ts             # Misi & kemajuan anggota
+│   │   │   └── shop.ts               # Pembelian item, pendaftaran marketplace
 │   │   ├── app/
-│   │   │   ├── (auth)/               # Public auth pages (signin, signup)
-│   │   │   ├── (dashboard)/          # Authenticated pages
-│   │   │   │   ├── page.tsx          # Home dashboard
-│   │   │   │   ├── arena/            # Battle arena
-│   │   │   │   ├── governance/       # E-RAT voting, koperasi stats, members
-│   │   │   │   ├── marketplace/      # P2P marketplace admin view
-│   │   │   │   ├── profile/          # Member profile
-│   │   │   │   ├── quests/           # Mission center & item shop
-│   │   │   │   └── savings/          # Savings/loans/dues detail
-│   │   │   └── api/                  # REST API for mobile
+│   │   │   ├── (auth)/               # Halaman auth publik (signin, signup)
+│   │   │   ├── (dashboard)/          # Halaman terproteksi autentikasi
+│   │   │   │   ├── page.tsx          # Dashboard home anggota
+│   │   │   │   ├── arena/            # Arena pertarungan PvP
+│   │   │   │   ├── governance/       # Voting E-RAT, statistik, daftar anggota
+│   │   │   │   ├── marketplace/      # Tampilan marketplace admin
+│   │   │   │   ├── profile/          # Profil & lencana anggota
+│   │   │   │   ├── quests/           # Pusat misi & toko item
+│   │   │   │   └── savings/          # Detail simpanan/pinjaman/iuran
+│   │   │   └── api/                  # API REST untuk aplikasi mobile
 │   │   │       ├── auth/{login,signup}/route.ts
 │   │   │       └── mobile-sync/{route.ts, action/route.ts}
-│   │   ├── components/               # Shared UI (Sidebar, MissionList, AutoMatchmake, ...)
-│   │   ├── db/schema/                # Drizzle table definitions
-│   │   ├── utils/supabase/           # Supabase server/client helpers
-│   │   └── proxy.ts                  # Next.js middleware (auth guard; excludes /api/*)
+│   │   ├── components/               # Komponen UI bersama (Sidebar, MissionList, AutoMatchmake, ...)
+│   │   ├── db/schema/                # Definisi tabel Drizzle ORM
+│   │   ├── utils/supabase/           # Pembantu server/klien Supabase
+│   │   └── proxy.ts                  # Middleware Next.js (auth guard; mengecualikan /api/*)
 │   └── package.json
 │
-├── mobile/                           # Flutter app (web + Android + iOS)
+├── mobile/                           # Aplikasi Flutter (web + Android + iOS)
 │   ├── lib/
-│   │   ├── main.dart                 # App entry, MaterialApp, Provider setup
-│   │   ├── models/                   # Mission, ShopItem, HistoryItem
+│   │   ├── main.dart                 # Entrypoint aplikasi, MaterialApp, setup Provider
+│   │   ├── models/                   # Model data (Mission, ShopItem, HistoryItem)
 │   │   ├── providers/
-│   │   │   └── koperasi_provider.dart   # Central ChangeNotifier
-│   │   └── views/                    # 13 screens + 4 widgets (see mobile/README.md)
-│   ├── test/                         # 65 widget/unit tests
+│   │   │   └── koperasi_provider.dart   # ChangeNotifier pusat (state utama)
+│   │   └── views/                    # Layar aplikasi & widget kustom (lihat mobile/README.md)
+│   ├── test/                         # 65 pengujian unit dan widget
 │   └── pubspec.yaml
 │
 ├── .github/workflows/
-│   ├── desktop-ci.yml                # Lint + tsc + jest
-│   └── mobile-ci.yml                 # Dart format + analyze + test
+│   ├── desktop-ci.yml                # CI Desktop: Lint + tsc + jest
+│   └── mobile-ci.yml                 # CI Mobile: Dart format + analyze + test
 │
-├── n8n/                              # WhatsApp automation (see section below)
-│   ├── My workflow.sanitized.json    # Importable workflow, credentials redacted
-│   └── SETUP.md                      # How to re-bind credentials in your n8n
+├── n8n/                              # Otomatisasi WhatsApp n8n
+│   ├── My workflow.sanitized.json    # File ekspor workflow bersih (redaksi rahasia)
+│   └── SETUP.md                      # Cara konfigurasi ulang kredensial di n8n
 │
-├── package.json                      # Root workspace (cross-app scripts)
-├── context.md                        # Domain model spec
-└── handoff.md                        # Engineering handoff doc
+├── package.json                      # Workspace root (script lintas-aplikasi)
+├── context.md                        # Spesifikasi domain model
+└── handoff.md                        # Dokumen serah terima teknis (handoff)
 ```
 
 ---
 
-## The Two Apps
+## Dua Aplikasi
 
-### 1. Desktop Admin Dashboard (`desktop/`)
+### 1. Dashboard Admin Desktop (`desktop/`)
 
-The Next.js dashboard contains two main roles: **Members** (who use the default dashboard features) and **Admins** (who manage the cooperative operations). It uses **Server Actions** for almost all data access (no separate API layer needed for the web UI), except for the small REST surface used by the mobile app.
+Dashboard Next.js mencakup dua peran utama: **Anggota** (yang menggunakan fitur dashboard standar) dan **Admin** (yang mengelola operasional koperasi). Menggunakan **Server Actions** untuk hampir semua akses data (tidak memerlukan lapisan API terpisah untuk UI web), kecuali untuk API REST kecil yang digunakan oleh aplikasi mobile.
 
-**Pages**
+**Halaman**
 
-| Route | Auth | Role | Purpose |
+| Rute | Auth | Peran | Tujuan |
 |---|---|---|---|
-| `/signin` | Public | All | Email/password sign-in |
-| `/signup` | Public | All | New member registration |
-| `/` (home) | Required | Member | Savings total, points, rank, daily missions, koperasi stats |
-| `/quests` | Required | Member | Mission center + item shop |
-| `/arena` | Required | Member | Active battle view, history, auto-matchmake controls |
-| `/governance` | Required | Member | E-RAT voting, proposal timeline, koperasi stats |
-| `/governance/members` | Required | Member | Member directory with detail drill-down |
-| `/marketplace` | Required | Member | P2P marketplace administration view |
-| `/savings` | Required | Member | Savings, loans, and dues records |
-| `/profile` | Required | Member | Member card, progress stats, badge collection |
-| `/admin` | Required | Admin | Admin landing, financial statistics, pending cash-out approvals |
-| `/admin/members` | Required | Admin | Cooperative member directory, approval logs, and member status editor |
-| `/admin/governance` | Required | Admin | E-RAT Proposal creation and management panel |
-| `/admin/health` | Required | Admin | SIDEPAK Health Score visual dashboard and dimension details |
-| `/admin/health/methodology` | Required | Admin | Scientific explanation and methodology description for the Health Score model |
-| `/admin/profile` | Required | Admin | Admin profile details and personal credentials management |
+| `/signin` | Publik | Semua | Masuk dengan email & password |
+| `/signup` | Publik | Semua | Pendaftaran anggota baru |
+| `/` (home) | Wajib | Anggota | Total simpanan, poin, peringkat, misi harian, statistik koperasi |
+| `/quests` | Wajib | Anggota | Pusat misi + toko item |
+| `/arena` | Wajib | Anggota | Tampilan arena pertarungan aktif, riwayat pertarungan, kontrol pencarian lawan otomatis |
+| `/governance` | Wajib | Anggota | Voting E-RAT, linimasa proposal, statistik koperasi |
+| `/governance/members` | Wajib | Anggota | Direktori anggota koperasi |
+| `/marketplace` | Wajib | Anggota | Tampilan pasar P2P (Peer-to-Peer) |
+| `/savings` | Wajib | Anggota | Rekam data simpanan, pinjaman, dan iuran wajib |
+| `/profile` | Wajib | Anggota | Kartu anggota digital, status level/XP, koleksi lencana |
+| `/admin` | Wajib | Admin | Beranda admin, statistik keuangan koperasi, persetujuan penarikan saldo |
+| `/admin/members` | Wajib | Admin | Manajemen profil anggota, persetujuan pendaftaran, editor status |
+| `/admin/governance` | Wajib | Admin | Panel pembuatan dan pengelolaan proposal kebijakan E-RAT |
+| `/admin/health` | Wajib | Admin | Dashboard visual Skor Kesehatan Koperasi SIDEPAK beserta detail dimensinya |
+| `/admin/health/methodology` | Wajib | Admin | Penjelasan ilmiah dan metodologi perhitungan Skor Kesehatan Koperasi |
+| `/admin/profile` | Wajib | Admin | Detail profil admin dan pengaturan kredensial |
 
-See [desktop/README.md](./desktop/README.md) for full setup, env vars, and the API reference.
+Lihat [desktop/README.md](./desktop/README.md) untuk detail setup, variabel lingkungan (env vars), dan referensi API lengkap.
 
-### 2. Member Web/Mobile App (`mobile/`)
+### 2. Aplikasi Web/Mobile Anggota (`mobile/`)
 
-A single Flutter codebase that builds for **web (Chrome/Safari/Firefox)**, **Android (APK)**, and **iOS**. The member app contains screens for standard members as well as an integrated mobile **Admin Mode** for operators.
+Satu basis kode Flutter yang dibangun untuk **web (Chrome/Safari/Firefox)**, **Android (APK)**, dan **iOS**. Aplikasi anggota ini juga dilengkapi dengan integrasi **Mode Admin** mobile untuk pengurus.
 
-**Screens**
+**Layar**
 
-| Screen | Audience | Purpose |
+| Layar | Target Pengguna | Tujuan |
 |---|---|---|
-| Login / Sign Up | All | Email/password auth; persists JWT to `shared_preferences` |
-| Onboarding | All | Introductory landing slides describing the SIDEPAK cooperative model |
-| Home | Member | Savings total, point balance, rank badge, daily missions, koperasi stats |
-| Misi (Missions) | Member | Rank label, weekly streak calendar, daily/weekly missions, item shop |
-| Battle (Arena) | Member | Active battle vs auto-matched opponent, comparison rows, history |
-| Koperasi | Member | Stats cards, E-RAT proposal voting, timeline |
-| Profile | Member | Rank badge, earned badges, impact stats, rank progression |
-| Health Score | Member | Visualization of the cooperative's current health score and details |
-| Marketplace | Member | Spend points to list and buy items in a P2P marketplace with optional item effects (e.g. `freeze_streak`, `prank`). |
-| Events | Member | Community events list, join, create |
-| Members Directory | Member | Browse members, view detail |
-| Simpanan | Member | Savings breakdown (Pokok, Wajib, Sukarela) |
-| Admin Dashboard | Admin | Administrative landing, financial metrics summary, pending transaction approvals |
-| Admin Members | Admin | Operator directory for editing member profiles and approval flows |
-| Admin Profile | Admin | Admin user credentials and cooperative info settings |
+| Login / Sign Up | Semua | Autentikasi email/password; menyimpan JWT secara lokal di `shared_preferences` |
+| Onboarding | Semua | Slide pengantar yang menjelaskan konsep koperasi digital SIDEPAK |
+| Home | Anggota | Total simpanan, saldo poin, lencana peringkat aktif, misi harian, statistik koperasi |
+| Misi (Missions) | Anggota | Kalender streak mingguan (Senin-Minggu), misi harian & mingguan, toko item |
+| Battle (Arena) | Anggota | Tampilan battle mingguan melawan lawan otomatis, bar perbandingan poin, hitung mundur |
+| Koperasi | Anggota | Kartu statistik (transaksi, anggota baru, omzet), voting proposal E-RAT, linimasa |
+| Profile | Anggota | Lencana peringkat, koleksi pencapaian, kartu dampak sosial (tabungan, kemenangan battle) |
+| Health Score | Anggota | Tampilan visual metrik kesehatan koperasi saat ini |
+| Marketplace | Anggota | Pasar P2P: telusuri barang, daftarkan barang jualan pribadi, beli barang pakai poin |
+| Events | Anggota | Daftar kegiatan komunitas koperasi, gabung event, formulir pembuatan event baru |
+| Members Directory | Anggota | Telusuri semua anggota koperasi lainnya, detail profil anggota |
+| Simpanan | Anggota | Rincian detail simpanan (Pokok, Wajib, Sukarela) |
+| Admin Dashboard | Admin | Statistik operasional admin mobile, saldo kas koperasi, persetujuan simpanan/penarikan |
+| Admin Members | Admin | Direktori pengurus mobile untuk mengedit profil anggota dan status persetujuan |
+| Admin Profile | Admin | Pengaturan akun dan informasi profil admin |
 
-The Flutter app **does not** talk directly to Supabase. It talks to the **Next.js REST API** (`/api/auth/*` and `/api/mobile-sync/*`), which proxies through to Supabase with correct server-side credentials. This gives centralized auth, request validation, and a single place to add rate limiting later.
+Aplikasi Flutter **tidak** terhubung langsung ke database Supabase. Aplikasi ini berkomunikasi dengan **Next.js REST API** (`/api/auth/*` dan `/api/mobile-sync/*`), yang memproksi kueri ke Supabase menggunakan kredensial tingkat server yang aman.
 
-See [mobile/README.md](./mobile/README.md) for screen details, state management, and APK build instructions.
+Lihat [mobile/README.md](./mobile/README.md) untuk detail layar, manajemen state, dan petunjuk kompilasi APK.
 
 ---
 
-## Architecture
+## Arsitektur
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -204,6 +211,7 @@ See [mobile/README.md](./mobile/README.md) for screen details, state management,
 │  users · members · member_progress · savings · loans · dues  │
 │  battles · quests · member_quests · badges · member_badges   │
 │  proposals · votes · items · member_items · point_tx         │
+│  wallet_transactions · disbursements · marketplace_tx ...    │
 └──────────────────────────────────────────────────────────────┘
                           ▲
                           │  Drizzle ORM
@@ -212,15 +220,15 @@ See [mobile/README.md](./mobile/README.md) for screen details, state management,
        │   Next.js (port 3000, Vercel)         │
        │                                       │
        │  ┌─────────────────────────────────┐  │
-       │  │  React Server Components        │  │  ← admin dashboard pages
+       │  │  React Server Components        │  │  ← Halaman dashboard admin & anggota
        │  │  src/app/(dashboard)/...        │  │
        │  └────────────┬────────────────────┘  │
        │               │                       │
        │       src/actions/*.ts (Server       │
-       │       Actions — typed DB helpers)     │
+       │       Actions — helper database)      │
        │                                       │
        │  ┌─────────────────────────────────┐  │
-       │  │  REST Route Handlers            │  │  ← consumed by Flutter
+       │  │  REST Route Handlers            │  │  ← Dikonsumsi oleh Flutter
        │  │  /api/auth/login                │  │
        │  │  /api/auth/signup               │  │
        │  │  /api/mobile-sync    (GET)      │  │
@@ -228,186 +236,105 @@ See [mobile/README.md](./mobile/README.md) for screen details, state management,
        │  └─────────────────────────────────┘  │
        │                                       │
        │  src/proxy.ts — auth guard            │
-       │  (excludes /api/* from redirect)      │
+       │  (mengecualikan /api/* dari redirect) │
        └──────────────────┬────────────────────┘
                           │  HTTP + JWT Bearer
        ┌──────────────────┴────────────────────┐
        │   Flutter App (port 3001 web)         │
        │   KoperasiProvider (ChangeNotifier)   │
-        │   → views/*                            │
-        └───────────────────────────────────────┘
+       │   → views/*                           │
+       └───────────────────────────────────────┘
 ```
 
 ---
 
-## WhatsApp Automation (n8n)
+## Otomatisasi WhatsApp (n8n)
 
-Member engagement is driven by a single **n8n workflow** that handles both **inbound** (members messaging the cooperative) and **outbound** (the cooperative pushing announcements to members) WhatsApp traffic. The workflow lives in [`n8n/`](./n8n/) as a sanitized, importable JSON file.
+Keterlibatan anggota didorong oleh satu **workflow n8n** yang menangani lalu lintas WhatsApp baik masuk (*inbound*) maupun keluar (*outbound*). Workflow ini disimpan di folder [`n8n/`](./n8n/) dalam bentuk file JSON yang telah disanitasi.
 
-### Branches
+### Aliran Percabangan
 
-| Branch | Trigger | What it does |
+| Aliran | Pemicu | Fungsi |
 |---|---|---|
-| **Inbound** | WhatsApp `messages` webhook | Reads a member's text message, runs an AI agent that can query Supabase **read-only** (scoped to the sender's `wa_id`), then replies via WhatsApp. Sliding-window chat memory is keyed by `wa_id` so context persists across messages from the same sender. |
-| **Outbound — Events** | Schedule (hourly) | AI agent scans the `events` table for rows with `n8n_sent = false`, looks up members of the relevant cooperative, sends each a WhatsApp notification, then runs `UPDATE events SET n8n_sent = true WHERE id = <event_id>` so the row is never re-broadcast. |
-| **Outbound — Proposals** | Schedule (hourly) | Same pattern as the events branch but for the `proposals` table (governance proposals) — broadcast the proposal, then mark `n8n_sent = true`. |
-
-### Flow
-
-```
-                  ┌─► If (body not empty) ─► AI Agent (inbound) ─► Send message
-WhatsApp Trigger ─┤                            ▲   ▲   ▲
-                  │                            │   │   └─ DeepSeek Chat Model
-                  │                            │   └─ Simple Memory (per wa_id)
-                  │                            └─ MCP Client (Supabase read-only)
-
-Schedule Trigger  ┬─► AI Agent1 — events broadcast ─► Send message (tool)
-(hourly)          │        ▲   ▲   ▲
-                  │        │   │   └─ DeepSeek Chat Model1
-                  │        │   └─ MCP Client1 (Supabase read + targeted UPDATE)
-                  │        └─ WhatsApp send tool
-                  │
-                  └─► AI Agent2 — proposals broadcast ─► Send message (tool)
-                          ▲   ▲   ▲
-                          │   │   └─ DeepSeek Chat Model2
-                          │   └─ MCP Client2 (Supabase read + targeted UPDATE)
-                          └─ WhatsApp send tool
-```
-
-### Security guardrails baked into the agents
-
-- **Inbound agent** is restricted to `SELECT` only — `INSERT`, `UPDATE`, `DELETE`, `DROP`, `ALTER`, `TRUNCATE`, `CREATE`, `REPLACE` are forbidden in SQL.
-- All inbound queries must be filtered by the active member's identity (`member_id` / `cooperative_id`) — the agent cannot peek at other members' data.
-- The agent must run a **fresh** SQL query for any dynamic data (balances, points, streaks) instead of reusing chat-memory numbers (anti-stale-memory).
-- **Outbound agents** are the only writers: they may only run a targeted `UPDATE <table> SET n8n_sent = true WHERE id = <row_id>` and are fail-safe — a single error aborts the run to prevent repeated broadcasts on the next tick.
-- All three agents are explicitly hardened against prompt-injection from the user message.
-
-### Re-creating the workflow in your own n8n
-
-The shipped file (`n8n/My workflow.sanitized.json`) has every credential, webhook ID, WhatsApp phone number ID, and Supabase project reference stripped. To run it:
-
-1. In n8n: **Workflows → Import from File…** → pick `My workflow.sanitized.json`.
-2. Create the four credentials listed in [`n8n/SETUP.md`](./n8n/SETUP.md):
-   - **WhatsApp Trigger OAuth2** (Meta) — for the inbound webhook
-   - **WhatsApp Business Cloud** (Meta) — for sending
-   - **DeepSeek API** — LLM for all three agents
-   - **HTTP Header Auth (multi)** — `Authorization` + `apikey` headers for the Supabase MCP endpoint
-3. Replace the two placeholders inside the imported nodes:
-   - `phoneNumberId`: `=<YOUR_WHATSAPP_PHONE_NUMBER_ID>` (appears 3× — on `Send message` and both `Send message in WhatsApp Business Cloud` nodes)
-   - `endpointUrl` on the three MCP Client nodes: `https://mcp.supabase.com/mcp?project_ref=<YOUR_SUPABASE_PROJECT_REF>`
-4. Activate the workflow. Send a WhatsApp message to the connected number to exercise the inbound branch; insert a row with `n8n_sent = false` into `events` or `proposals` to exercise the outbound branches.
-
-> The original un-sanitized export is kept locally at `n8n/My workflow.json` for the original author and is **git-ignored** — it contains the production phone number ID, Supabase project ref, and webhook paths.
+| **Inbound** | Webhook WhatsApp `messages` | Membaca pesan teks anggota, menjalankan agen AI (DeepSeek) dengan hak kueri Supabase **read-only** (dibatasi sesuai `wa_id` pengirim), lalu membalas via WhatsApp. Riwayat obrolan disimpan dinamis berdasarkan `wa_id`. |
+| **Outbound — Events** | Jadwal Rutin (Per Jam) | Agen AI memindai tabel `events` dengan filter `n8n_sent = false`, mencari anggota koperasi yang bersangkutan, mengirimkan notifikasi WhatsApp, lalu memperbarui status `n8n_sent = true` agar tidak disiarkan ulang. |
+| **Outbound — Proposals** | Jadwal Rutin (Per Jam) | Pola yang sama seperti cabang event, namun menargetkan tabel `proposals` untuk menyiarkan proposal rapat anggota (E-RAT). |
 
 ---
 
-## Core Domain Model
+## Model Domain Utama
 
+### 1. Poin & Marketplace
+Anggota mendapatkan poin dari misi, battle arena, partisipasi event, dan transaksi keuangan. Poin dibelanjakan di **marketplace antar-anggota (P2P)**. Semua barang diposting oleh anggota itu sendiri (tidak ada stok admin). Barang dapat memiliki efek opsional (misalnya `freeze_streak`, `prank`).
 
-### 1. Points & Marketplace
+### 2. Level & Peringkat
+Anggota mengumpulkan XP dari aktivitas untuk naik level. Lencana peringkat ditentukan berdasarkan ambang batas level:
+*   **Perunggu (Bronze):** Level 1-2
+*   **Perak (Silver):** Level 3-5
+*   **Emas (Gold):** Level 6-9
+*   **Platinum:** Level 10-14
+*   **Legenda (Legend):** Level 15+
 
-Members earn points from quests, battles, events, and financial activity. Points are spent in a **member-to-member (P2P) marketplace** — there is no admin-stocked shop. All items are listed by members themselves; other members buy with their point balance. Items may carry an effect (e.g. `freeze_streak`, `prank`).
+### 3. Papan Peringkat (Leaderboard)
+Enam dimensi peringkat yang dikelompokkan per koperasi dan dapat difilter secara mingguan, bulanan, atau sepanjang waktu: poin, level/XP, partisipasi event, rasio kemenangan battle, total tabungan, dan login streak.
 
-### 2. Ranks & Levels
+### 4. Battle Arena (PvP Mingguan)
+Setiap minggu, sistem **secara otomatis memasangkan anggota** secara acak dalam pertempuran 1v1. Pemenang ditentukan di akhir minggu berdasarkan akumulasi poin tertinggi yang dikumpulkan dalam minggu tersebut.
 
-Members gain XP from activities, which raises their **level**. Ranks are derived from level thresholds (5 tiers: Perunggu, Perak, Emas, Platinum, Legenda). Members also maintain **streaks** (current + longest) for consecutive daily activity.
+### 5. Skor Kesehatan Koperasi (SIDEPAK Health Score)
+Skor gabungan (0-100) untuk menentukan peringkat kesehatan koperasi pedesaan:
+*   **Sehat ($\ge 60$):** Koperasi berjalan sangat aktif dan tertib administrasi.
+*   **Waspada ($35\text{--}59$):** Membutuhkan pengawasan, terdapat kelambatan pada iuran atau keaktifan anggota.
+*   **Kritis ($< 35$):** Koperasi berisiko tinggi kolaps karena kurangnya iuran atau partisipasi digital.
 
-| Rank | Level range |
+Dihitung berdasarkan 5 metrik terbobot: Kepatuhan Iuran (35%), Penetrasi Digital (25%), Partisipasi Tata Kelola (20%), Kesehatan Kredit (10%), dan Gamifikasi (10%).
+
+---
+
+## Skema Database
+
+| Tabel | Tujuan |
 |---|---|
-| Perunggu (Bronze) | 1–2 |
-| Perak (Silver) | 3–5 |
-| Emas (Gold) | 6–9 |
-| Platinum | 10–14 |
-| Legenda (Legend) | 15+ |
-
-### 3. Events
-
-Cooperative-organized community events that members can join for XP/points (e.g. trash pickup, community garden day, financial literacy workshop). Events are scoped to a cooperative and tracked via the `event_participants` join table.
-
-### 4. Leaderboards
-
-Six ranking dimensions, all scoped within a cooperative and filterable by weekly / monthly / all-time:
-
-- Points
-- Level / XP
-- Events participated
-- Battle win rate
-- Savings deposited
-- Current/longest streak
-
-### 5. Quests (Daily & Weekly)
-
-Daily quests reset every day (e.g. "Make a deposit"). Weekly quests span a week (e.g. "Save 50k this week"). Each quest has a target action type, target count, and a points reward. Progress is tracked per member in `member_quests`.
-
-### 6. Battles (Weekly PvP)
-
-Each week, the system **automatically pairs members** into 1v1 battles. Each player's points earned that week are tracked. When the week ends, the higher-scorer wins a bonus. **All members are auto-enrolled by default** — no opt-in toggle.
-
-### 7. SIDEPAK Health Score System
-
-The cooperative health score (0–100) measures how active and financially stable a cooperative is. It classifies cooperatives into three statuses:
-- **Sehat (>=60)** — Fully operational, high digital and financial compliance.
-- **Waspada (35-59)** — Needs monitoring, potential lag in dues or participation.
-- **Kritis (<35)** — High risk, major defaults or lack of member engagement.
-
-Calculated based on 5 weighted dimensions:
-- **D1: Kepatuhan Iuran (35%)** — Proportion of paid dues from the `dues` table.
-- **D2: Penetrasi Digital (25%)** — Proportion of members with a linked user account.
-- **D3: Partisipasi Governance (20%)** — Ratio of active voters on proposals in the last 90 days.
-- **D4: Kesehatan Kredit (10%)** — Loan repayment rate (ratio of paid loans to non-pending loans).
-- **D5: Engagement Gamifikasi (10%)** — Log-normalized median member XP and current activity streak.
-
-### 8. Wallet & Disbursements
-
-Members can top-up and withdraw funds from their digital wallet (`wallet_balance` inside `member_progress`). Wallet cash-outs are integrated with the **Xendit Payout API**, enabling disbursements directly to members' bank accounts with automated status webhooks (`/api/webhooks/xendit`) to process successes/failures and issue refunds.
+| `users` | Akun pengguna auth Supabase (UUID) |
+| `cooperatives` | Entitas koperasi pedesaan |
+| `members` | Profil anggota (NIK, nama lengkap, koperasi, nomor anggota, no hp, status) |
+| `member_progress` | Level, XP, saldo poin, streak, tanggal aktivitas, saldo dompet digital, skor kredit |
+| `point_transactions` | Catatan masuk/keluar poin beserta sumbernya (`quest`, `battle`, `saving`, dll.) |
+| `savings` | Transaksi setoran/penarikan simpanan sukarela |
+| `loans` | Rekam pinjaman anggota (bunga, status persetujuan, batas tempo) |
+| `dues` | Pembayaran iuran pokok (sekali) dan iuran wajib (bulanan) |
+| `battles` | Riwayat pertarungan mingguan 1v1 antara anggota |
+| `quests` | Definisi misi harian, mingguan, dan sekali selesai |
+| `member_quests` | Status kemajuan pengerjaan misi per anggota |
+| `items` | Definisi item booster toko yang dapat dibeli dengan poin |
+| `member_items` | Inventaris item yang dimiliki anggota beserta jumlahnya |
+| `badges` | Definisi lencana pencapaian |
+| `member_badges` | Lencana yang berhasil didapatkan oleh anggota |
+| `proposals` | Proposal kebijakan tata kelola koperasi (E-RAT) |
+| `votes` | Hak suara anggota terhadap proposal (Setuju / Tolak / Abstain) |
+| `events` | Kegiatan komunitas koperasi |
+| `event_participants` | Kehadiran partisipasi anggota pada event |
+| `wallet_transactions` | Riwayat transaksi dompet digital |
+| `disbursements` | Rekam permintaan penarikan saldo riil terintegrasi Xendit |
+| `marketplace_transactions` | Catatan transaksi jual-beli barang P2P antar-anggota |
+| `seasons` | Pengaturan rentang musim aktif untuk liga PvP |
+| `koperasi_season_scores` | Poin akumulasi kemenangan koperasi dalam satu musim pertarungan |
 
 ---
 
-## Database Schema
+## Referensi API
 
-| Table | Purpose |
-|---|---|
-| `users` | Supabase auth users (UUID) |
-| `cooperatives` | Cooperative entity |
-| `members` | Member profile (NIK, nama lengkap, koperasi, nomor anggota, nomorHp, statusAnggota) |
-| `member_progress` | Level, XP, points balance, current/longest streak, last activity date, wallet balance, credit score |
-| `point_transactions` | History of points earned/spent (with source: `quest`, `battle`, `saving`, `loan`, `purchase`, `sale`, …) |
-| `savings` | Deposit/withdrawal transactions |
-| `loans` | Loan records (interest rate, status, due date) |
-| `dues` | Simpanan pokok (one-time) + Simpanan wajib (monthly) |
-| `battles` | Battle records (challenger, opponent, weekly scores, winner, status) |
-| `quests` | Quest definitions (daily / weekly / one-time) |
-| `member_quests` | Per-member quest progress and completion |
-| `items` | Marketplace items (member-listed, with optional effect) |
-| `member_items` | Member-owned items and quantities |
-| `badges` | Badge definitions (requirement type + value) |
-| `member_badges` | Earned badges per member |
-| `proposals` | Governance proposals (E-RAT agendas) |
-| `votes` | Member votes on proposals (Setuju / Tolak / Abstain) |
-| `events` | Community events |
-| `event_participants` | Per-member event attendance |
-| `wallet_transactions` | Logs of deposit and top-up transactions |
-| `disbursements` | Cash-out / withdrawal requests linked with Xendit |
-| `marketplace_transactions` | Records of P2P item purchases and sales between members |
-| `seasons` | Interactive season schedule windows for PvP battle leagues |
-| `koperasi_season_scores` | Cooperative win/loss records and points tally per season |
-
----
-
-## API Reference
-
-The Flutter app uses a small REST surface exported from `desktop/src/app/api/`. All four routes return JSON and set permissive CORS headers so the Flutter web build can call them from a different port during dev.
+Aplikasi Flutter berkomunikasi dengan API REST di `desktop/src/app/api/`.
 
 ### `POST /api/auth/login`
-
 ```jsonc
 // Request
 { "email": "user@example.com", "password": "••••••" }
 
-// 200 OK
+// Response (200 OK)
 {
   "success": true,
-  "token": "eyJhbGciOi...",     // Supabase JWT
+  "token": "eyJhbGciOi...",     // JWT Supabase
   "memberId": 42,
   "email": "user@example.com",
   "fullName": "Andi Wijaya"
@@ -415,8 +342,8 @@ The Flutter app uses a small REST surface exported from `desktop/src/app/api/`. 
 ```
 
 ### `POST /api/auth/signup`
-
 ```jsonc
+// Request
 {
   "email": "user@example.com",
   "password": "••••••",
@@ -427,71 +354,13 @@ The Flutter app uses a small REST surface exported from `desktop/src/app/api/`. 
 }
 ```
 
-### `GET /api/mobile-sync` (auth required)
-
+### `GET /api/mobile-sync` (membutuhkan autentikasi)
 `Authorization: Bearer <token>`
+Mengembalikan seluruh data yang dibutuhkan oleh aplikasi anggota dalam satu kali panggilan API (menjalankan 9 kueri database paralel via `Promise.all`).
 
-Returns a single bundle covering everything the member app needs in one round-trip. The handler runs **9 parallel Drizzle queries** via `Promise.all` to keep latency low.
-
-```jsonc
-{
-  "success": true,
-  "data": {
-    "dashboard": {
-      "progress": {
-        "pointsBalance": 1350,
-        "currentStreak": 7,
-        "longestStreak": 14,
-        "level": 3,
-        "lastActivityDate": "2026-06-28T00:00:00Z"
-      },
-      "transactions": [],
-      "level": 3
-    },
-    "financials": {
-      "savings": [], "loans": [], "dues": [],
-      "simpananPokok": 750000,
-      "simpananWajib": 750000,
-      "simpananSukarela": 7254000
-    },
-    "quests": [
-      { "id": 1, "title": "Setor simpanan hari ini", "rewardPoints": 50,
-        "category": "daily", "progress": { "isCompleted": false } }
-    ],
-    "governance": {
-      "activeProposals": [{ "id": 1, "title": "...", "status": "active" }],
-      "totalMembers": 120,
-      "totalAsetDesa": 84000000
-    },
-    "arena": {
-      "activeBattles": [
-        { "id": 1, "challengerId": 1, "opponentId": 2,
-          "challengerPoints": 8200, "opponentPoints": 7500,
-          "endDate": "2026-06-29T23:59:00Z",
-          "opponent": { "namaLengkap": "Budi Santoso" } }
-      ],
-      "pastBattles": []
-    },
-    "koperasiStats": { "transaksi": 37, "anggotaBaru": 8, "omzetHarian": 0, "umkmAktif": 0 },
-    "badges": [{ "id": 1, "name": "Kolektor Teladan", "description": "...",
-                 "earnedAt": "2026-06-01T00:00:00Z" }],
-    "winRate": { "winRate": 62.5, "totalBattles": 8 },
-    "leaderboard": { /* points, level, events, battles, savings, streaks */ },
-    "storeItems": [ /* marketplace items */ ],
-    "memberInventory": [ /* owned items */ ],
-    "marketplaceItems": [ /* P2P listings */ ],
-    "memberEventParticipations": [ /* joined events */ ],
-    "activeMembers": [ /* directory */ ]
-  }
-}
-```
-
-### `POST /api/mobile-sync/action` (auth required)
-
+### `POST /api/mobile-sync/action` (membutuhkan autentikasi)
 `Authorization: Bearer <token>`
-
-Single write endpoint with a discriminated `action` field. The server validates the payload, mutates the relevant tables via Drizzle, and returns the updated view fragment.
-
+Endpoint tunggal untuk transaksi tulis menggunakan parameter pembeda `action`.
 ```jsonc
 { "action": "complete_quest", "questId": 1 }
 { "action": "cast_vote",     "proposalId": 1, "vote": "Setuju" }
@@ -499,14 +368,10 @@ Single write endpoint with a discriminated `action` field. The server validates 
 { "action": "use_item",      "itemId": 1 }
 ```
 
-### `POST /api/admin-member` (admin auth required)
-
+### `POST /api/admin-member` (membutuhkan autentikasi admin)
 `Authorization: Bearer <token>`
-
-Updates a member's profile details. Only accessible by authenticated users with the `admin` role.
-
+Mengubah detail profil anggota koperasi. Hanya dapat diakses oleh user dengan role `admin`.
 ```jsonc
-// Request body
 {
   "memberId": 12,
   "data": {
@@ -515,208 +380,115 @@ Updates a member's profile details. Only accessible by authenticated users with 
     "statusAnggota": "active"
   }
 }
-
-// Response: 200 OK
-{
-  "success": true
-}
 ```
 
-### `POST /api/withdraw` (auth required)
-
+### `POST /api/withdraw` (membutuhkan autentikasi)
 `Authorization: Bearer <token>`
-
-Initiates a digital wallet withdrawal request. Deducts the amount from the member's wallet balance, creates a pending disbursement in the database, and schedules a payout using the Xendit API.
-
+Mengajukan penarikan saldo dompet digital. Saldo dipotong dari `member_progress.wallet_balance` dan pencairan diproses ke rekening bank tujuan melalui Xendit.
 ```jsonc
-// Request body
 {
   "amount": 25000,
   "bankCode": "BCA",
   "accountNumber": "1234567890",
   "accountName": "Andi Wijaya"
 }
-
-// Response: 200 OK
-{
-  "success": true,
-  "data": {
-    "id": 4,
-    "memberId": 42,
-    "amount": 25000,
-    "bankCode": "BCA",
-    "accountNumber": "1234567890",
-    "accountName": "Andi Wijaya",
-    "status": "PENDING",
-    "externalId": "withdraw-42-1718090000000",
-    "createdAt": "2026-07-11T09:40:00Z"
-  }
-}
 ```
 
 ### `POST /api/webhooks/xendit`
-
-Receives payout status callbacks from Xendit. Verifies the callback token, transitions the disbursement record status to `COMPLETED` or `FAILED`, and handles automated savings refunds upon failure.
-
+Menerima status penarikan dari Xendit. Memperbarui status disbursement menjadi `COMPLETED` atau `FAILED` (saldo otomatis dikembalikan apabila transaksi gagal).
 ```jsonc
-// Request Headers
-// x-callback-token: <XENDIT_WEBHOOK_TOKEN>
-
-// Request body
 {
   "external_id": "withdraw-42-1718090000000",
-  "status": "COMPLETED", // or 'FAILED'
+  "status": "COMPLETED",
   "amount": 25000
-}
-
-// Response: 200 OK
-{
-  "received": true
 }
 ```
 
 ### `GET /api/delete-admin` (dev utility)
-
-Deletes all accounts with the `admin` role along with their profiles and progress. Used primarily for testing and cleanup.
-
-```jsonc
-// Response: 200 OK
-{
-  "message": "Deleted admins successfully",
-  "count": 2
-}
-```
-
-### CORS
-
-All API routes export an `OPTIONS()` handler that returns 204 with the required preflight headers. The Next.js middleware (`src/proxy.ts`) intentionally **excludes `/api/*`** from its auth-redirect matcher so that preflight requests are answered by the Route Handler rather than redirected to `/signin` (which would cause `Redirect is not allowed for a preflight request` errors).
+Menghapus seluruh akun pengurus berstatus `admin` untuk keperluan reset pengujian database.
 
 ---
 
-## Quick Start
+## Quick Start (Panduan Memulai)
 
-### Prerequisites
+### Prasyarat
+*   **Node.js** v20+ dan npm v10+
+*   **Flutter SDK** v3.27+ dengan Dart v3.6+
+*   Database **Supabase** (PostgreSQL)
 
-- **Node.js** 20+ and npm 10+ (for `desktop/`)
-- **Flutter** 3.27+ with Dart 3.6+ (for `mobile/`)
-- A **Supabase** project (free tier is fine) with the schema applied
-
-### Clone & install
-
+### Instalasi
 ```bash
 git clone https://github.com/danarrigo/SIDEPAK
 cd SIDEPAK
-npm install                       # installs root workspace (desktop only)
+npm install
 ```
 
-### Set up the desktop env
-
+### Jalankan Aplikasi secara Lokal
 ```bash
-cp desktop/.env.example desktop/.env.local
-# then fill in your Supabase creds (see desktop/README.md)
-```
-
-### Run both apps
-
-```bash
-# Terminal 1 — Desktop dashboard
+# Terminal 1 — Dashboard Desktop Next.js
 cd desktop
-npm run dev                       # http://localhost:3000
+cp .env.example .env.local  # kemudian isi variabel kredensial Supabase Anda
+npm run dev                 # Berjalan pada http://localhost:3000
 
-# Terminal 2 — Flutter web app
+# Terminal 2 — Aplikasi Flutter
 cd mobile
 flutter pub get
-flutter run -d chrome --web-port 3001 --web-hostname localhost
-# → opens http://localhost:3001
+flutter run -d chrome --web-port 3001 --web-hostname localhost  # Berjalan pada http://localhost:3001
 ```
-
-> The Flutter app expects the Next.js backend on `localhost:3000`. Both must run simultaneously.
-
-For per-app setup, env vars, and Supabase schema application, see:
-- [desktop/README.md](./desktop/README.md)
-- [mobile/README.md](./mobile/README.md)
 
 ---
 
-## Building the Mobile APK
+## Membangun APK Mobile
 
+Untuk mengkompilasi file paket instalasi Android:
 ```bash
 cd mobile
 flutter pub get
 
-# Debug APK (single fat APK, ~140 MB, all ABIs)
+# Debug APK (file instalasi debug, ~140 MB)
 flutter build apk --debug
 
-# Release APK (single fat APK, ~51 MB, tree-shaken icons, debug-signed)
+# Release APK (produksi standar, ~51 MB)
 flutter build apk --release
 
-# Per-ABI APKs (smaller, ~20 MB each)
+# Per-ABI APK (ukuran kecil dipisah per jenis prosesor ponsel, ~20 MB)
 flutter build apk --split-per-abi --release
-
-# App Bundle for Play Store
-flutter build appbundle --release
 ```
-
-> **Signing for production:** the release APK above is signed with Flutter's default debug key. Before uploading to the Play Store, generate an upload keystore and configure `android/app/build.gradle.kts` to use it.
 
 ---
 
 ## CI/CD
 
-Two GitHub Actions workflows run on every push to `main`:
+Dua alur pengujian GitHub Actions berjalan otomatis setiap kali ada kode yang didorong (*push*) ke branch `main`:
+*   `desktop-ci.yml` — Menjalankan uji `npm run lint` → `tsc --noEmit` → `jest` di folder `desktop/`.
+*   `mobile-ci.yml` — Menjalankan pemeriksaan format Dart, analisis statis, dan `flutter test`.
 
-| Workflow | Triggers | Steps |
-|---|---|---|
-| `desktop-ci.yml` | Push to `main`, PRs touching `desktop/` | `npm ci` → `npm run lint` → `tsc --noEmit` → `jest` |
-| `mobile-ci.yml` | Push to `main`, PRs touching `mobile/` | `flutter pub get` → `dart format --set-exit-if-changed` → `flutter analyze` → `flutter test` |
-
-The `desktop/` app is deployed to **Google Cloud Run** using the provided `Dockerfile`. The Flutter web build is deployed to Vercel at `https://hackathon-SIDEPAK.vercel.app`.
+Dashboard Next.js di-deploy ke **Google Cloud Run** menggunakan Dockerfile, sedangkan Flutter Web di-deploy ke **Vercel** di alamat `https://hackathon-SIDEPAK.vercel.app`.
 
 ---
 
-## Testing
+## Pengujian (Testing)
 
-| Suite | Command | Count |
-|---|---|---|
-| Desktop (Jest + RTL) | `cd desktop && npm test` | 50 unit/integration tests |
-| Mobile (Flutter) | `cd mobile && flutter test` | 65 widget/unit tests |
-
-Both suites must pass before a PR can be merged. CI runs both on every push to `main`.
+*   **Uji Desktop (Jest & RTL):** `cd desktop && npm test`
+*   **Uji Mobile (Flutter Widget):** `cd mobile && flutter test`
 
 ---
 
-## Project Scripts
+## Batasan Diketahui
 
-The root `package.json` provides cross-app wrappers (handy in CI runners):
-
-```bash
-npm run test:desktop      # cd desktop && npm test
-npm run test:mobile       # cd mobile && flutter test
-npm run lint:desktop      # cd desktop && npm run lint
-npm run analyze:mobile    # cd mobile && flutter analyze
-```
+*   **`omzetHarian` & `umkmAktif`** masih di-hardcode `0` karena tabel di database belum terisi.
+*   **Streak Kalender** dihitung mundur secara dinamis dari `lastActivityDate` anggota, belum didukung riwayat aktivitas harian yang permanen.
+*   **Rilis APK** ditandatangani menggunakan *debug key* bawaan Flutter. Kunci keystore kustom diperlukan sebelum didistribusikan ke Google Play Store.
 
 ---
 
-## Known Limitations
+## Kontribusi
 
-- **`koperasiStats.omzetHarian` and `umkmAktif`** always return `0` in `/api/mobile-sync` — not yet populated in the DB; the UI shows `'-'` as a fallback.
-- **Streak calendar** is approximated by walking backward from `lastActivityDate` for N days. There is no per-day activity log yet.
-- **Battle comparison rows** (opponent's missions, savings) currently show `'-'` — opponent detail stats aren't fetched in the sync bundle.
-- **Release APK is debug-signed** by default; a production keystore is needed before publishing to the Play Store.
-- **Pinned Flutter package versions** in `mobile/pubspec.yaml` (`shared_preferences: ^2.5.3`, `flutter_lints: ^5.0.0`) are deliberately held back to match the CI's Flutter 3.27.x (Dart 3.6.0) toolchain. Bump them once the CI runner is upgraded to Flutter 3.34+ (Dart 3.9+).
-
----
-
-## Contributing
-
-1. Branch off `main` (`git checkout -b feature/your-feature`).
-2. Make your changes. Add or update tests.
-3. Run `npm run test:desktop` and `npm run test:mobile` locally.
-4. Run `cd mobile && dart format lib test` if you touched any Dart file.
-5. Push your branch and open a PR — CI will run both test suites automatically.
-6. Squash-merge once approved.
+1. Buat branch baru dari `main` (`git checkout -b feature/fitur-anda`).
+2. Terapkan perubahan kode Anda dan tambahkan file tes baru bila diperlukan.
+3. Jalankan seluruh uji pengujian lokal.
+4. Buat Pull Request (PR) untuk digabungkan kembali ke branch `main`.
 
 ---
 
-*Built with ❤️ for the advancement of Indonesian village cooperatives.*
+*Dibuat dengan ❤️ untuk kemajuan Koperasi Indonesia.*

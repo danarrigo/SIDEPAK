@@ -1,59 +1,59 @@
-# KopDes — Mobile App 📱
+# KopDes — Aplikasi Mobile 📱
 
-A Flutter client for the KopDes cooperative platform. A **single codebase** that builds for **web (Chrome/Safari/Firefox)**, **Android (APK)**, and **iOS**. The web build is the primary target for the hackathon demo; the Android APK is for field testing on actual phones.
+Klien Flutter untuk platform koperasi KopDes. Sebuah **basis kode tunggal** yang dikompilasi untuk **web (Chrome/Safari/Firefox)**, **Android (APK)**, dan **iOS**. Build web adalah target utama untuk demo hackathon; Android APK untuk pengujian lapangan pada ponsel nyata.
 
-For the project overview, see the [root README](../README.md). For the Next.js backend, see [desktop/README.md](../desktop/README.md).
+Untuk gambaran umum proyek, silakan lihat [README utama di root](../README.md). Untuk backend Next.js, lihat [desktop/README.md](../desktop/README.md).
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack (Teknologi)
 
 - **Framework**: [Flutter](https://flutter.dev/) (Dart 3.6, Flutter 3.27+)
-- **State management**: [`provider`](https://pub.dev/packages/provider) — single `KoperasiProvider` (`ChangeNotifier`) holds all app state
-- **UI/UX**: Custom *Dark Slate & Yellow* theme matching the web dashboard
-- **HTTP**: Dart `http` package against the Next.js REST API
-- **Persistence**: `shared_preferences` (pinned to `^2.5.3` for Dart 3.6.0 compat) — stores the JWT
-- **Backend integration**: Next.js REST endpoints at `/api/auth/*` and `/api/mobile-sync/*` (no direct Supabase access from the app)
+- **Manajemen State**: [`provider`](https://pub.dev/packages/provider) — satu `KoperasiProvider` (`ChangeNotifier`) memegang semua state aplikasi
+- **UI/UX**: Tema kustom *Dark Slate & Yellow* yang cocok dengan dashboard web desktop
+- **HTTP**: Paket Dart `http` untuk memanggil Next.js REST API
+- **Penyimpanan Lokal**: `shared_preferences` (dikunci ke versi `^2.5.3` untuk kompatibilitas Dart 3.6.0) — menyimpan token JWT
+- **Integrasi Backend**: REST API Next.js di `/api/auth/*` dan `/api/mobile-sync/*` (tidak ada akses langsung Supabase dari aplikasi)
 
 ---
 
-## ✨ Features
+## ✨ Fitur
 
-- **Pocket dashboard** — savings total, point balance, rank badge, daily missions at a glance
-- **KopDes Arena (mobile)** — animated battle view, weekly progress bar, battle history
-- **Mission center** — daily/weekly quests, item shop, weekly streak calendar (Mon–Sun)
-- **Marketplace** — browse P2P listings, list your own items, buy/spend points
-- **Governance (E-RAT)** — vote on proposals (Setuju / Tolak / Abstain), view timeline
-- **SIDEPAK Health Score (mobile)** — visual breakdown of the cooperative's health dimensions directly inside the member app
-- **Admin Mode** — mobile views for administrators to inspect financial statistics and approve pending member deposit or withdrawal requests
-- **Real-time sync** — all data is fetched from `/api/mobile-sync` (single bundle, 9 parallel Drizzle queries on the server), avoiding the Postgres pool exhaustion issues that plagued earlier split-fetch implementations
+- **Dashboard Saku** — Total simpanan, saldo poin, lencana peringkat, dan misi harian dalam sekali pandang.
+- **KopDes Arena (Mobile)** — Tampilan pertempuran beranimasi, bar kemajuan mingguan, dan riwayat pertarungan.
+- **Pusat Misi** — Misi harian & mingguan, toko item, dan kalender streak mingguan (Senin-Minggu).
+- **Marketplace** — Telusuri barang dagangan P2P, daftarkan barang jualan pribadi, dan transaksi menggunakan saldo poin.
+- **Tata Kelola (E-RAT)** — Memberikan suara (Setuju / Tolak / Abstain) pada proposal aktif pedesaan beserta linimasa kebijakan.
+- **SIDEPAK Health Score (Mobile)** — Tampilan visual dimensi kesehatan koperasi langsung di dalam aplikasi anggota.
+- **Mode Admin** — Layar mobile admin untuk pengurus guna melihat bagan keuangan koperasi serta menyetujui kueri simpanan/penarikan saldo anggota.
+- **Real-Time Sync** — Semua data ditarik dari `/api/mobile-sync` (satu bundle data, dijalankan dengan 9 kueri database paralel di server), menghindari masalah kehabisan pool koneksi Postgres.
 
 ---
 
-## 📂 Source structure
+## 📂 Struktur Kode Sumber
 
 ```
 mobile/lib/
-├── main.dart                       # App entry, MaterialApp, Provider setup, routing
+├── main.dart                       # Entrypoint aplikasi, setup MaterialApp, setup Provider, navigasi
 ├── models/
-│   ├── mission.dart                # Quest / mission model
-│   ├── shop_item.dart              # Marketplace item model
-│   └── history_item.dart           # Battle history entry model
+│   ├── mission.dart                # Model misi / quest
+│   ├── shop_item.dart              # Model item marketplace
+│   └── history_item.dart           # Model riwayat battle PvP
 ├── providers/
-│   └── koperasi_provider.dart      # Central ChangeNotifier (all state + API calls)
+│   └── koperasi_provider.dart      # ChangeNotifier utama (State global & pemanggilan API)
 └── views/
     ├── login_view.dart
     ├── signup_view.dart
-    ├── home_view.dart              # Dashboard: savings, points, missions, coop stats
-    ├── misi_view.dart              # Mission center, streak calendar, item shop
-    ├── battle_view.dart            # Arena: active battle, history
-    ├── koperasi_view.dart          # Koperasi stats, E-RAT voting, timeline
-    ├── profile_view.dart           # Profile, rank, badges, impact stats
-    ├── marketplace_view.dart       # P2P marketplace
-    ├── events_view.dart            # Community events
-    ├── members_directory_view.dart # Member directory
-    ├── member_detail_view.dart     # Member detail
-    ├── simpanan_view.dart          # Savings detail (Pokok / Wajib / Sukarela)
+    ├── home_view.dart              # Beranda: simpanan, poin, misi, statistik koperasi
+    ├── misi_view.dart              # Pusat misi, kalender streak, toko item
+    ├── battle_view.dart            # Arena: pertempuran PvP aktif, riwayat
+    ├── koperasi_view.dart          # Statistik koperasi, voting E-RAT, linimasa
+    ├── profile_view.dart           # Profil, peringkat, lencana pencapaian, statistik dampak
+    ├── marketplace_view.dart       # Pasar P2P antar-anggota
+    ├── events_view.dart            # Kegiatan komunitas
+    ├── members_directory_view.dart # Direktori daftar anggota
+    ├── member_detail_view.dart     # Detail anggota
+    ├── simpanan_view.dart          # Detail simpanan (Pokok / Wajib / Sukarela)
     └── widgets/
         ├── create_event_form.dart
         ├── leaderboard_section.dart
@@ -63,162 +63,116 @@ mobile/lib/
 
 ---
 
-## 🗺️ Screens
+## 🗺️ Layar
 
-| Screen | Audience | Purpose |
+| Layar | Target Pengguna | Tujuan |
 |---|---|---|
-| **Login** | All | Email/password sign-in; persists JWT to `shared_preferences` |
-| **Sign Up** | All | New member registration (NIK, nama lengkap, …) |
-| **Onboarding** | All | Onboarding carousel introducing the cooperative concept and application features |
-| **Home** | Member | Savings total, point balance, current rank badge, daily missions, koperasi stats |
-| **Misi (Missions)** | Member | Rank label, weekly streak calendar (Mon–Sun), daily/weekly missions, item shop |
-| **Battle (Arena)** | Member | Active battle vs auto-matched opponent, comparison rows, end date countdown, history |
-| **Koperasi** | Member | Stats cards (transaksi, anggota baru, omzet harian, UMKM aktif), E-RAT proposal voting, timeline |
-| **Profile** | Member | Rank badge, earned badges, impact cards (savings, battles won, events joined), rank progression meter |
-| **Health Score** | Member | View of the cooperative's health dimensions (dues compliance, digital penetration, governance, etc.) |
-| **Marketplace** | Member | P2P marketplace: browse items, list own items, buy/spend points |
-| **Events** | Member | Community events list, join event, create event form |
-| **Members Directory** | Member | Browse all members, view individual member detail |
-| **Simpanan** | Member | Detailed savings breakdown (Pokok, Wajib, Sukarela) |
-| **Admin Dashboard** | Admin | Operational metrics summary, cooperative balances, and pending deposit/withdrawal lists |
-| **Admin Members** | Admin | Operator view of all members and their registration statuses |
-| **Admin Profile** | Admin | Admin credentials settings and profile overview |
+| **Login** | Semua | Masuk akun email/password; menyimpan JWT ke `shared_preferences` |
+| **Sign Up** | Semua | Registrasi anggota baru (NIK, nama lengkap, …) |
+| **Onboarding** | Semua | Layar slide pengantar koperasi digital SIDEPAK |
+| **Home** | Anggota | Saldo simpanan, saldo poin, lencana peringkat aktif, misi harian, statistik koperasi |
+| **Misi (Missions)** | Anggota | Label peringkat, kalender streak mingguan (Senin-Minggu), misi harian/mingguan, toko item |
+| **Battle (Arena)** | Anggota | Battle mingguan vs lawan acak, bar perbandingan, hitung mundur berakhirnya battle, riwayat |
+| **Koperasi** | Anggota | Kartu statistik (transaksi, anggota baru, omzet, UMKM), voting proposal E-RAT, linimasa |
+| **Profile** | Anggota | Lencana peringkat, koleksi lencana pencapaian, kartu dampak, diagram kemajuan level |
+| **Health Score** | Anggota | Visualisasi status dimensi kesehatan koperasi saat ini |
+| **Marketplace** | Anggota | Pasar P2P: belanja barang, daftarkan dagangan baru, beli pakai poin |
+| **Events** | Anggota | Kegiatan komunitas: daftar event, buat event baru, ikut serta |
+| **Members Directory** | Anggota | Telusuri semua anggota koperasi pedesaan, detail profil |
+| **Simpanan** | Anggota | Rincian simpanan (Pokok, Wajib, Sukarela) |
+| **Admin Dashboard** | Admin | Ringkasan metrik keuangan, saldo kas, persetujuan penarikan saldo anggota |
+| **Admin Members** | Admin | Layar manajemen anggota untuk pengurus mengubah data anggota |
+| **Admin Profile** | Admin | Kredensial akun pengurus & profil admin |
 
 ---
 
-## 🧠 State management
+## 🧠 Manajemen State
 
-All client state lives in a single `KoperasiProvider` (`ChangeNotifier`). The provider is the only place that calls the REST API; views read from it via `Provider.of<KoperasiProvider>(context)` or `context.watch`.
+Semua state klien disimpan di dalam `KoperasiProvider` (`ChangeNotifier`). Provider ini adalah satu-satunya komponen yang memanggil API REST Next.js; komponen UI membaca state menggunakan `Provider.of<KoperasiProvider>(context)` atau `context.watch`.
 
-| Field | Backend source | Description |
+| Field | Sumber Backend | Deskripsi |
 |---|---|---|
-| `points` | `member_progress.pointsBalance` | Current point balance |
-| `streak` | `member_progress.currentStreak` | Active login streak (days) |
-| `level` | `member_progress.level` | Member level (1–20+) |
-| `rankName` | Computed from `level` | Perunggu / Perak / Emas / Platinum / Legenda |
-| `weeklyStreakDays` | Computed from `lastActivityDate` + `streak` | Mon–Sun streak map |
-| `userWinRate` | `getWinRate()` or active battle scores | Win rate percentage |
-| `missions` | `getActiveQuests()` | Daily & weekly missions |
-| `historyList` | `getBattleHistory()` | Past battle records |
-| `activeBattle` | `getArenaData()` | Current ongoing battle |
-| `activeProposals` | `getGovernanceData()` | E-RAT active agenda |
-| `earnedBadges` | `getMemberBadges()` | Badges earned by user |
-| `simpananPokok` / `Wajib` / `Sukarela` | `getFinancialsData()` | Savings breakdown |
-
-### Rank tier system
-
-| Rank | Required level |
-|---|---|
-| Perunggu (Bronze) | 1–2 |
-| Perak (Silver) | 3–5 |
-| Emas (Gold) | 6–9 |
-| Platinum | 10–14 |
-| Legenda (Legend) | 15+ |
-
-### Auth flow
-
-```
-Mobile App                          Next.js API
-    │                                    │
-    ├── POST /api/auth/login ──────────► │
-    │   { email, password }              ├── supabase.auth.signInWithPassword()
-    │                                    ├── db.select(members).where(userId)
-    │ ◄── { token, memberId, fullName } ─┤
-    │                                    │
-    │   Save to SharedPreferences        │
-    │   (token, memberId, email, name)   │
-    │                                    │
-    ├── GET /api/mobile-sync ──────────► │
-    │   Authorization: Bearer <token>    ├── supabase.auth.getUser(token)
-    │                                    ├── resolve memberId from members table
-    │ ◄── { success, data: {...} } ──────┤── 9 parallel Drizzle queries
-```
-
-The JWT is read back from `shared_preferences` on app launch; if it is still valid, the login screen is skipped.
+| `points` | `member_progress.pointsBalance` | Saldo poin saat ini |
+| `streak` | `member_progress.currentStreak` | Streak login aktif (hari) |
+| `level` | `member_progress.level` | Level anggota (1–20+) |
+| `rankName` | Dihitung dari `level` | Perunggu / Perak / Emas / Platinum / Legenda |
+| `weeklyStreakDays` | Dihitung dari `lastActivityDate` + `streak` | Peta streak Senin–Minggu |
+| `userWinRate` | `getWinRate()` atau kueri battle aktif | Persentase kemenangan battle |
+| `missions` | `getActiveQuests()` | Misi harian & mingguan |
+| `historyList` | `getBattleHistory()` | Rekam riwayat pertempuran sebelumnya |
+| `activeBattle` | `getArenaData()` | Detail battle mingguan yang sedang berjalan |
+| `activeProposals` | `getGovernanceData()` | Agenda voting proposal E-RAT aktif |
+| `earnedBadges` | `getMemberBadges()` | Lencana yang diraih oleh anggota |
+| `simpananPokok` / `Wajib` / `Sukarela` | `getFinancialsData()` | Rincian detail simpanan finansial |
 
 ---
 
-## 🚀 Running locally
+## 🚀 Menjalankan Secara Lokal
 
-### 1. Prerequisites
+### 1. Prasyarat
 
-Install [Flutter SDK](https://docs.flutter.dev/get-started/install) (3.27+, Dart 3.6+) and have an active emulator (Android/iOS) or a connected physical device.
+Pastikan Anda memiliki [Flutter SDK](https://docs.flutter.dev/get-started/install) (versi 3.27+, Dart 3.6+) dan emulator (Android/iOS) atau browser Chrome siap pakai.
 
-### 2. Install dependencies
+### 2. Instalasi Dependensi
 
 ```bash
 flutter pub get
 ```
 
-### 3. Run the app
+### 3. Menjalankan Aplikasi
 
 ```bash
-# Web (default for hackathon demo)
+# Web (Utama untuk keperluan demo hackathon)
 flutter run -d chrome --web-port 3001 --web-hostname localhost
 
-# Android emulator / device
+# Android emulator / perangkat fisik
 flutter run -d android
 
-# iOS simulator (macOS only)
+# iOS simulator (Khusus macOS)
 flutter run -d ios
 ```
 
-> The Flutter app expects the Next.js backend on `http://localhost:3000`. If you have trouble connecting to `localhost` from a mobile device, point the base URL to your machine's LAN IP (e.g. `http://192.168.1.10:3000`) — but for the hackathon demo the Vercel-deployed backend works without any local setup.
+> **Catatan:** Aplikasi Flutter mencari backend Next.js di `http://localhost:3000`. Jika Anda menguji melalui emulator perangkat mobile fisik, ubah base URL ke alamat IP LAN komputer Anda (misal: `http://192.168.1.10:3000`).
 
-### 4. Format & analyze
+### 4. Format & Analisis Kode
 
 ```bash
-dart format lib test                  # apply canonical Dart formatting
-flutter analyze                       # static analysis (must be clean)
+dart format lib test                  # Menerapkan pemformatan kode Dart kanonikal
+flutter analyze                       # Menjalankan analisis statis kode
 ```
 
 ---
 
-## 📦 Building the APK
+## 📦 Membangun Paket APK
 
 ```bash
-# Debug APK (single fat APK, ~140 MB, all ABIs)
+# Debug APK (~140 MB)
 flutter build apk --debug
-# → build/app/outputs/flutter-apk/app-debug.apk
 
-# Release APK (single fat APK, ~51 MB, tree-shaken icons, debug-signed)
+# Release APK (~51 MB)
 flutter build apk --release
-# → build/app/outputs/flutter-apk/app-release.apk
 
-# Per-ABI APKs (smaller, ~20 MB each — better for distribution)
+# Per-ABI APK (dipisah berdasarkan prosesor target, ~20 MB masing-masing)
 flutter build apk --split-per-abi --release
-# → build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-# → build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-# → build/app/outputs/flutter-apk/app-x86_64-release.apk
-
-# App Bundle for Play Store
-flutter build appbundle --release
-# → build/app/outputs/bundle/release/app-release.aab
 ```
-
-> **Signing for production:** the release APK above is signed with Flutter's default debug key. Before uploading to the Play Store, generate an upload keystore and configure `android/app/build.gradle.kts` to use it. See the Flutter docs on [app signing](https://docs.flutter.dev/deployment/android#signing-the-app).
 
 ---
 
-## 🧪 Testing
+## 🧪 Pengujian (Testing)
 
 ```bash
-flutter test                          # 65 widget + unit tests
+flutter test                          # Menjalankan 65 uji unit dan widget
 flutter analyze                       # static analysis
-dart format --output=none --set-exit-if-changed lib test   # CI formatting gate
+dart format --output=none --set-exit-if-changed lib test   # CI lint check
 ```
-
-All three must pass before a PR can be merged. CI runs them on every push to `main` (see `.github/workflows/mobile-ci.yml`).
 
 ---
 
-## 📝 Package version pins
+## 📝 Versi Dependensi yang Dikunci
 
-`mobile/pubspec.yaml` deliberately pins a few packages below their latest major versions to match the CI's Flutter 3.27.x (Dart 3.6.0) toolchain:
+File `mobile/pubspec.yaml` mengunci beberapa dependensi ke versi lama agar sesuai dengan SDK Flutter 3.27.x (Dart 3.6.0) yang digunakan oleh runner CI GitHub Actions:
 
 ```yaml
-flutter_lints: ^5.0.0   # ^6.0.0 needs Dart >=3.8.0
-shared_preferences: ^2.5.3   # ^2.5.5 needs Dart >=3.9.0
+flutter_lints: ^5.0.0   # ^6.0.0 memerlukan Dart >=3.8.0
+shared_preferences: ^2.5.3   # ^2.5.5 memerlukan Dart >=3.9.0
 ```
-
-Bump them once the CI runner is upgraded to Flutter 3.34+ (Dart 3.9+).

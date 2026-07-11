@@ -108,6 +108,7 @@ class _LoginViewState extends State<LoginView> {
                         width: 64,
                         height: 64,
                         fit: BoxFit.cover,
+                        alignment: Alignment.center,
                       ),
                     ),
                   ),

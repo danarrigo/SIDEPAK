@@ -823,7 +823,8 @@ class KoperasiProvider extends ChangeNotifier {
     }
   }
 
-  Future<String> updateAdminMember(int targetMemberId, Map<String, dynamic> data) async {
+  Future<String> updateAdminMember(
+      int targetMemberId, Map<String, dynamic> data) async {
     try {
       final response = await _client.post(
         Uri.parse(_apiUrl('/api/admin-member')),

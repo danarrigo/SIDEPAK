@@ -46,14 +46,6 @@ class _OnboardingPaywallState extends State<OnboardingPaywall>
     super.dispose();
   }
 
-  void _dismiss() {
-    _controller.reverse().then((_) {
-      setState(() {
-        _isVisible = false;
-      });
-    });
-  }
-
   void _handlePay() {
     widget.onPay();
   }

@@ -18,7 +18,8 @@ class HealthScoreView extends StatelessWidget {
         height: double.infinity,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 32),
+          padding:
+              const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 32),
           child: provider.healthScore == null
               ? _buildEmptyState(provider)
               : _buildContent(context, provider),
@@ -40,12 +41,16 @@ class HealthScoreView extends StatelessWidget {
               color: const Color(0xFF0F172A).withOpacity(0.08),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Icon(Icons.monitor_heart_outlined, color: Color(0xFF0F172A), size: 36),
+            child: const Icon(Icons.monitor_heart_outlined,
+                color: Color(0xFF0F172A), size: 36),
           ),
           const SizedBox(height: 20),
           const Text(
             'Data Kesehatan Belum Tersedia',
-            style: TextStyle(color: Color(0xFF0F172A), fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                color: Color(0xFF0F172A),
+                fontSize: 16,
+                fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           const Text(
@@ -97,12 +102,16 @@ class HealthScoreView extends StatelessWidget {
               const SizedBox(height: 4),
               const Text(
                 'Skor Kesehatan Koperasi',
-                style: TextStyle(color: Color(0xFF0F172A), fontSize: 22, fontWeight: FontWeight.w900),
+                style: TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900),
               ),
               if (coopName.isNotEmpty)
                 Text(
                   coopName,
-                  style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                  style:
+                      const TextStyle(color: Color(0xFF64748B), fontSize: 13),
                 ),
             ],
           ),
@@ -128,7 +137,8 @@ class HealthScoreView extends StatelessWidget {
               _buildGauge(score, labelColor),
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                 decoration: BoxDecoration(
                   color: labelBg,
                   borderRadius: BorderRadius.circular(30),
@@ -148,7 +158,8 @@ class HealthScoreView extends StatelessWidget {
               Text(
                 _getLabelDescription(label),
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF64748B), fontSize: 12, height: 1.5),
+                style: const TextStyle(
+                    color: Color(0xFF64748B), fontSize: 12, height: 1.5),
               ),
             ],
           ),
@@ -168,24 +179,35 @@ class HealthScoreView extends StatelessWidget {
             children: [
               const Text(
                 'FORMULA SKOR',
-                style: TextStyle(color: Color(0xFFFACC15), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                style: TextStyle(
+                    color: Color(0xFFFACC15),
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5),
               ),
               const SizedBox(height: 8),
               Text(
-                dimensions
-                    .map((d) {
-                      final rawScore = (d['score'] as num?) ?? 0;
-                      return '${(rawScore * 100).toStringAsFixed(0)} × ${d['weight']}%';
-                    })
-                    .join(' + '),
-                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11, fontFamily: 'monospace'),
+                dimensions.map((d) {
+                  final rawScore = (d['score'] as num?) ?? 0;
+                  return '${(rawScore * 100).toStringAsFixed(0)} × ${d['weight']}%';
+                }).join(' + '),
+                style: const TextStyle(
+                    color: Color(0xFF94A3B8),
+                    fontSize: 11,
+                    fontFamily: 'monospace'),
               ),
               const SizedBox(height: 4),
               Row(
                 children: [
-                  const Text('= ', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
-                  Text('$score', style: const TextStyle(color: Color(0xFFFACC15), fontSize: 22, fontWeight: FontWeight.w900)),
-                  const Text(' / 100', style: TextStyle(color: Color(0xFF64748B), fontSize: 12)),
+                  const Text('= ',
+                      style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                  Text('$score',
+                      style: const TextStyle(
+                          color: Color(0xFFFACC15),
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900)),
+                  const Text(' / 100',
+                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12)),
                 ],
               ),
             ],
@@ -197,7 +219,10 @@ class HealthScoreView extends StatelessWidget {
         // Dimensions Header
         const Text(
           'Rincian 5 Dimensi Kesehatan',
-          style: TextStyle(color: Color(0xFF0F172A), fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Color(0xFF0F172A),
+              fontSize: 16,
+              fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
         const Text(
@@ -224,7 +249,10 @@ class HealthScoreView extends StatelessWidget {
             children: [
               const Text(
                 'Kontribusi Per Dimensi',
-                style: TextStyle(color: Color(0xFF0F172A), fontSize: 14, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               ...dimensions.map((dim) => _buildWeightBar(dim)).toList(),
@@ -247,14 +275,29 @@ class HealthScoreView extends StatelessWidget {
             children: [
               const Text(
                 'Panduan Interpretasi',
-                style: TextStyle(color: Color(0xFF0F172A), fontSize: 14, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              _buildThresholdItem(const Color(0xFF22C55E), const Color(0xFFDCFCE7), 'Sehat (≥60)', 'Koperasi beroperasi optimal. Kepatuhan iuran tinggi, anggota aktif, governance berjalan.'),
+              _buildThresholdItem(
+                  const Color(0xFF22C55E),
+                  const Color(0xFFDCFCE7),
+                  'Sehat (≥60)',
+                  'Koperasi beroperasi optimal. Kepatuhan iuran tinggi, anggota aktif, governance berjalan.'),
               const SizedBox(height: 8),
-              _buildThresholdItem(const Color(0xFFF59E0B), const Color(0xFFFEF3C7), 'Waspada (35–59)', 'Perlu perhatian. Ada dimensi lemah — identifikasi dan intervensi sebelum memburuk.'),
+              _buildThresholdItem(
+                  const Color(0xFFF59E0B),
+                  const Color(0xFFFEF3C7),
+                  'Waspada (35–59)',
+                  'Perlu perhatian. Ada dimensi lemah — identifikasi dan intervensi sebelum memburuk.'),
               const SizedBox(height: 8),
-              _buildThresholdItem(const Color(0xFFEF4444), const Color(0xFFFEE2E2), 'Kritis (<35)', 'Memerlukan tindakan segera. Mayoritas dimensi di bawah ambang batas minimal.'),
+              _buildThresholdItem(
+                  const Color(0xFFEF4444),
+                  const Color(0xFFFEE2E2),
+                  'Kritis (<35)',
+                  'Memerlukan tindakan segera. Mayoritas dimensi di bawah ambang batas minimal.'),
             ],
           ),
         ),
@@ -267,16 +310,19 @@ class HealthScoreView extends StatelessWidget {
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0), style: BorderStyle.solid),
+            border: Border.all(
+                color: const Color(0xFFE2E8F0), style: BorderStyle.solid),
           ),
           child: Row(
             children: [
-              const Icon(Icons.info_outline, color: Color(0xFF94A3B8), size: 16),
+              const Icon(Icons.info_outline,
+                  color: Color(0xFF94A3B8), size: 16),
               const SizedBox(width: 10),
               Expanded(
                 child: const Text(
                   'Diadaptasi dari metodologi Simkopdes Health Score (1.026 koperasi) menggunakan prinsip Structural Spirit Preservation.',
-                  style: TextStyle(color: Color(0xFF64748B), fontSize: 11, height: 1.5),
+                  style: TextStyle(
+                      color: Color(0xFF64748B), fontSize: 11, height: 1.5),
                 ),
               ),
             ],
@@ -310,7 +356,10 @@ class HealthScoreView extends StatelessWidget {
               ),
               const Text(
                 '/ 100',
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Color(0xFF94A3B8),
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -358,11 +407,17 @@ class HealthScoreView extends StatelessWidget {
                   children: [
                     Text(
                       dim['label'] as String? ?? '',
-                      style: const TextStyle(color: Color(0xFF0F172A), fontSize: 14, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'Bobot ${dim['weight']}%',
-                      style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                          color: Color(0xFF94A3B8),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -372,11 +427,17 @@ class HealthScoreView extends StatelessWidget {
                 children: [
                   Text(
                     '$pct',
-                    style: TextStyle(color: const Color(0xFF0F172A), fontSize: 22, fontWeight: FontWeight.w900),
+                    style: TextStyle(
+                        color: const Color(0xFF0F172A),
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900),
                   ),
                   Text(
                     'Kontribusi: ${(weightedScore * 100).toInt()}pts',
-                    style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: color,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -396,12 +457,16 @@ class HealthScoreView extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             dim['description'] as String? ?? '',
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 12,
+                fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
           Text(
             dim['detail'] as String? ?? '',
-            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11, height: 1.4),
+            style: const TextStyle(
+                color: Color(0xFF94A3B8), fontSize: 11, height: 1.4),
           ),
         ],
       ),
@@ -424,26 +489,37 @@ class HealthScoreView extends StatelessWidget {
             children: [
               Text(
                 dim['label'] as String? ?? '',
-                style: const TextStyle(color: Color(0xFF0F172A), fontSize: 12, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600),
               ),
               Text(
                 '$actualContrib / $weight pts',
-                style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: color, fontSize: 11, fontWeight: FontWeight.bold),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Stack(
             children: [
-              Container(height: 10, decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(5))),
+              Container(
+                  height: 10,
+                  decoration: BoxDecoration(
+                      color: color.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(5))),
               FractionallySizedBox(
-                widthFactor: actualContrib / 35.0, // normalized against max weight (35)
+                widthFactor:
+                    actualContrib / 35.0, // normalized against max weight (35)
                 child: Container(
                   height: 10,
                   decoration: BoxDecoration(
                     color: color,
                     borderRadius: BorderRadius.circular(5),
-                    boxShadow: [BoxShadow(color: color.withOpacity(0.4), blurRadius: 4)],
+                    boxShadow: [
+                      BoxShadow(color: color.withOpacity(0.4), blurRadius: 4)
+                    ],
                   ),
                 ),
               ),
@@ -465,15 +541,27 @@ class HealthScoreView extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(width: 10, height: 10, margin: const EdgeInsets.only(top: 3), decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          Container(
+              width: 10,
+              height: 10,
+              margin: const EdgeInsets.only(top: 3),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w900)),
+                Text(label,
+                    style: TextStyle(
+                        color: color,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900)),
                 const SizedBox(height: 2),
-                Text(desc, style: TextStyle(color: color.withOpacity(0.8), fontSize: 11, height: 1.4)),
+                Text(desc,
+                    style: TextStyle(
+                        color: color.withOpacity(0.8),
+                        fontSize: 11,
+                        height: 1.4)),
               ],
             ),
           ),
@@ -483,19 +571,27 @@ class HealthScoreView extends StatelessWidget {
   }
 
   String _getLabelDescription(String label) {
-    if (label == 'Sehat') return 'Koperasi Anda beroperasi optimal.\nKepatuhan iuran tinggi, anggota aktif, governance berjalan dengan baik.';
-    if (label == 'Waspada') return 'Koperasi memerlukan perhatian.\nIdentifikasi dimensi yang lemah dan lakukan intervensi sebelum kondisi memburuk.';
+    if (label == 'Sehat')
+      return 'Koperasi Anda beroperasi optimal.\nKepatuhan iuran tinggi, anggota aktif, governance berjalan dengan baik.';
+    if (label == 'Waspada')
+      return 'Koperasi memerlukan perhatian.\nIdentifikasi dimensi yang lemah dan lakukan intervensi sebelum kondisi memburuk.';
     return 'Koperasi memerlukan tindakan segera.\nMayoritas dimensi di bawah ambang batas minimal operasional.';
   }
 
   IconData _iconForKey(String key) {
     switch (key) {
-      case 'd1': return Icons.payments_outlined;
-      case 'd2': return Icons.devices_outlined;
-      case 'd3': return Icons.how_to_vote_outlined;
-      case 'd4': return Icons.account_balance_outlined;
-      case 'd5': return Icons.local_fire_department_outlined;
-      default: return Icons.bar_chart;
+      case 'd1':
+        return Icons.payments_outlined;
+      case 'd2':
+        return Icons.devices_outlined;
+      case 'd3':
+        return Icons.how_to_vote_outlined;
+      case 'd4':
+        return Icons.account_balance_outlined;
+      case 'd5':
+        return Icons.local_fire_department_outlined;
+      default:
+        return Icons.bar_chart;
     }
   }
 

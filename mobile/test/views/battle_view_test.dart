@@ -11,12 +11,11 @@ class _StubProvider extends ChangeNotifier implements KoperasiProvider {
   final List<HistoryItem> _history;
   final List<InventoryItem> _inventory;
   bool matchmakeCalled = false;
-  String matchmakeReturnMessage;
+  String matchmakeReturnMessage = 'Lawan ditemukan!';
   _StubProvider(
       {Map<String, dynamic>? activeBattle,
       List<HistoryItem>? history,
-      List<InventoryItem>? inventory,
-      this.matchmakeReturnMessage = 'Lawan ditemukan!'})
+      List<InventoryItem>? inventory})
       : _activeBattle = activeBattle,
         _history = history ?? const [],
         _inventory = inventory ?? const [];
@@ -39,6 +38,14 @@ class _StubProvider extends ChangeNotifier implements KoperasiProvider {
   Map<String, dynamic>? get rivalCooperative => null;
   @override
   String? get koperasiName => null;
+  @override
+  List<dynamic> get leaderboard => const [];
+  @override
+  List<dynamic> get leaderboardByKoperasi => const [];
+  @override
+  List<dynamic> get leaderboardByProvinsi => const [];
+  @override
+  List<dynamic> get leaderboardByNasional => const [];
   @override
   int? get memberId => 1;
   @override
@@ -144,7 +151,7 @@ void main() {
     final p = _StubProvider();
     await tester.pumpWidget(_wrap(const BattleView(), p));
     await tester.pump(); // trigger initState
-    expect(find.text('Arena 1v1'), findsOneWidget);
+    expect(find.text('Liga Koperasi'), findsOneWidget);
     expect(find.text('Mencari Lawan...'), findsOneWidget);
 
     // Let the async matchmake complete without timing out on the spinner
@@ -178,7 +185,7 @@ void main() {
     );
     await tester.pumpWidget(_wrap(const BattleView(), p));
     await tester.pump();
-    expect(find.text('Arena 1v1'), findsOneWidget);
+    expect(find.text('Liga Koperasi'), findsOneWidget);
     expect(find.text('MENANG'), findsOneWidget);
     expect(find.text('Andi'), findsWidgets);
   });

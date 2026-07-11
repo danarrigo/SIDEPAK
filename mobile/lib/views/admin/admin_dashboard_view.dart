@@ -498,7 +498,8 @@ class AdminDashboardView extends StatelessWidget {
     final pendingProposals = stats['pendingProposals'] as List<dynamic>? ?? [];
     final pendingEvents = stats['pendingEvents'] as List<dynamic>? ?? [];
     final pendingLoans = stats['pendingLoans'] as List<dynamic>? ?? [];
-    final totalPending = pendingProposals.length + pendingEvents.length + pendingLoans.length;
+    final totalPending =
+        pendingProposals.length + pendingEvents.length + pendingLoans.length;
 
     if (totalPending == 0) {
       return Container(
@@ -507,7 +508,8 @@ class AdminDashboardView extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+          border:
+              Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
         ),
         child: Column(
           children: [
@@ -533,48 +535,61 @@ class AdminDashboardView extends StatelessWidget {
       }
     }
 
-    String _formatMoney(int v) => 'Rp ${v.toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}';
+    String _formatMoney(int v) =>
+        'Rp ${v.toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (Match m) => "${m[1]}.")}';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (pendingProposals.isNotEmpty) ...[
-          const Text('Proposal Program (Voting)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+          const Text('Proposal Program (Voting)',
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey)),
           const SizedBox(height: 8),
           ...pendingProposals.map((item) => _buildApprovalCard(
-            title: item['title'] ?? 'Proposal',
-            subtitle: 'Oleh: ${item['authorName'] ?? 'Anggota'}',
-            date: _formatDate(item['createdAt']),
-            icon: Icons.how_to_vote_rounded,
-            iconColor: Colors.blue,
-            tag: 'PROPOSAL',
-          )),
+                title: item['title'] ?? 'Proposal',
+                subtitle: 'Oleh: ${item['authorName'] ?? 'Anggota'}',
+                date: _formatDate(item['createdAt']),
+                icon: Icons.how_to_vote_rounded,
+                iconColor: Colors.blue,
+                tag: 'PROPOSAL',
+              )),
           const SizedBox(height: 16),
         ],
         if (pendingEvents.isNotEmpty) ...[
-          const Text('Pengajuan Event / Kegiatan', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+          const Text('Pengajuan Event / Kegiatan',
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey)),
           const SizedBox(height: 8),
           ...pendingEvents.map((item) => _buildApprovalCard(
-            title: item['name'] ?? 'Event',
-            subtitle: 'Oleh: ${item['creatorName'] ?? 'Anggota'}',
-            date: _formatDate(item['createdAt']),
-            icon: Icons.event_rounded,
-            iconColor: Colors.purple,
-            tag: 'EVENT',
-          )),
+                title: item['name'] ?? 'Event',
+                subtitle: 'Oleh: ${item['creatorName'] ?? 'Anggota'}',
+                date: _formatDate(item['createdAt']),
+                icon: Icons.event_rounded,
+                iconColor: Colors.purple,
+                tag: 'EVENT',
+              )),
           const SizedBox(height: 16),
         ],
         if (pendingLoans.isNotEmpty) ...[
-          const Text('Pengajuan Pinjaman', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+          const Text('Pengajuan Pinjaman',
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey)),
           const SizedBox(height: 8),
           ...pendingLoans.map((item) => _buildApprovalCard(
-            title: _formatMoney(_toInt(item['amount'])),
-            subtitle: 'Pemohon: ${item['memberName'] ?? 'Anggota'}',
-            date: _formatDate(item['createdAt']),
-            icon: Icons.payments_rounded,
-            iconColor: Colors.amber,
-            tag: 'PINJAMAN',
-          )),
+                title: _formatMoney(_toInt(item['amount'])),
+                subtitle: 'Pemohon: ${item['memberName'] ?? 'Anggota'}',
+                date: _formatDate(item['createdAt']),
+                icon: Icons.payments_rounded,
+                iconColor: Colors.amber,
+                tag: 'PINJAMAN',
+              )),
           const SizedBox(height: 16),
         ],
       ],
@@ -616,14 +631,26 @@ class AdminDashboardView extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(tag, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: iconColor, letterSpacing: 1)),
-                    Text(date, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                    Text(tag,
+                        style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: iconColor,
+                            letterSpacing: 1)),
+                    Text(date,
+                        style:
+                            const TextStyle(fontSize: 10, color: Colors.grey)),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0F172A))),
                 const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(subtitle,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey)),
               ],
             ),
           ),

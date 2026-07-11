@@ -14,7 +14,8 @@ class _AdminMembersViewState extends State<AdminMembersView> {
     final provider = context.read<KoperasiProvider>();
     final namaCtrl = TextEditingController(text: member['namaLengkap']);
     final phoneCtrl = TextEditingController(text: member['nomorHp']);
-    String status = member['statusAnggota'] == 'active' ? 'active' : 'pending_pokok';
+    String status =
+        member['statusAnggota'] == 'active' ? 'active' : 'pending_pokok';
 
     showDialog(
       context: context,
@@ -29,7 +30,8 @@ class _AdminMembersViewState extends State<AdminMembersView> {
                   children: [
                     TextField(
                       controller: namaCtrl,
-                      decoration: const InputDecoration(labelText: 'Nama Lengkap'),
+                      decoration:
+                          const InputDecoration(labelText: 'Nama Lengkap'),
                     ),
                     const SizedBox(height: 8),
                     TextField(
@@ -43,7 +45,9 @@ class _AdminMembersViewState extends State<AdminMembersView> {
                       decoration: const InputDecoration(labelText: 'Status'),
                       items: const [
                         DropdownMenuItem(value: 'active', child: Text('Aktif')),
-                        DropdownMenuItem(value: 'pending_pokok', child: Text('Menunggu Pokok')),
+                        DropdownMenuItem(
+                            value: 'pending_pokok',
+                            child: Text('Menunggu Pokok')),
                       ],
                       onChanged: (val) {
                         if (val != null) {
@@ -72,7 +76,9 @@ class _AdminMembersViewState extends State<AdminMembersView> {
                     );
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(msg == 'success' ? 'Anggota diperbarui' : msg)),
+                        SnackBar(
+                            content: Text(
+                                msg == 'success' ? 'Anggota diperbarui' : msg)),
                       );
                     }
                   },
@@ -213,7 +219,8 @@ class _AdminMembersViewState extends State<AdminMembersView> {
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.edit_rounded, color: Colors.grey),
+                                icon: const Icon(Icons.edit_rounded,
+                                    color: Colors.grey),
                                 onPressed: () {
                                   _showEditDialog(context, member);
                                 },

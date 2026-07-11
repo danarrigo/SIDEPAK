@@ -133,16 +133,13 @@ class AdminProfileView extends StatelessWidget {
                             provider.koperasiName ??
                                 'Koperasi belum terhubung'),
                         const SizedBox(height: 16),
-                        _buildInfoRow(
-                            'Total Anggota',
+                        _buildInfoRow('Total Anggota',
                             '${provider.adminStats?['totalMembers'] ?? 0} Orang'),
                         const SizedBox(height: 16),
-                        _buildInfoRow(
-                            'Anggota Aktif',
+                        _buildInfoRow('Anggota Aktif',
                             '${provider.adminStats?['activeMembers'] ?? 0} Orang'),
                         const SizedBox(height: 16),
-                        _buildInfoRow(
-                            'Total Aset',
+                        _buildInfoRow('Total Aset',
                             'Rp ${provider.adminStats?['totalAssets']?.toString() ?? '0'}'),
                       ],
                     ),
@@ -241,7 +238,8 @@ class AdminProfileView extends StatelessWidget {
     );
   }
 
-  void _showProfileContactDialog(BuildContext context, KoperasiProvider provider) {
+  void _showProfileContactDialog(
+      BuildContext context, KoperasiProvider provider) {
     final TextEditingController phoneCtrl = TextEditingController();
     bool obscurePhone = true;
     bool isLoading = false;

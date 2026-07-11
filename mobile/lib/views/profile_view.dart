@@ -50,8 +50,6 @@ class ProfileView extends StatelessWidget {
         : provider.simpananPokok +
             provider.simpananWajib +
             provider.simpananSukarela;
-    final estimasiSHU =
-        totalSimpananDisplay > 0 ? (totalSimpananDisplay * 0.12).floor() : 0;
 
     return RefreshIndicator(
         onRefresh: () => provider.fetchData(),

@@ -56,7 +56,7 @@ dev_dependencies:
   # via Flutter 3.27.x). Bump back to ^6.0.0 once the CI Flutter version is
   # upgraded to 3.29+ / Dart 3.8+.
   flutter_lints: ^5.0.0
-  flutter_native_splash: ^2.4.8
+  flutter_native_splash: ^2.4.4
   flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the

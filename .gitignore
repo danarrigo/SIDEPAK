@@ -1,3 +1,7 @@
 handoff.md
 # Mobile Android build outputs
 mobile/android/build/
+
+# n8n workflow — never commit the original export (contains phone number ID,
+# Supabase project ref, webhook IDs). Only the sanitized file is safe to share.
+n8n/My workflow.json

@@ -13,6 +13,7 @@
 - [Repository Structure](#repository-structure)
 - [The Two Apps](#the-two-apps)
 - [Architecture](#architecture)
+- [WhatsApp Automation (n8n)](#whatsapp-automation-n8n)
 - [Core Domain Model](#core-domain-model)
 - [Database Schema](#database-schema)
 - [API Reference](#api-reference)
@@ -123,6 +124,10 @@ SIDEPAK/
 │   ├── desktop-ci.yml                # Lint + tsc + jest
 │   └── mobile-ci.yml                 # Dart format + analyze + test
 │
+├── n8n/                              # WhatsApp automation (see section below)
+│   ├── My workflow.sanitized.json    # Importable workflow, credentials redacted
+│   └── SETUP.md                      # How to re-bind credentials in your n8n
+│
 ├── package.json                      # Root workspace (cross-app scripts)
 ├── context.md                        # Domain model spec
 └── handoff.md                        # Engineering handoff doc
@@ -216,13 +221,75 @@ See [mobile/README.md](./mobile/README.md) for screen details, state management,
        ┌──────────────────┴────────────────────┐
        │   Flutter App (port 3001 web)         │
        │   KoperasiProvider (ChangeNotifier)   │
-       │   → views/*                            │
-       └───────────────────────────────────────┘
+        │   → views/*                            │
+        └───────────────────────────────────────┘
 ```
 
 ---
 
+## WhatsApp Automation (n8n)
+
+Member engagement is driven by a single **n8n workflow** that handles both **inbound** (members messaging the cooperative) and **outbound** (the cooperative pushing announcements to members) WhatsApp traffic. The workflow lives in [`n8n/`](./n8n/) as a sanitized, importable JSON file.
+
+### Branches
+
+| Branch | Trigger | What it does |
+|---|---|---|
+| **Inbound** | WhatsApp `messages` webhook | Reads a member's text message, runs an AI agent that can query Supabase **read-only** (scoped to the sender's `wa_id`), then replies via WhatsApp. Sliding-window chat memory is keyed by `wa_id` so context persists across messages from the same sender. |
+| **Outbound — Events** | Schedule (hourly) | AI agent scans the `events` table for rows with `n8n_sent = false`, looks up members of the relevant cooperative, sends each a WhatsApp notification, then runs `UPDATE events SET n8n_sent = true WHERE id = <event_id>` so the row is never re-broadcast. |
+| **Outbound — Proposals** | Schedule (hourly) | Same pattern as the events branch but for the `proposals` table (governance proposals) — broadcast the proposal, then mark `n8n_sent = true`. |
+
+### Flow
+
+```
+                  ┌─► If (body not empty) ─► AI Agent (inbound) ─► Send message
+WhatsApp Trigger ─┤                            ▲   ▲   ▲
+                  │                            │   │   └─ DeepSeek Chat Model
+                  │                            │   └─ Simple Memory (per wa_id)
+                  │                            └─ MCP Client (Supabase read-only)
+
+Schedule Trigger  ┬─► AI Agent1 — events broadcast ─► Send message (tool)
+(hourly)          │        ▲   ▲   ▲
+                  │        │   │   └─ DeepSeek Chat Model1
+                  │        │   └─ MCP Client1 (Supabase read + targeted UPDATE)
+                  │        └─ WhatsApp send tool
+                  │
+                  └─► AI Agent2 — proposals broadcast ─► Send message (tool)
+                          ▲   ▲   ▲
+                          │   │   └─ DeepSeek Chat Model2
+                          │   └─ MCP Client2 (Supabase read + targeted UPDATE)
+                          └─ WhatsApp send tool
+```
+
+### Security guardrails baked into the agents
+
+- **Inbound agent** is restricted to `SELECT` only — `INSERT`, `UPDATE`, `DELETE`, `DROP`, `ALTER`, `TRUNCATE`, `CREATE`, `REPLACE` are forbidden in SQL.
+- All inbound queries must be filtered by the active member's identity (`member_id` / `cooperative_id`) — the agent cannot peek at other members' data.
+- The agent must run a **fresh** SQL query for any dynamic data (balances, points, streaks) instead of reusing chat-memory numbers (anti-stale-memory).
+- **Outbound agents** are the only writers: they may only run a targeted `UPDATE <table> SET n8n_sent = true WHERE id = <row_id>` and are fail-safe — a single error aborts the run to prevent repeated broadcasts on the next tick.
+- All three agents are explicitly hardened against prompt-injection from the user message.
+
+### Re-creating the workflow in your own n8n
+
+The shipped file (`n8n/My workflow.sanitized.json`) has every credential, webhook ID, WhatsApp phone number ID, and Supabase project reference stripped. To run it:
+
+1. In n8n: **Workflows → Import from File…** → pick `My workflow.sanitized.json`.
+2. Create the four credentials listed in [`n8n/SETUP.md`](./n8n/SETUP.md):
+   - **WhatsApp Trigger OAuth2** (Meta) — for the inbound webhook
+   - **WhatsApp Business Cloud** (Meta) — for sending
+   - **DeepSeek API** — LLM for all three agents
+   - **HTTP Header Auth (multi)** — `Authorization` + `apikey` headers for the Supabase MCP endpoint
+3. Replace the two placeholders inside the imported nodes:
+   - `phoneNumberId`: `=<YOUR_WHATSAPP_PHONE_NUMBER_ID>` (appears 3× — on `Send message` and both `Send message in WhatsApp Business Cloud` nodes)
+   - `endpointUrl` on the three MCP Client nodes: `https://mcp.supabase.com/mcp?project_ref=<YOUR_SUPABASE_PROJECT_REF>`
+4. Activate the workflow. Send a WhatsApp message to the connected number to exercise the inbound branch; insert a row with `n8n_sent = false` into `events` or `proposals` to exercise the outbound branches.
+
+> The original un-sanitized export is kept locally at `n8n/My workflow.json` for the original author and is **git-ignored** — it contains the production phone number ID, Supabase project ref, and webhook paths.
+
+---
+
 ## Core Domain Model
+
 
 ### 1. Points & Marketplace
 

@@ -31,8 +31,8 @@ class _AdminGovernanceViewState extends State<AdminGovernanceView>
   void _showForm({Map<String, dynamic>? item}) {
     final bool isEvent = _tabController.index == 0;
     
-    final TextEditingController titleController = TextEditingController(text: isEvent ? item?['name'] : item?['title']);
-    final TextEditingController descController = TextEditingController(text: item?['description']);
+    final TextEditingController titleController = TextEditingController(text: item == null ? null : (isEvent ? item['name']?.toString() : item['title']?.toString()));
+    final TextEditingController descController = TextEditingController(text: item == null ? null : item['description']?.toString());
     
     DateTime? startDate;
     DateTime? endDate;

@@ -600,7 +600,8 @@ class HealthScoreView extends StatelessWidget {
   }
 
   Widget _buildRecommendationsSection(List<dynamic> dimensions) {
-    final lowDims = dimensions.where((d) => ((d['score'] as num?) ?? 0) < 0.6).toList();
+    final lowDims =
+        dimensions.where((d) => ((d['score'] as num?) ?? 0) < 0.6).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -619,11 +620,13 @@ class HealthScoreView extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFFDCFCE7),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF22C55E).withOpacity(0.3)),
+              border:
+                  Border.all(color: const Color(0xFF22C55E).withOpacity(0.3)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.verified_user_rounded, color: Color(0xFF22C55E), size: 24),
+                const Icon(Icons.verified_user_rounded,
+                    color: Color(0xFF22C55E), size: 24),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -631,12 +634,18 @@ class HealthScoreView extends StatelessWidget {
                     children: const [
                       Text(
                         'Kinerja Seluruh Dimensi Optimal!',
-                        style: TextStyle(color: Color(0xFF15803D), fontSize: 13, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: Color(0xFF15803D),
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 4),
                       Text(
                         'Koperasi Anda berada dalam kondisi optimal di seluruh dimensi penilaian (skor ≥ 60%). Pertahankan transparansi dan keaktifan ini.',
-                        style: TextStyle(color: Color(0xFF166534), fontSize: 11, height: 1.4),
+                        style: TextStyle(
+                            color: Color(0xFF166534),
+                            fontSize: 11,
+                            height: 1.4),
                       ),
                     ],
                   ),
@@ -648,7 +657,7 @@ class HealthScoreView extends StatelessWidget {
           ...lowDims.map((d) {
             final key = d['key'] as String? ?? '';
             final scorePct = (((d['score'] as num?) ?? 0) * 100).round();
-            
+
             final Map<String, Map<String, dynamic>> recommendations = {
               'd1': {
                 'title': 'Kepatuhan Iuran Rendah',
@@ -696,19 +705,20 @@ class HealthScoreView extends StatelessWidget {
                 ]
               }
             };
-            
+
             final rec = recommendations[key];
             if (rec == null) return const SizedBox.shrink();
-            
+
             final tipsList = List<String>.from(rec['tips'] as List);
-            
+
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: const Color(0xFFFFFBEB),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.3)),
+                border:
+                    Border.all(color: const Color(0xFFF59E0B).withOpacity(0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -718,7 +728,8 @@ class HealthScoreView extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 18),
+                          const Icon(Icons.warning_amber_rounded,
+                              color: Color(0xFFD97706), size: 18),
                           const SizedBox(width: 6),
                           Text(
                             rec['title'] as String,
@@ -732,14 +743,18 @@ class HealthScoreView extends StatelessWidget {
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFEF3C7),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           'Skor: $scorePct%',
-                          style: const TextStyle(color: Color(0xFFB45309), fontSize: 9, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              color: Color(0xFFB45309),
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -747,24 +762,36 @@ class HealthScoreView extends StatelessWidget {
                   const Divider(color: Color(0xFFFEF3C7), height: 16),
                   Text(
                     rec['action'] as String,
-                    style: const TextStyle(color: Color(0xFF1E293B), fontSize: 13, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        color: Color(0xFF1E293B),
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  ...tipsList.map((tip) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('• ', style: TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 12)),
-                        Expanded(
-                          child: Text(
-                            tip,
-                            style: const TextStyle(color: Color(0xFF475569), fontSize: 11, height: 1.4),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )).toList(),
+                  ...tipsList
+                      .map((tip) => Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('• ',
+                                    style: TextStyle(
+                                        color: Color(0xFFF59E0B),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12)),
+                                Expanded(
+                                  child: Text(
+                                    tip,
+                                    style: const TextStyle(
+                                        color: Color(0xFF475569),
+                                        fontSize: 11,
+                                        height: 1.4),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ))
+                      .toList(),
                 ],
               ),
             );

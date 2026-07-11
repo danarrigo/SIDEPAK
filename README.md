@@ -47,13 +47,15 @@ See per-app guides for setup details:
 ## Key Features
 
 - **Digital financial services** — Savings (*Simpanan Pokok, Wajib, Sukarela*) and Loans (*Pinjaman*) tracked with full audit trail.
+- **SIDEPAK Health Score** — Deterministic health scoring engine measuring cooperative health based on 5 weighted dimensions (Dues compliance, digital penetration, governance, credit health, and gamification engagement).
+- **Wallet & Xendit Disbursements** — In-app wallet functionality with integrated payout services via Xendit for digital withdrawal requests.
 - **SIDEPAK Arena — gamification layer**
   - Complete **Daily Quests** to earn points (fully integrated with real app actions like savings, logins, and events).
   - Maintain a **Login Streak** for bonus rewards.
   - Compete in **Weekly Arena Battles** against other members (auto-matched).
 - **Member-to-member marketplace** — Spend points to list and buy items in a P2P marketplace with optional item effects (e.g. `freeze_streak`, `prank`).
 - **Cooperative governance (E-RAT)** — Members vote on proposals (*Setuju / Tolak / Abstain*); proposals resolve by quorum.
-- **Multi-platform** — Desktop admin in Next.js, member app in Flutter (web + Android APK + iOS).
+- **Multi-platform & Multi-Role** — Admin and member portals across both Next.js (desktop) and Flutter (mobile/web).
 
 ---
 
@@ -139,43 +141,54 @@ SIDEPAK/
 
 ### 1. Desktop Admin Dashboard (`desktop/`)
 
-The Next.js admin dashboard is used by cooperative operators and staff. It uses **Server Actions** for almost all data access (no separate API layer needed for the web UI), except for the small REST surface used by the mobile app.
+The Next.js dashboard contains two main roles: **Members** (who use the default dashboard features) and **Admins** (who manage the cooperative operations). It uses **Server Actions** for almost all data access (no separate API layer needed for the web UI), except for the small REST surface used by the mobile app.
 
 **Pages**
 
-| Route | Auth | Purpose |
-|---|---|---|
-| `/signin` | Public | Email/password sign-in |
-| `/signup` | Public | New member registration |
-| `/` (home) | Required | Savings total, points, rank, daily missions, koperasi stats |
-| `/quests` | Required | Mission center + item shop |
-| `/arena` | Required | Active battle view, history, auto-matchmake controls |
-| `/governance` | Required | E-RAT voting, proposal timeline, koperasi stats |
-| `/governance/members` | Required | Member directory with detail drill-down |
-| `/marketplace` | Required | P2P marketplace administration view |
-| `/savings` | Required | Savings, loans, and dues records |
-| `/profile` | Required | Member card, progress stats, badge collection |
+| Route | Auth | Role | Purpose |
+|---|---|---|---|
+| `/signin` | Public | All | Email/password sign-in |
+| `/signup` | Public | All | New member registration |
+| `/` (home) | Required | Member | Savings total, points, rank, daily missions, koperasi stats |
+| `/quests` | Required | Member | Mission center + item shop |
+| `/arena` | Required | Member | Active battle view, history, auto-matchmake controls |
+| `/governance` | Required | Member | E-RAT voting, proposal timeline, koperasi stats |
+| `/governance/members` | Required | Member | Member directory with detail drill-down |
+| `/marketplace` | Required | Member | P2P marketplace administration view |
+| `/savings` | Required | Member | Savings, loans, and dues records |
+| `/profile` | Required | Member | Member card, progress stats, badge collection |
+| `/admin` | Required | Admin | Admin landing, financial statistics, pending cash-out approvals |
+| `/admin/members` | Required | Admin | Cooperative member directory, approval logs, and member status editor |
+| `/admin/governance` | Required | Admin | E-RAT Proposal creation and management panel |
+| `/admin/health` | Required | Admin | SIDEPAK Health Score visual dashboard and dimension details |
+| `/admin/health/methodology` | Required | Admin | Scientific explanation and methodology description for the Health Score model |
+| `/admin/profile` | Required | Admin | Admin profile details and personal credentials management |
 
 See [desktop/README.md](./desktop/README.md) for full setup, env vars, and the API reference.
 
 ### 2. Member Web/Mobile App (`mobile/`)
 
-A single Flutter codebase that builds for **web (Chrome/Safari/Firefox)**, **Android (APK)**, and **iOS**. The web build is the primary target for member access during the hackathon demo; the Android APK is for field testing on phones.
+A single Flutter codebase that builds for **web (Chrome/Safari/Firefox)**, **Android (APK)**, and **iOS**. The member app contains screens for standard members as well as an integrated mobile **Admin Mode** for operators.
 
 **Screens**
 
-| Screen | Purpose |
-|---|---|
-| Login / Sign Up | Email/password auth; persists JWT to `shared_preferences` |
-| Home | Savings total, point balance, rank badge, daily missions, koperasi stats |
-| Misi (Missions) | Rank label, weekly streak calendar, daily/weekly missions, item shop |
-| Battle (Arena) | Active battle vs auto-matched opponent, comparison rows, history |
-| Koperasi | Stats cards, E-RAT proposal voting, timeline |
-| Profile | Rank badge, earned badges, impact stats, rank progression |
-| Marketplace | Browse items, list own items, buy/spend points |
-| Events | Community events list, join, create |
-| Members Directory | Browse members, view detail |
-| Simpanan | Savings breakdown (Pokok, Wajib, Sukarela) |
+| Screen | Audience | Purpose |
+|---|---|---|
+| Login / Sign Up | All | Email/password auth; persists JWT to `shared_preferences` |
+| Onboarding | All | Introductory landing slides describing the SIDEPAK cooperative model |
+| Home | Member | Savings total, point balance, rank badge, daily missions, koperasi stats |
+| Misi (Missions) | Member | Rank label, weekly streak calendar, daily/weekly missions, item shop |
+| Battle (Arena) | Member | Active battle vs auto-matched opponent, comparison rows, history |
+| Koperasi | Member | Stats cards, E-RAT proposal voting, timeline |
+| Profile | Member | Rank badge, earned badges, impact stats, rank progression |
+| Health Score | Member | Visualization of the cooperative's current health score and details |
+| Marketplace | Member | Spend points to list and buy items in a P2P marketplace with optional item effects (e.g. `freeze_streak`, `prank`). |
+| Events | Member | Community events list, join, create |
+| Members Directory | Member | Browse members, view detail |
+| Simpanan | Member | Savings breakdown (Pokok, Wajib, Sukarela) |
+| Admin Dashboard | Admin | Administrative landing, financial metrics summary, pending transaction approvals |
+| Admin Members | Admin | Operator directory for editing member profiles and approval flows |
+| Admin Profile | Admin | Admin user credentials and cooperative info settings |
 
 The Flutter app **does not** talk directly to Supabase. It talks to the **Next.js REST API** (`/api/auth/*` and `/api/mobile-sync/*`), which proxies through to Supabase with correct server-side credentials. This gives centralized auth, request validation, and a single place to add rate limiting later.
 
@@ -330,6 +343,24 @@ Daily quests reset every day (e.g. "Make a deposit"). Weekly quests span a week 
 
 Each week, the system **automatically pairs members** into 1v1 battles. Each player's points earned that week are tracked. When the week ends, the higher-scorer wins a bonus. **All members are auto-enrolled by default** — no opt-in toggle.
 
+### 7. SIDEPAK Health Score System
+
+The cooperative health score (0–100) measures how active and financially stable a cooperative is. It classifies cooperatives into three statuses:
+- **Sehat (>=60)** — Fully operational, high digital and financial compliance.
+- **Waspada (35-59)** — Needs monitoring, potential lag in dues or participation.
+- **Kritis (<35)** — High risk, major defaults or lack of member engagement.
+
+Calculated based on 5 weighted dimensions:
+- **D1: Kepatuhan Iuran (35%)** — Proportion of paid dues from the `dues` table.
+- **D2: Penetrasi Digital (25%)** — Proportion of members with a linked user account.
+- **D3: Partisipasi Governance (20%)** — Ratio of active voters on proposals in the last 90 days.
+- **D4: Kesehatan Kredit (10%)** — Loan repayment rate (ratio of paid loans to non-pending loans).
+- **D5: Engagement Gamifikasi (10%)** — Log-normalized median member XP and current activity streak.
+
+### 8. Wallet & Disbursements
+
+Members can top-up and withdraw funds from their digital wallet (`wallet_balance` inside `member_progress`). Wallet cash-outs are integrated with the **Xendit Payout API**, enabling disbursements directly to members' bank accounts with automated status webhooks (`/api/webhooks/xendit`) to process successes/failures and issue refunds.
+
 ---
 
 ## Database Schema
@@ -338,8 +369,8 @@ Each week, the system **automatically pairs members** into 1v1 battles. Each pla
 |---|---|
 | `users` | Supabase auth users (UUID) |
 | `cooperatives` | Cooperative entity |
-| `members` | Member profile (NIK, nama lengkap, koperasi, nomor anggota) |
-| `member_progress` | Level, XP, points balance, current/longest streak, last activity date |
+| `members` | Member profile (NIK, nama lengkap, koperasi, nomor anggota, nomorHp, statusAnggota) |
+| `member_progress` | Level, XP, points balance, current/longest streak, last activity date, wallet balance, credit score |
 | `point_transactions` | History of points earned/spent (with source: `quest`, `battle`, `saving`, `loan`, `purchase`, `sale`, …) |
 | `savings` | Deposit/withdrawal transactions |
 | `loans` | Loan records (interest rate, status, due date) |
@@ -355,6 +386,11 @@ Each week, the system **automatically pairs members** into 1v1 battles. Each pla
 | `votes` | Member votes on proposals (Setuju / Tolak / Abstain) |
 | `events` | Community events |
 | `event_participants` | Per-member event attendance |
+| `wallet_transactions` | Logs of deposit and top-up transactions |
+| `disbursements` | Cash-out / withdrawal requests linked with Xendit |
+| `marketplace_transactions` | Records of P2P item purchases and sales between members |
+| `seasons` | Interactive season schedule windows for PvP battle leagues |
+| `koperasi_season_scores` | Cooperative win/loss records and points tally per season |
 
 ---
 
@@ -463,9 +499,97 @@ Single write endpoint with a discriminated `action` field. The server validates 
 { "action": "use_item",      "itemId": 1 }
 ```
 
+### `POST /api/admin-member` (admin auth required)
+
+`Authorization: Bearer <token>`
+
+Updates a member's profile details. Only accessible by authenticated users with the `admin` role.
+
+```jsonc
+// Request body
+{
+  "memberId": 12,
+  "data": {
+    "namaLengkap": "Budi Santoso",
+    "nomorHp": "081234567890",
+    "statusAnggota": "active"
+  }
+}
+
+// Response: 200 OK
+{
+  "success": true
+}
+```
+
+### `POST /api/withdraw` (auth required)
+
+`Authorization: Bearer <token>`
+
+Initiates a digital wallet withdrawal request. Deducts the amount from the member's wallet balance, creates a pending disbursement in the database, and schedules a payout using the Xendit API.
+
+```jsonc
+// Request body
+{
+  "amount": 25000,
+  "bankCode": "BCA",
+  "accountNumber": "1234567890",
+  "accountName": "Andi Wijaya"
+}
+
+// Response: 200 OK
+{
+  "success": true,
+  "data": {
+    "id": 4,
+    "memberId": 42,
+    "amount": 25000,
+    "bankCode": "BCA",
+    "accountNumber": "1234567890",
+    "accountName": "Andi Wijaya",
+    "status": "PENDING",
+    "externalId": "withdraw-42-1718090000000",
+    "createdAt": "2026-07-11T09:40:00Z"
+  }
+}
+```
+
+### `POST /api/webhooks/xendit`
+
+Receives payout status callbacks from Xendit. Verifies the callback token, transitions the disbursement record status to `COMPLETED` or `FAILED`, and handles automated savings refunds upon failure.
+
+```jsonc
+// Request Headers
+// x-callback-token: <XENDIT_WEBHOOK_TOKEN>
+
+// Request body
+{
+  "external_id": "withdraw-42-1718090000000",
+  "status": "COMPLETED", // or 'FAILED'
+  "amount": 25000
+}
+
+// Response: 200 OK
+{
+  "received": true
+}
+```
+
+### `GET /api/delete-admin` (dev utility)
+
+Deletes all accounts with the `admin` role along with their profiles and progress. Used primarily for testing and cleanup.
+
+```jsonc
+// Response: 200 OK
+{
+  "message": "Deleted admins successfully",
+  "count": 2
+}
+```
+
 ### CORS
 
-All four API routes export an `OPTIONS()` handler that returns 204 with the required preflight headers. The Next.js middleware (`src/proxy.ts`) intentionally **excludes `/api/*`** from its auth-redirect matcher so that preflight requests are answered by the Route Handler rather than redirected to `/signin` (which would cause `Redirect is not allowed for a preflight request` errors).
+All API routes export an `OPTIONS()` handler that returns 204 with the required preflight headers. The Next.js middleware (`src/proxy.ts`) intentionally **excludes `/api/*`** from its auth-redirect matcher so that preflight requests are answered by the Route Handler rather than redirected to `/signin` (which would cause `Redirect is not allowed for a preflight request` errors).
 
 ---
 

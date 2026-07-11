@@ -24,6 +24,8 @@ For the project overview, see the [root README](../README.md). For the Next.js b
 - **Mission center** — daily/weekly quests, item shop, weekly streak calendar (Mon–Sun)
 - **Marketplace** — browse P2P listings, list your own items, buy/spend points
 - **Governance (E-RAT)** — vote on proposals (Setuju / Tolak / Abstain), view timeline
+- **SIDEPAK Health Score (mobile)** — visual breakdown of the cooperative's health dimensions directly inside the member app
+- **Admin Mode** — mobile views for administrators to inspect financial statistics and approve pending member deposit or withdrawal requests
 - **Real-time sync** — all data is fetched from `/api/mobile-sync` (single bundle, 9 parallel Drizzle queries on the server), avoiding the Postgres pool exhaustion issues that plagued earlier split-fetch implementations
 
 ---
@@ -63,19 +65,24 @@ mobile/lib/
 
 ## 🗺️ Screens
 
-| Screen | Purpose |
-|---|---|
-| **Login** | Email/password sign-in; persists JWT to `shared_preferences` |
-| **Sign Up** | New member registration (NIK, nama lengkap, …) |
-| **Home** | Savings total, point balance, current rank badge, daily missions, koperasi stats |
-| **Misi (Missions)** | Rank label, weekly streak calendar (Mon–Sun), daily/weekly missions, item shop |
-| **Battle (Arena)** | Active battle vs auto-matched opponent, comparison rows, end date countdown, history |
-| **Koperasi** | Stats cards (transaksi, anggota baru, omzet harian, UMKM aktif), E-RAT proposal voting, timeline |
-| **Profile** | Rank badge, earned badges, impact cards (savings, battles won, events joined), rank progression meter |
-| **Marketplace** | P2P marketplace: browse items, list own items, buy/spend points |
-| **Events** | Community events list, join event, create event form |
-| **Members Directory** | Browse all members, view individual member detail |
-| **Simpanan** | Detailed savings breakdown (Pokok, Wajib, Sukarela) |
+| Screen | Audience | Purpose |
+|---|---|---|
+| **Login** | All | Email/password sign-in; persists JWT to `shared_preferences` |
+| **Sign Up** | All | New member registration (NIK, nama lengkap, …) |
+| **Onboarding** | All | Onboarding carousel introducing the cooperative concept and application features |
+| **Home** | Member | Savings total, point balance, current rank badge, daily missions, koperasi stats |
+| **Misi (Missions)** | Member | Rank label, weekly streak calendar (Mon–Sun), daily/weekly missions, item shop |
+| **Battle (Arena)** | Member | Active battle vs auto-matched opponent, comparison rows, end date countdown, history |
+| **Koperasi** | Member | Stats cards (transaksi, anggota baru, omzet harian, UMKM aktif), E-RAT proposal voting, timeline |
+| **Profile** | Member | Rank badge, earned badges, impact cards (savings, battles won, events joined), rank progression meter |
+| **Health Score** | Member | View of the cooperative's health dimensions (dues compliance, digital penetration, governance, etc.) |
+| **Marketplace** | Member | P2P marketplace: browse items, list own items, buy/spend points |
+| **Events** | Member | Community events list, join event, create event form |
+| **Members Directory** | Member | Browse all members, view individual member detail |
+| **Simpanan** | Member | Detailed savings breakdown (Pokok, Wajib, Sukarela) |
+| **Admin Dashboard** | Admin | Operational metrics summary, cooperative balances, and pending deposit/withdrawal lists |
+| **Admin Members** | Admin | Operator view of all members and their registration statuses |
+| **Admin Profile** | Admin | Admin credentials settings and profile overview |
 
 ---
 

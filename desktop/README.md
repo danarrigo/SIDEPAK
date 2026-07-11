@@ -60,18 +60,24 @@ desktop/src/
 
 ## 🗺️ Pages (App Router)
 
-| Route | Auth | Purpose |
-|---|---|---|
-| `/signin` | Public | Email/password sign-in |
-| `/signup` | Public | New member registration |
-| `/` | Required | Home dashboard (savings, points, rank, missions) |
-| `/quests` | Required | Mission center + item shop |
-| `/arena` | Required | Active battle, history, auto-matchmake |
-| `/governance` | Required | E-RAT voting, proposal timeline, koperasi stats |
-| `/governance/members` | Required | Member directory |
-| `/marketplace` | Required | P2P marketplace admin view |
-| `/savings` | Required | Savings, loans, dues detail |
-| `/profile` | Required | Member card, progress stats, badges |
+| Route | Auth | Role | Purpose |
+|---|---|---|---|
+| `/signin` | Public | All | Email/password sign-in |
+| `/signup` | Public | All | New member registration |
+| `/` | Required | Member | Home dashboard (savings, points, rank, missions) |
+| `/quests` | Required | Member | Mission center + item shop |
+| `/arena` | Required | Member | Active battle, history, auto-matchmake |
+| `/governance` | Required | Member | E-RAT voting, proposal timeline, koperasi stats |
+| `/governance/members` | Required | Member | Member directory |
+| `/marketplace` | Required | Member | P2P marketplace admin view |
+| `/savings` | Required | Member | Savings, loans, dues detail |
+| `/profile` | Required | Member | Member card, progress stats, badges |
+| `/admin` | Required | Admin | Admin landing, financial statistics, pending cash-out approvals |
+| `/admin/members` | Required | Admin | Cooperative member directory, approval logs, and member status editor |
+| `/admin/governance` | Required | Admin | E-RAT Proposal creation and management panel |
+| `/admin/health` | Required | Admin | SIDEPAK Health Score visual dashboard and dimension details |
+| `/admin/health/methodology` | Required | Admin | Scientific explanation and methodology description for the Health Score model |
+| `/admin/profile` | Required | Admin | Admin profile details and personal credentials management |
 
 ---
 
@@ -145,7 +151,7 @@ The Flutter app calls the Next.js API at `http://localhost:3000/api/...` so both
 
 ## 🔌 API reference
 
-The Flutter app talks to four REST endpoints. All return JSON and set CORS headers so a Flutter web build (on a different port) can call them. See the [root README § API Reference](../README.md#api-reference) for full request/response shapes.
+The Flutter app talks to the Next.js backend REST API. All return JSON and set CORS headers so a Flutter web build (on a different port) can call them. See the [root README § API Reference](../README.md#api-reference) for full request/response shapes.
 
 | Endpoint | Method | Auth | Purpose |
 |---|---|---|---|
@@ -153,6 +159,10 @@ The Flutter app talks to four REST endpoints. All return JSON and set CORS heade
 | `/api/auth/signup` | POST | — | Register a new member → returns Supabase JWT + member profile |
 | `/api/mobile-sync` | GET | `Bearer <token>` | Single bundle of all member data (9 parallel Drizzle queries) |
 | `/api/mobile-sync/action` | POST | `Bearer <token>` | Write endpoint with discriminated `action` field |
+| `/api/admin-member` | POST | `Bearer <token>` (Admin) | Updates a member's profile details (Admin role only) |
+| `/api/withdraw` | POST | `Bearer <token>` | Initiates a digital wallet withdrawal request and creates Xendit payout |
+| `/api/webhooks/xendit` | POST | — | Callback webhook receiver to update status of payouts from Xendit |
+| `/api/delete-admin` | GET | — | Development utility endpoint to wipe admin profiles and progress |
 
 ### CORS handling
 

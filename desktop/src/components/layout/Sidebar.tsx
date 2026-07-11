@@ -4,6 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 export default function Sidebar({ memberName }: { memberName?: string }) {
   const pathname = usePathname();
@@ -22,14 +23,17 @@ export default function Sidebar({ memberName }: { memberName?: string }) {
       className={`group hidden md:flex flex-col h-screen sticky top-0 bg-[#0B1120] border-r border-white/5 shadow-2xl z-50 overflow-x-hidden transition-[width] duration-300 ease-in-out ${isPinned ? "w-64" : "w-[68px] hover:w-64"}`}
     >
       <div className="h-24 flex items-center px-5 relative shrink-0">
-        <h1 className={`font-headline-lg text-headline-lg text-tertiary tracking-tighter drop-shadow-[0_0_12px_rgba(250,204,21,0.4)] transition-all duration-300 whitespace-nowrap origin-left ${!isPinned ? "scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100" : "scale-100 opacity-100"}`}>
-          SIDEPAK
-        </h1>
+        <div className={`transition-all duration-300 origin-left flex items-center gap-3 ${!isPinned ? "scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100" : "scale-100 opacity-100"}`}>
+          <Image src="/logo.png" alt="SIDEPAK Logo" width={40} height={40} className="object-contain" />
+          <h1 className="font-headline-lg text-2xl text-tertiary tracking-tighter drop-shadow-[0_0_12px_rgba(250,204,21,0.4)] whitespace-nowrap">
+            SIDEPAK
+          </h1>
+        </div>
         
         {/* SP mini logo when collapsed */}
-        <h1 className={`font-headline-lg text-2xl text-tertiary tracking-tighter absolute left-1/2 -translate-x-1/2 transition-all duration-300 ${!isPinned ? "opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-0" : "opacity-0 scale-0"}`}>
-          SP
-        </h1>
+        <div className={`absolute left-1/2 -translate-x-1/2 transition-all duration-300 ${!isPinned ? "opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-0" : "opacity-0 scale-0"}`}>
+          <Image src="/logo.png" alt="SIDEPAK Logo" width={32} height={32} className="object-contain" />
+        </div>
         
         {/* Pin button */}
         <button 

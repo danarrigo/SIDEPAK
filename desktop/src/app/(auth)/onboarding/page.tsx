@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef, useActionState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, redirect } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { signup } from "@/actions/auth";
 
@@ -135,9 +136,7 @@ export default function OnboardingPage() {
         
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-16">
-            <div className="bg-tertiary text-[#0F172A] p-2 rounded-xl">
-              <span className="material-symbols-outlined font-bold text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance</span>
-            </div>
+            <Image src="/logo.png" alt="SIDEPAK Logo" width={48} height={48} className="object-contain" />
             <span className="text-2xl font-black tracking-tight">SIDEPAK</span>
           </div>
 

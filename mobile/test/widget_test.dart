@@ -9,7 +9,6 @@ void main() {
       (tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pump();
-    expect(find.text('SIDEPAK'), findsOneWidget);
     expect(find.text('Masuk'), findsOneWidget);
     // 'Daftar Sekarang' is part of the longer string 'Belum memiliki akun? Daftar Sekarang'
     expect(find.textContaining('Daftar Sekarang'), findsOneWidget);

@@ -9,7 +9,8 @@ export default function AdminMobileNav() {
   const navLinks = [
     { href: "/admin", icon: "dashboard", label: "Dashboard" },
     { href: "/admin/members", icon: "groups", label: "Anggota" },
-    { href: "/admin/governance", icon: "article", label: "Tata Kelola & Event" },
+    { href: "/admin/governance", icon: "article", label: "Tata Kelola" },
+    { href: "/admin/health", icon: "monitor_heart", label: "Kesehatan" },
     { href: "/admin/profile", icon: "settings", label: "Pengaturan" },
   ];
 

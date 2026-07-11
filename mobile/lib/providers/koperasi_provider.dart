@@ -138,6 +138,9 @@ class KoperasiProvider extends ChangeNotifier {
   // Active members directory (Phase 4a)
   List<dynamic> activeMembers = [];
 
+  // Health Score (D1-D5 SIDEPAK model)
+  Map<String, dynamic>? healthScore;
+
   KoperasiProvider() {
     loadSavedSession();
   }
@@ -423,6 +426,10 @@ class KoperasiProvider extends ChangeNotifier {
         // Sync admin stats if provided
         if (data['adminStats'] != null) {
           adminStats = data['adminStats'] as Map<String, dynamic>?;
+          // Parse health score from adminStats
+          if (adminStats?['healthScore'] != null) {
+            healthScore = adminStats!['healthScore'] as Map<String, dynamic>?;
+          }
         }
 
         final progress = data['dashboard']?['progress'];

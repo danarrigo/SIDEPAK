@@ -4,6 +4,7 @@ import '../../providers/koperasi_provider.dart';
 import 'admin_dashboard_view.dart';
 import 'admin_members_view.dart';
 import 'admin_profile_view.dart';
+import '../health_score_view.dart';
 
 class AdminNavigationWrapper extends StatefulWidget {
   const AdminNavigationWrapper({super.key});
@@ -22,6 +23,8 @@ class _AdminNavigationWrapperState extends State<AdminNavigationWrapper> {
       case 1:
         return const AdminMembersView();
       case 2:
+        return const HealthScoreView();
+      case 3:
         return AdminProfileView(
           onLogout: () {
             Provider.of<KoperasiProvider>(context, listen: false).logout();
@@ -57,7 +60,8 @@ class _AdminNavigationWrapperState extends State<AdminNavigationWrapper> {
             children: [
               _buildNavItem(0, Icons.dashboard_rounded, 'Dashboard'),
               _buildNavItem(1, Icons.groups_rounded, 'Anggota'),
-              _buildNavItem(2, Icons.person_rounded, 'Profil'),
+              _buildNavItem(2, Icons.monitor_heart_rounded, 'Kesehatan'),
+              _buildNavItem(3, Icons.person_rounded, 'Profil'),
             ],
           ),
         ),

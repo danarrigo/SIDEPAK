@@ -7,6 +7,7 @@ import { getGovernanceData, getKoperasiStats } from "@/actions/governance";
 import { getArenaData, getBattleHistory, getMemberStats } from "@/actions/arena";
 import { getMemberBadges, getWinRate, getStoreItems, getLeaderboard, getLeaderboardProvincial, getLeaderboardNational, getMemberInventory, getClaimedChests } from "@/actions/gamification";
 import { getMarketplaceItems } from "@/actions/shop";
+import { getCoopHealthScore } from "@/actions/health_score";
 
 import { getActiveMembers } from "@/actions/members";
 import { getActiveLoan, getPendingLoans } from "@/actions/financials";
@@ -140,6 +141,7 @@ export async function GET() {
       const pendingProposals = await getPendingProposals(coopId).catch(() => []);
       const pendingEvents = await getPendingEvents(coopId).catch(() => []);
       const pendingLoans = await getPendingLoans(coopId).catch(() => []);
+      const healthScore = await getCoopHealthScore(coopId).catch(() => null);
 
       adminStats = {
         totalMembers: coopStats?.totalMembers || 0,
@@ -150,6 +152,7 @@ export async function GET() {
         pendingProposals,
         pendingEvents,
         pendingLoans,
+        healthScore,
       };
     }
 

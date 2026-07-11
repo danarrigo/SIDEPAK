@@ -16,7 +16,7 @@ export default function LoginPage() {
     <div className="w-full min-h-screen flex items-center justify-center bg-background p-6">
       <div className="glass-card border border-outline-variant rounded-2xl w-full max-w-md p-8 shadow-lg">
         <div className="mb-8 text-center flex flex-col items-center">
-          <Image src="/logo.jpeg" alt="SIDEPAK Logo" width={80} height={80} className="object-contain mb-4" />
+          <Image src="/logo.jpeg" alt="SIDEPAK Logo" width={80} height={80} className="object-cover rounded-full mb-4" />
           <h1 className="text-3xl font-black text-on-surface">Masuk</h1>
           <p className="text-sm text-on-surface-variant mt-2">Masuk ke akun SIDEPAK Anda</p>
         </div>

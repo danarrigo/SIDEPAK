@@ -24,7 +24,7 @@ export default function Sidebar({ memberName }: { memberName?: string }) {
     >
       <div className="h-24 flex items-center px-5 relative shrink-0">
         <div className={`transition-all duration-300 origin-left flex items-center gap-3 ${!isPinned ? "scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100" : "scale-100 opacity-100"}`}>
-          <Image src="/logo.jpeg" alt="SIDEPAK Logo" width={40} height={40} className="object-contain" />
+          <Image src="/logo.jpeg" alt="SIDEPAK Logo" width={40} height={40} className="object-cover rounded-full" />
           <h1 className="font-headline-lg text-2xl text-tertiary tracking-tighter drop-shadow-[0_0_12px_rgba(250,204,21,0.4)] whitespace-nowrap">
             SIDEPAK
           </h1>
@@ -32,7 +32,7 @@ export default function Sidebar({ memberName }: { memberName?: string }) {
         
         {/* SP mini logo when collapsed */}
         <div className={`absolute left-1/2 -translate-x-1/2 transition-all duration-300 ${!isPinned ? "opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-0" : "opacity-0 scale-0"}`}>
-          <Image src="/logo.jpeg" alt="SIDEPAK Logo" width={32} height={32} className="object-contain" />
+          <Image src="/logo.jpeg" alt="SIDEPAK Logo" width={32} height={32} className="object-cover rounded-full" />
         </div>
         
         {/* Pin button */}

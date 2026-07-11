@@ -102,11 +102,13 @@ class _LoginViewState extends State<LoginView> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Center(
-                    child: Image.asset(
-                      'assets/images/logo.jpeg',
-                      width: 64,
-                      height: 64,
-                      fit: BoxFit.contain,
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/logo.jpeg',
+                        width: 64,
+                        height: 64,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),

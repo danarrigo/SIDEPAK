@@ -136,7 +136,7 @@ export default function OnboardingPage() {
         
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-16">
-            <Image src="/logo.jpeg" alt="SIDEPAK Logo" width={48} height={48} className="object-contain" />
+            <Image src="/logo.jpeg" alt="SIDEPAK Logo" width={48} height={48} className="object-cover rounded-full" />
             <span className="text-2xl font-black tracking-tight">SIDEPAK</span>
           </div>
 

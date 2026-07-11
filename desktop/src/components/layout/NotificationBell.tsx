@@ -39,12 +39,6 @@ export default function NotificationBell({ memberId }: { memberId?: number }) {
     router.refresh(); // Refresh in case it affects other global state
   }
 
-  async function handleTestNotification() {
-    if (!memberId) return;
-    await createTestNotification(memberId);
-    await loadNotifications();
-  }
-
   const unreadCount = notifications.length;
 
   return (
@@ -63,12 +57,7 @@ export default function NotificationBell({ memberId }: { memberId?: number }) {
         <div className="absolute right-0 mt-3 w-80 bg-surface-container-highest border border-outline-variant/30 rounded-xl shadow-lg z-50 animate-slide-up origin-top-right overflow-hidden">
           <div className="p-3 border-b border-outline-variant/30 bg-surface flex justify-between items-center">
             <span className="font-bold text-sm">Notifikasi {unreadCount > 0 && `(${unreadCount})`}</span>
-            <button 
-              onClick={handleTestNotification}
-              className="text-[10px] text-primary cursor-pointer hover:underline border border-primary/30 px-2 py-0.5 rounded"
-            >
-              Tes Notif
-            </button>
+
           </div>
           
           <div className="max-h-80 overflow-y-auto">

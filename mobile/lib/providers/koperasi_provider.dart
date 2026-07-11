@@ -1167,6 +1167,84 @@ class KoperasiProvider extends ChangeNotifier {
     }
   }
 
+  // ============ ADMIN GOVERNANCE ============
+
+  Future<String> adminCreateEvent(String name, String description, DateTime startDate, DateTime endDate) async {
+    try {
+      final body = await _postAction({
+        'action': 'admin-create-event',
+        'name': name,
+        'description': description,
+        'startDate': startDate.toIso8601String(),
+        'endDate': endDate.toIso8601String(),
+      });
+      if (body['success'] == true) {
+        await fetchData();
+        return 'Event berhasil dibuat!';
+      }
+      return body['error']?.toString() ?? 'Gagal membuat event.';
+    } catch (e) {
+      return 'Gagal menghubungi server.';
+    }
+  }
+
+  Future<String> adminEditEvent(int eventId, String name, String description, DateTime startDate, DateTime endDate) async {
+    try {
+      final body = await _postAction({
+        'action': 'admin-edit-event',
+        'eventId': eventId,
+        'name': name,
+        'description': description,
+        'startDate': startDate.toIso8601String(),
+        'endDate': endDate.toIso8601String(),
+      });
+      if (body['success'] == true) {
+        await fetchData();
+        return 'Event berhasil diupdate!';
+      }
+      return body['error']?.toString() ?? 'Gagal mengupdate event.';
+    } catch (e) {
+      return 'Gagal menghubungi server.';
+    }
+  }
+
+  Future<String> adminCreateProposal(String title, String description, DateTime? endDate) async {
+    try {
+      final body = await _postAction({
+        'action': 'admin-create-proposal',
+        'title': title,
+        'description': description,
+        'endDate': endDate?.toIso8601String(),
+      });
+      if (body['success'] == true) {
+        await fetchData();
+        return 'Proposal berhasil dibuat!';
+      }
+      return body['error']?.toString() ?? 'Gagal membuat proposal.';
+    } catch (e) {
+      return 'Gagal menghubungi server.';
+    }
+  }
+
+  Future<String> adminEditProposal(int proposalId, String title, String description, DateTime? endDate) async {
+    try {
+      final body = await _postAction({
+        'action': 'admin-edit-proposal',
+        'proposalId': proposalId,
+        'title': title,
+        'description': description,
+        'endDate': endDate?.toIso8601String(),
+      });
+      if (body['success'] == true) {
+        await fetchData();
+        return 'Proposal berhasil diupdate!';
+      }
+      return body['error']?.toString() ?? 'Gagal mengupdate proposal.';
+    } catch (e) {
+      return 'Gagal menghubungi server.';
+    }
+  }
+
   // ============ PHASE 4d: MATCHMAKE BATTLE ============
 
   Future<String> matchmakeBattle() async {

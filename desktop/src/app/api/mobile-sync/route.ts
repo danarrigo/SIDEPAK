@@ -143,6 +143,13 @@ export async function GET() {
       const pendingLoans = await getPendingLoans(coopId).catch(() => []);
       const healthScore = await getCoopHealthScore(coopId).catch(() => null);
 
+      const { proposals } = await import('@/db/schema/governance');
+      const { events } = await import('@/db/schema/activities');
+      const { desc } = await import('drizzle-orm');
+      
+      const allProposals = await db.select().from(proposals).where(eq(proposals.cooperativeId, coopId)).orderBy(desc(proposals.createdAt)).catch(() => []);
+      const allEvents = await db.select().from(events).where(eq(events.cooperativeId, coopId)).orderBy(desc(events.createdAt)).catch(() => []);
+
       adminStats = {
         totalMembers: coopStats?.totalMembers || 0,
         activeMembers: coopStats?.activeMembers || 0,
@@ -153,6 +160,8 @@ export async function GET() {
         pendingEvents,
         pendingLoans,
         healthScore,
+        allProposals,
+        allEvents,
       };
     }
 

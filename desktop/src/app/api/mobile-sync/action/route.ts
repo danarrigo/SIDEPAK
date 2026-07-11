@@ -196,6 +196,22 @@ export async function POST(request: Request) {
     } else if (action === 'pay-loan') {
       const { loanId } = body;
       result = await repayLoanFromWallet(memberId, Number(loanId));
+    } else if (action === 'admin-create-event') {
+      const { name, description, startDate, endDate } = body;
+      const { createEventByAdmin } = await import('@/actions/events');
+      result = await createEventByAdmin(member.cooperativeId!, name, description, new Date(startDate), new Date(endDate));
+    } else if (action === 'admin-edit-event') {
+      const { eventId, name, description, startDate, endDate } = body;
+      const { editEvent } = await import('@/actions/events');
+      result = await editEvent(Number(eventId), name, description, new Date(startDate), new Date(endDate));
+    } else if (action === 'admin-create-proposal') {
+      const { title, description, endDate } = body;
+      const { createProposalByAdmin } = await import('@/actions/governance');
+      result = await createProposalByAdmin(member.cooperativeId!, title, description, endDate ? new Date(endDate) : undefined);
+    } else if (action === 'admin-edit-proposal') {
+      const { proposalId, title, description, endDate } = body;
+      const { editProposal } = await import('@/actions/governance');
+      result = await editProposal(Number(proposalId), title, description, endDate ? new Date(endDate) : undefined);
     }
 
     return NextResponse.json(result, {

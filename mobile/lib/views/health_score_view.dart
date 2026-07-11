@@ -236,6 +236,10 @@ class HealthScoreView extends StatelessWidget {
 
         const SizedBox(height: 24),
 
+        _buildRecommendationsSection(dimensions),
+
+        const SizedBox(height: 24),
+
         // Weight Chart
         Container(
           decoration: BoxDecoration(
@@ -593,6 +597,180 @@ class HealthScoreView extends StatelessWidget {
       default:
         return Icons.bar_chart;
     }
+  }
+
+  Widget _buildRecommendationsSection(List<dynamic> dimensions) {
+    final lowDims = dimensions.where((d) => ((d['score'] as num?) ?? 0) < 0.6).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Rekomendasi Peningkatan Kinerja Koperasi',
+          style: TextStyle(
+              color: Color(0xFF0F172A),
+              fontSize: 16,
+              fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        if (lowDims.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFDCFCE7),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF22C55E).withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.verified_user_rounded, color: Color(0xFF22C55E), size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Kinerja Seluruh Dimensi Optimal!',
+                        style: TextStyle(color: Color(0xFF15803D), fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Koperasi Anda berada dalam kondisi optimal di seluruh dimensi penilaian (skor ≥ 60%). Pertahankan transparansi dan keaktifan ini.',
+                        style: TextStyle(color: Color(0xFF166534), fontSize: 11, height: 1.4),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ...lowDims.map((d) {
+            final key = d['key'] as String? ?? '';
+            final scorePct = (((d['score'] as num?) ?? 0) * 100).round();
+            
+            final Map<String, Map<String, dynamic>> recommendations = {
+              'd1': {
+                'title': 'Kepatuhan Iuran Rendah',
+                'action': 'Optimalkan Penagihan & Keuangan',
+                'tips': [
+                  'Kirim notifikasi tagihan atau pasang reminder otomatis di n8n untuk iuran bulanan.',
+                  'Sediakan kemudahan metode pembayaran digital (autodebet/e-wallet).',
+                  'Lakukan komunikasi personal khusus anggota dengan tunggakan di atas 3 bulan.'
+                ]
+              },
+              'd2': {
+                'title': 'Penetrasi Digital Rendah',
+                'action': 'Gencarkan Aktivasi Aplikasi SIDEPAK',
+                'tips': [
+                  'Bantu proses onboarding dan pembuatan akun SIDEPAK saat pertemuan bulanan/RAT.',
+                  'Berikan insentif Poin perdana (Welcome Reward) setelah aktivasi akun pertama.',
+                  'Buat panduan pendaftaran sederhana dalam format pamflet atau video singkat.'
+                ]
+              },
+              'd3': {
+                'title': 'Partisipasi Governance Rendah',
+                'action': 'Tingkatkan Keaktifan Pengambilan Keputusan',
+                'tips': [
+                  'Buat proposal/kebijakan baru yang secara riil berdampak langsung ke kesejahteraan anggota.',
+                  'Beri apresiasi berupa XP/Poin kecil kepada anggota setelah memberikan suara/voting.',
+                  'Sederhanakan bahasa penulisan proposal agar lebih ringkas dan mudah dipahami.'
+                ]
+              },
+              'd4': {
+                'title': 'Rasio Kredit Macet Tinggi',
+                'action': 'Perketat Manajemen Risiko Kredit',
+                'tips': [
+                  'Lakukan uji kelayakan kredit (credit scoring) lebih mendalam sebelum menyetujui pinjaman baru.',
+                  'Tawarkan skema restrukturisasi pembayaran/penjadwalan ulang cicilan bagi anggota yang kesulitan.',
+                  'Kirim pengingat tagihan ramah melalui sistem 3 hari sebelum tanggal jatuh tempo.'
+                ]
+              },
+              'd5': {
+                'title': 'Keaktifan Gamifikasi Rendah',
+                'action': 'Dongkrak Partisipasi & Event Liga',
+                'tips': [
+                  'Perbarui daftar Quest Mingguan dengan tantangan yang mudah namun mengasyikkan.',
+                  'Dorong partisipasi aktif anggota pada Liga Koperasi untuk mengumpulkan skor tim.',
+                  'Sediakan merchandise atau sembako murah di Toko Poin sebagai penukar Poin SIDEPAK.'
+                ]
+              }
+            };
+            
+            final rec = recommendations[key];
+            if (rec == null) return const SizedBox.shrink();
+            
+            final tipsList = List<String>.from(rec['tips'] as List);
+            
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFBEB),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 18),
+                          const SizedBox(width: 6),
+                          Text(
+                            rec['title'] as String,
+                            style: const TextStyle(
+                              color: Color(0xFF92400E),
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF3C7),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'Skor: $scorePct%',
+                          style: const TextStyle(color: Color(0xFFB45309), fontSize: 9, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(color: Color(0xFFFEF3C7), height: 16),
+                  Text(
+                    rec['action'] as String,
+                    style: const TextStyle(color: Color(0xFF1E293B), fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  ...tipsList.map((tip) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('• ', style: TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 12)),
+                        Expanded(
+                          child: Text(
+                            tip,
+                            style: const TextStyle(color: Color(0xFF475569), fontSize: 11, height: 1.4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )).toList(),
+                ],
+              ),
+            );
+          }).toList(),
+      ],
+    );
   }
 
   Color _hexToColor(String hex) {

@@ -209,6 +209,103 @@ export default async function HealthScorePage() {
         </div>
       </div>
 
+      {/* Tips & Recommendations Section */}
+      <div className="mb-8">
+        <h2 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-tertiary">tips_and_updates</span>
+          Rekomendasi Peningkatan Kinerja Koperasi
+        </h2>
+        
+        {dimensions.filter(d => d.score < 0.6).length === 0 ? (
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-green-800">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="material-symbols-outlined text-2xl">verified</span>
+              <h3 className="font-bold text-sm">Kinerja Seluruh Dimensi Optimal!</h3>
+            </div>
+            <p className="text-xs leading-relaxed">
+              Koperasi Anda berada dalam kondisi optimal di seluruh dimensi penilaian (skor &ge; 60%). Pertahankan transparansi, keaktifan anggota, serta kedisiplinan keuangan ini.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {dimensions.filter(d => d.score < 0.6).map((d) => {
+              const recommendations: Record<string, { title: string; action: string; tips: string[] }> = {
+                d1: {
+                  title: "Kepatuhan Iuran Rendah",
+                  action: "Optimalkan Penagihan & Keuangan",
+                  tips: [
+                    "Kirim notifikasi tagihan atau pasang reminder otomatis di n8n untuk iuran bulanan.",
+                    "Sediakan kemudahan metode pembayaran digital (autodebet/e-wallet).",
+                    "Lakukan komunikasi personal khusus anggota dengan tunggakan di atas 3 bulan."
+                  ]
+                },
+                d2: {
+                  title: "Penetrasi Digital Rendah",
+                  action: "Gencarkan Aktivasi Aplikasi SIDEPAK",
+                  tips: [
+                    "Bantu proses onboarding dan pembuatan akun SIDEPAK saat pertemuan bulanan/RAT.",
+                    "Berikan insentif Poin perdana (Welcome Reward) setelah aktivasi akun pertama.",
+                    "Buat panduan pendaftaran sederhana dalam format pamflet atau video singkat."
+                  ]
+                },
+                d3: {
+                  title: "Partisipasi Governance Rendah",
+                  action: "Tingkatkan Keaktifan Pengambilan Keputusan",
+                  tips: [
+                    "Buat proposal/kebijakan baru yang secara riil berdampak langsung ke kesejahteraan anggota.",
+                    "Beri apresiasi berupa XP/Poin kecil kepada anggota setelah memberikan suara/voting.",
+                    "Sederhanakan bahasa penulisan proposal agar lebih ringkas dan mudah dipahami."
+                  ]
+                },
+                d4: {
+                  title: "Rasio Kredit Macet Tinggi",
+                  action: "Perketat Manajemen Risiko Kredit",
+                  tips: [
+                    "Lakukan uji kelayakan kredit (credit scoring) lebih mendalam sebelum menyetujui pinjaman baru.",
+                    "Tawarkan skema restrukturisasi pembayaran/penjadwalan ulang cicilan bagi anggota yang kesulitan.",
+                    "Kirim pengingat tagihan ramah melalui sistem 3 hari sebelum tanggal jatuh tempo."
+                  ]
+                },
+                d5: {
+                  title: "Keaktifan Gamifikasi Rendah",
+                  action: "Dongkrak Partisipasi & Event Liga",
+                  tips: [
+                    "Perbarui daftar Quest Mingguan dengan tantangan yang mudah namun mengasyikkan.",
+                    "Dorong partisipasi aktif anggota pada Liga Koperasi untuk mengumpulkan skor tim.",
+                    "Sediakan merchandise atau sembako murah di Toko Poin sebagai penukar Poin SIDEPAK."
+                  ]
+                }
+              };
+              const rec = recommendations[d.key];
+              if (!rec) return null;
+              
+              return (
+                <div key={d.key} className="bg-amber-50/50 border border-amber-200 rounded-2xl p-5 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-3 border-b border-amber-100 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-amber-600 text-lg">warning</span>
+                        <span className="font-bold text-xs text-amber-800 uppercase tracking-wider">{rec.title}</span>
+                      </div>
+                      <span className="text-[10px] font-black text-amber-700 bg-amber-100/50 px-2 py-0.5 rounded">Skor: {Math.round(d.score * 100)}%</span>
+                    </div>
+                    <h4 className="font-bold text-sm text-slate-800 mb-2">{rec.action}</h4>
+                    <ul className="space-y-1.5">
+                      {rec.tips.map((tip, idx) => (
+                        <li key={idx} className="text-xs text-slate-600 leading-relaxed flex items-start gap-1.5">
+                          <span className="text-amber-500 font-bold">•</span>
+                          <span>{tip}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Threshold Guide */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6">
         <h3 className="font-bold text-slate-900 mb-4 text-sm flex items-center gap-2">

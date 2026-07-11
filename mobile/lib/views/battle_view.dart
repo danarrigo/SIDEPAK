@@ -261,7 +261,7 @@ class _BattleViewState extends State<BattleView> {
                               ),
                               const Text(
                                 'VS',
-                                style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 24, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+                                style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 16, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
                               ),
                               Expanded(
                                 child: Column(
@@ -319,12 +319,12 @@ class _BattleViewState extends State<BattleView> {
                       child: Container(color: const Color(0xFF0F172A)),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
                       child: Column(
                         children: [
                           Container(
-                            width: 100,
-                            height: 100,
+                            width: 160,
+                            height: 160,
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
@@ -334,7 +334,7 @@ class _BattleViewState extends State<BattleView> {
                               backgroundColor: const Color(0xFFE2E8F0),
                               child: Text(
                                 myName.isNotEmpty ? myName[0].toUpperCase() : 'A',
-                                style: const TextStyle(color: Color(0xFF0F172A), fontSize: 32, fontWeight: FontWeight.bold),
+                                style: const TextStyle(color: Color(0xFF0F172A), fontSize: 64, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
@@ -438,7 +438,7 @@ class _BattleViewState extends State<BattleView> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
 
               // VS Indicator & Matchmaking
               Center(
@@ -500,7 +500,7 @@ class _BattleViewState extends State<BattleView> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
 
               // Player 2 Card (Lawan)
               Container(
@@ -527,12 +527,12 @@ class _BattleViewState extends State<BattleView> {
                       child: Container(color: const Color(0xFFFACC15)),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
                       child: Column(
                         children: [
                           Container(
-                            width: 100,
-                            height: 100,
+                            width: 160,
+                            height: 160,
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
@@ -542,7 +542,7 @@ class _BattleViewState extends State<BattleView> {
                               backgroundColor: const Color(0xFFE2E8F0),
                               child: Text(
                                 opponentName != 'Menunggu Lawan' && opponentName.isNotEmpty ? opponentName[0].toUpperCase() : '?',
-                                style: const TextStyle(color: Color(0xFFFACC15), fontSize: 32, fontWeight: FontWeight.bold),
+                                style: const TextStyle(color: Color(0xFFFACC15), fontSize: 64, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
@@ -618,7 +618,7 @@ class _BattleViewState extends State<BattleView> {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 64),
 
               // Detail Pertandingan 1v1
               const Text(
@@ -661,7 +661,7 @@ class _BattleViewState extends State<BattleView> {
                               color: Color(0xFFF8FAFC),
                               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
                             child: const Row(
                               children: [
                                 Expanded(
@@ -699,14 +699,14 @@ class _BattleViewState extends State<BattleView> {
                             itemBuilder: (context, index) {
                               final row = filteredStats[index];
                               return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                                 child: Row(
                                   children: [
                                     Expanded(
                                       flex: 2,
                                       child: Text(
                                         row['label'] as String,
-                                        style: const TextStyle(color: Color(0xFF0F172A), fontSize: 13),
+                                        style: const TextStyle(color: Color(0xFF0F172A), fontSize: 16),
                                       ),
                                     ),
                                     Expanded(
@@ -717,7 +717,7 @@ class _BattleViewState extends State<BattleView> {
                                         style: const TextStyle(
                                           color: Color(0xFF0F172A),
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13,
+                                          fontSize: 20,
                                         ),
                                       ),
                                     ),
@@ -729,7 +729,7 @@ class _BattleViewState extends State<BattleView> {
                                         style: const TextStyle(
                                           color: Color(0xFFFACC15),
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13,
+                                          fontSize: 20,
                                         ),
                                       ),
                                     ),
@@ -742,7 +742,7 @@ class _BattleViewState extends State<BattleView> {
                       ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 64),
 
               // Riwayat Pertandingan 1v1
               const Text(
@@ -785,7 +785,7 @@ class _BattleViewState extends State<BattleView> {
                               color: Color(0xFFF8FAFC),
                               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
                             child: const Row(
                               children: [
                                 Expanded(
@@ -823,7 +823,7 @@ class _BattleViewState extends State<BattleView> {
                               final history = historyList[index];
                               final isWinner = history.result.toLowerCase() == 'menang';
                               return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                                 child: Row(
                                   children: [
                                     Expanded(
@@ -832,7 +832,7 @@ class _BattleViewState extends State<BattleView> {
                                         children: [
                                           Text(
                                             history.date ?? '-',
-                                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
@@ -840,7 +840,7 @@ class _BattleViewState extends State<BattleView> {
                                             style: const TextStyle(
                                               color: Color(0xFF0F172A),
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 13,
+                                              fontSize: 16,
                                             ),
                                           ),
                                         ],
@@ -877,7 +877,7 @@ class _BattleViewState extends State<BattleView> {
                                         style: const TextStyle(
                                           color: Color(0xFF0F172A),
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13,
+                                          fontSize: 20,
                                         ),
                                       ),
                                     ),
@@ -890,7 +890,7 @@ class _BattleViewState extends State<BattleView> {
                       ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 64),
 
               // Points Guide Header with Help Icon
               Row(
@@ -926,18 +926,11 @@ class _BattleViewState extends State<BattleView> {
               ),
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(24),
                   border: Border.all(color: const Color(0xFFE2E8F0)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -958,7 +951,7 @@ class _BattleViewState extends State<BattleView> {
               // Papan Peringkat Liga (Top 50)
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: const Color(0xFFE2E8F0)),
                   boxShadow: [
@@ -972,9 +965,9 @@ class _BattleViewState extends State<BattleView> {
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                       decoration: const BoxDecoration(
-                        color: Color(0xFFF8FAFC),
+                        color: Colors.white,
                         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                         border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
                       ),
@@ -982,7 +975,7 @@ class _BattleViewState extends State<BattleView> {
                         children: [
                           Text(
                             'Klasemen Liga (Top 50)',
-                            style: TextStyle(color: Color(0xFF0F172A), fontSize: 14, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: Color(0xFF0F172A), fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -1005,16 +998,16 @@ class _BattleViewState extends State<BattleView> {
                           final item = provider.leaderboard[index];
                           final isMineByName = item['koperasiName'] == provider.koperasiName;
                           return Container(
-                            color: isMineByName ? const Color(0xFF0F172A).withOpacity(0.1) : Colors.transparent,
-                            padding: const EdgeInsets.all(16),
+                            color: isMineByName ? const Color(0xFF0F172A).withOpacity(0.05) : Colors.transparent,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                             child: Row(
                               children: [
                                 SizedBox(
-                                  width: 24,
+                                  width: 28,
                                   child: Text(
                                     index == 0 ? '🥇' : index == 1 ? '🥈' : index == 2 ? '🥉' : '${index + 1}',
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(color: Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(color: Color(0xFF64748B), fontSize: 18, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -1029,7 +1022,7 @@ class _BattleViewState extends State<BattleView> {
                                               item['koperasiName'] ?? '-',
                                               style: TextStyle(
                                                 color: isMineByName ? const Color(0xFF0F172A) : const Color(0xFF0F172A),
-                                                fontSize: 14,
+                                                fontSize: 16,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                               maxLines: 1,
@@ -1039,14 +1032,14 @@ class _BattleViewState extends State<BattleView> {
                                           if (isMineByName) ...[
                                             const SizedBox(width: 8),
                                             Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                               decoration: BoxDecoration(
                                                 color: const Color(0xFF0F172A),
                                                 borderRadius: BorderRadius.circular(20),
                                               ),
                                               child: const Text(
                                                 'ANDA',
-                                                style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                                                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                                               ),
                                             ),
                                           ],
@@ -1055,11 +1048,11 @@ class _BattleViewState extends State<BattleView> {
                                       const SizedBox(height: 4),
                                       Row(
                                         children: [
-                                          Text('${item['totalWins'] ?? 0} W', style: const TextStyle(color: Color(0xFF0F172A), fontSize: 10, fontWeight: FontWeight.bold)),
+                                          Text('${item['totalWins'] ?? 0} W', style: const TextStyle(color: Color(0xFF0F172A), fontSize: 12, fontWeight: FontWeight.bold)),
                                           const SizedBox(width: 8),
-                                          Text('${item['totalDraws'] ?? 0} D', style: const TextStyle(color: Color(0xFF64748B), fontSize: 10, fontWeight: FontWeight.bold)),
+                                          Text('${item['totalDraws'] ?? 0} D', style: const TextStyle(color: Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.bold)),
                                           const SizedBox(width: 8),
-                                          Text('${item['totalLosses'] ?? 0} L', style: const TextStyle(color: Color(0xFFEF4444), fontSize: 10, fontWeight: FontWeight.bold)),
+                                          Text('${item['totalLosses'] ?? 0} L', style: const TextStyle(color: Color(0xFFEF4444), fontSize: 12, fontWeight: FontWeight.bold)),
                                         ],
                                       ),
                                     ],
@@ -1067,7 +1060,7 @@ class _BattleViewState extends State<BattleView> {
                                 ),
                                 Text(
                                   '${formatNumber(item['totalXp'] ?? 0)} XP',
-                                  style: const TextStyle(color: Color(0xFFFACC15), fontSize: 12, fontWeight: FontWeight.w900),
+                                  style: const TextStyle(color: Color(0xFFFACC15), fontSize: 16, fontWeight: FontWeight.w900),
                                 ),
                               ],
                             ),

@@ -187,8 +187,8 @@ export default async function HealthScorePage() {
           Rincian 5 Dimensi Kesehatan
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {dimensions.map((dim) => (
-            <DimensionCard key={dim.key} {...dim} />
+          {dimensions.map(({ key, ...restDim }) => (
+            <DimensionCard key={key} {...restDim} />
           ))}
           {/* Methodology Card */}
           <div className="bg-slate-50 rounded-2xl border border-dashed border-slate-300 p-5 flex flex-col justify-between">

@@ -10,22 +10,10 @@ export default function LeaderboardTableClient({
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // MOCK DATA: Menambahkan data buatan agar fitur "Lihat Semua" (expand/collapse) bisa terlihat meskipun di database baru ada 1 Koperasi.
-  const displayLeaderboard = leaderboard.length <= 3 ? [
-    ...leaderboard,
-    ...Array.from({ length: 15 }).map((_, i) => ({
-      id: 9990 + i,
-      koperasiId: 9990 + i,
-      koperasiName: `Koperasi Makmur Desa ${i + 1}`,
-      totalWins: Math.floor(Math.random() * 10),
-      totalDraws: Math.floor(Math.random() * 3),
-      totalLosses: Math.floor(Math.random() * 5),
-      totalPoints: Math.floor(Math.random() * 500) + 100,
-    })).sort((a, b) => b.totalWins - a.totalWins || b.totalPoints - a.totalPoints)
-  ] : leaderboard;
-
-  const displayData = isExpanded ? displayLeaderboard : displayLeaderboard.slice(0, 5);
-  const hasMore = displayLeaderboard.length > 5;
+  // If not expanded, show top 5. If myCooperative is not in top 5, we can choose to show it at the bottom, 
+  // but for simplicity let's just slice to top 5 and rely on "Lihat Semua" to show the rest.
+  const displayData = isExpanded ? leaderboard : leaderboard.slice(0, 5);
+  const hasMore = leaderboard.length > 5;
 
   return (
     <section className="glass-card rounded-xl overflow-hidden animate-slide-up delay-100 mt-12">
@@ -95,7 +83,7 @@ export default function LeaderboardTableClient({
           className="w-full text-center p-3 bg-surface-container-lowest hover:bg-surface-container-low cursor-pointer transition-colors border-t border-outline-variant"
           onClick={() => setIsExpanded(true)}
         >
-          <span className="text-sm font-bold text-primary">Tampilkan {displayLeaderboard.length - 5} Koperasi Lainnya...</span>
+          <span className="text-sm font-bold text-primary">Tampilkan {leaderboard.length - 5} Koperasi Lainnya...</span>
         </div>
       )}
     </section>

@@ -25,20 +25,20 @@ export async function getLeagueLeaderboard(seasonId: number) {
       totalWins: koperasiSeasonScores.totalWins,
       totalLosses: koperasiSeasonScores.totalLosses,
       totalDraws: koperasiSeasonScores.totalDraws,
-      totalXp: koperasiSeasonScores.totalXp,
+      totalPoints: koperasiSeasonScores.totalPoints,
       koperasiName: cooperatives.name,
     })
     .from(koperasiSeasonScores)
     .innerJoin(cooperatives, eq(koperasiSeasonScores.koperasiId, cooperatives.id))
     .where(eq(koperasiSeasonScores.seasonId, seasonId))
-    .orderBy(desc(koperasiSeasonScores.totalWins), desc(koperasiSeasonScores.totalXp))
+    .orderBy(desc(koperasiSeasonScores.totalWins), desc(koperasiSeasonScores.totalPoints))
     .limit(50);
     
   return scores;
 }
 
-export async function addXpToKoperasi(koperasiId: number, xpAmount: number) {
-  if (xpAmount <= 0) return;
+export async function addPointsToKoperasi(koperasiId: number, pointsAmount: number) {
+  if (pointsAmount <= 0) return;
   
   const activeSeason = await getCurrentSeason();
   if (!activeSeason) return;
@@ -55,12 +55,12 @@ export async function addXpToKoperasi(koperasiId: number, xpAmount: number) {
     await db.insert(koperasiSeasonScores).values({
       koperasiId,
       seasonId: activeSeason.id,
-      totalXp: xpAmount
+      totalPoints: pointsAmount
     });
   } else {
     await db.update(koperasiSeasonScores)
       .set({
-        totalXp: score.totalXp + xpAmount,
+        totalPoints: score.totalPoints + pointsAmount,
         updatedAt: new Date(),
       })
       .where(eq(koperasiSeasonScores.id, score.id));

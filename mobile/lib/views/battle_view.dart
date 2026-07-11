@@ -1059,7 +1059,7 @@ class _BattleViewState extends State<BattleView> {
                                   ),
                                 ),
                                 Text(
-                                  '${formatNumber(item['totalXp'] ?? 0)} XP',
+                                  '${formatNumber(item['totalPoints'] ?? 0)} Poin',
                                   style: const TextStyle(color: Color(0xFFFACC15), fontSize: 16, fontWeight: FontWeight.w900),
                                 ),
                               ],

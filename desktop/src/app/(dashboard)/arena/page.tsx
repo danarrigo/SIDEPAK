@@ -96,7 +96,7 @@ export default async function Page() {
                   <th className="p-4 font-medium border-b border-outline-variant text-center">Menang</th>
                   <th className="p-4 font-medium border-b border-outline-variant text-center">Seri</th>
                   <th className="p-4 font-medium border-b border-outline-variant text-center">Kalah</th>
-                  <th className="p-4 font-medium border-b border-outline-variant text-right">Total XP</th>
+                  <th className="p-4 font-medium border-b border-outline-variant text-right">Total Poin</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/50">
@@ -125,7 +125,7 @@ export default async function Page() {
                         <td className="p-4 text-center font-bold text-on-surface-variant">{item.totalDraws}</td>
                         <td className="p-4 text-center font-bold text-error">{item.totalLosses}</td>
                         <td className="p-4 text-right font-bold text-tertiary">
-                          {item.totalXp.toLocaleString()} XP
+                          {item.totalPoints.toLocaleString()} Poin
                         </td>
                       </tr>
                     );
@@ -203,7 +203,7 @@ export default async function Page() {
                       </div>
                     </div>
                     <div className="text-right font-black text-tertiary text-xs">
-                      {item.totalXp.toLocaleString()} XP
+                      {item.totalPoints.toLocaleString()} Poin
                     </div>
                   </div>
                 );

@@ -84,6 +84,6 @@ export const koperasiSeasonScores = pgTable("koperasi_season_scores", {
   totalWins: integer("total_wins").default(0).notNull(),
   totalLosses: integer("total_losses").default(0).notNull(),
   totalDraws: integer("total_draws").default(0).notNull(),
-  totalXp: integer("total_xp").default(0).notNull(),
+  totalPoints: integer("total_points").default(0).notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

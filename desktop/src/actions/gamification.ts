@@ -7,7 +7,7 @@ import { members } from "@/db/schema/members";
 import { cooperatives } from "@/db/schema/cooperatives";
 import { or, eq, and, desc, sql } from "drizzle-orm";
 import { cache } from "react";
-import { addXpToKoperasi } from "./league";
+import { addPointsToKoperasi } from "./league";
 
 export const getMemberProgress = cache(async (memberId: number) => {
   try {
@@ -101,7 +101,7 @@ export async function awardPoints(memberId: number, amount: number, source: stri
     // Fetch member to get koperasiId
     const [memberData] = await db.select().from(members).where(eq(members.id, memberId));
     if (memberData && memberData.cooperativeId) {
-      await addXpToKoperasi(memberData.cooperativeId, finalAmount);
+      await addPointsToKoperasi(memberData.cooperativeId, finalAmount);
     }
 
     // Update active battle score

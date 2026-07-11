@@ -45,6 +45,10 @@ Platform ini menargetkan *Koperasi Merah Putih Desa* — koperasi tingkat desa y
 | **Aplikasi Mobile** (`mobile/`) | Untuk kenyamanan saat menggunakan HP |
 | **Aplikasi Website** (`desktop/`) | Untuk jika tidak ingin melakukan download atau sedang tidak menggunakan handphone |
 
+**Akun Demo:**
+- Anggota Biasa: `janedoe@gmail.com` / `janedoe`
+- Administrator: `admin@gmail.com` / `admindoe`
+
 Panduan setup aplikasi:
 - [Panduan Dashboard Web Desktop & API](./desktop/README.md)
 - [Panduan Mobile (Flutter)](./mobile/README.md)

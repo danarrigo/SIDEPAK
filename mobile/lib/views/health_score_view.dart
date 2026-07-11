@@ -173,7 +173,10 @@ class HealthScoreView extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 dimensions
-                    .map((d) => '${((d['score'] as num?) * 100)?.toStringAsFixed(0) ?? 0} × ${d['weight']}%')
+                    .map((d) {
+                      final rawScore = (d['score'] as num?) ?? 0;
+                      return '${(rawScore * 100).toStringAsFixed(0)} × ${d['weight']}%';
+                    })
                     .join(' + '),
                 style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11, fontFamily: 'monospace'),
               ),

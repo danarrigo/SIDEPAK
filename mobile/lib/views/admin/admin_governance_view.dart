@@ -30,15 +30,20 @@ class _AdminGovernanceViewState extends State<AdminGovernanceView>
 
   void _showForm({Map<String, dynamic>? item}) {
     final bool isEvent = _tabController.index == 0;
-    
-    final TextEditingController titleController = TextEditingController(text: item == null ? null : (isEvent ? item['name']?.toString() : item['title']?.toString()));
-    final TextEditingController descController = TextEditingController(text: item == null ? null : item['description']?.toString());
-    
+
+    final TextEditingController titleController = TextEditingController(
+        text: item == null
+            ? null
+            : (isEvent ? item['name']?.toString() : item['title']?.toString()));
+    final TextEditingController descController = TextEditingController(
+        text: item == null ? null : item['description']?.toString());
+
     DateTime? startDate;
     DateTime? endDate;
 
     if (item != null) {
-      if (item['startDate'] != null) startDate = DateTime.tryParse(item['startDate']);
+      if (item['startDate'] != null)
+        startDate = DateTime.tryParse(item['startDate']);
       if (item['endDate'] != null) endDate = DateTime.tryParse(item['endDate']);
       if (!isEvent && item['createdAt'] != null && endDate == null) {
         endDate = DateTime.tryParse(item['createdAt']);
@@ -79,7 +84,8 @@ class _AdminGovernanceViewState extends State<AdminGovernanceView>
                     controller: titleController,
                     decoration: InputDecoration(
                       labelText: 'Judul / Nama',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -88,23 +94,35 @@ class _AdminGovernanceViewState extends State<AdminGovernanceView>
                     maxLines: 3,
                     decoration: InputDecoration(
                       labelText: 'Deskripsi',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                   const SizedBox(height: 16),
                   if (isEvent) ...[
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Tanggal Mulai', style: TextStyle(fontSize: 14)),
-                      subtitle: Text(startDate != null ? startDate.toString().substring(0, 16) : 'Pilih Tanggal & Waktu'),
+                      title: const Text('Tanggal Mulai',
+                          style: TextStyle(fontSize: 14)),
+                      subtitle: Text(startDate != null
+                          ? startDate.toString().substring(0, 16)
+                          : 'Pilih Tanggal & Waktu'),
                       trailing: const Icon(Icons.calendar_today_rounded),
                       onTap: () async {
-                        final date = await showDatePicker(context: context, initialDate: startDate ?? DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));
+                        final date = await showDatePicker(
+                            context: context,
+                            initialDate: startDate ?? DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100));
                         if (date != null) {
-                          final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(startDate ?? DateTime.now()));
+                          final time = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.fromDateTime(
+                                  startDate ?? DateTime.now()));
                           if (time != null) {
                             setModalState(() {
-                              startDate = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+                              startDate = DateTime(date.year, date.month,
+                                  date.day, time.hour, time.minute);
                             });
                           }
                         }
@@ -113,16 +131,27 @@ class _AdminGovernanceViewState extends State<AdminGovernanceView>
                   ],
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Batas Akhir (Tenggat Waktu)', style: TextStyle(fontSize: 14)),
-                    subtitle: Text(endDate != null ? endDate.toString().substring(0, 16) : 'Pilih Tanggal & Waktu'),
+                    title: const Text('Batas Akhir (Tenggat Waktu)',
+                        style: TextStyle(fontSize: 14)),
+                    subtitle: Text(endDate != null
+                        ? endDate.toString().substring(0, 16)
+                        : 'Pilih Tanggal & Waktu'),
                     trailing: const Icon(Icons.calendar_today_rounded),
                     onTap: () async {
-                      final date = await showDatePicker(context: context, initialDate: endDate ?? DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));
+                      final date = await showDatePicker(
+                          context: context,
+                          initialDate: endDate ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100));
                       if (date != null) {
-                        final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(endDate ?? DateTime.now()));
+                        final time = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.fromDateTime(
+                                endDate ?? DateTime.now()));
                         if (time != null) {
                           setModalState(() {
-                            endDate = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+                            endDate = DateTime(date.year, date.month, date.day,
+                                time.hour, time.minute);
                           });
                         }
                       }
@@ -133,41 +162,72 @@ class _AdminGovernanceViewState extends State<AdminGovernanceView>
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF0F172A),
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     onPressed: () async {
-                      if (titleController.text.isEmpty || descController.text.isEmpty || endDate == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Harap lengkapi semua data wajib.')));
+                      if (titleController.text.isEmpty ||
+                          descController.text.isEmpty ||
+                          endDate == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Harap lengkapi semua data wajib.')));
                         return;
                       }
                       if (isEvent && startDate == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Harap lengkapi tanggal mulai event.')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Harap lengkapi tanggal mulai event.')));
                         return;
                       }
 
                       Navigator.pop(context);
-                      final provider = Provider.of<KoperasiProvider>(context, listen: false);
-                      
+                      final provider =
+                          Provider.of<KoperasiProvider>(context, listen: false);
+
                       String msg = '';
                       if (isEvent) {
                         if (item == null) {
-                          msg = await provider.adminCreateEvent(titleController.text, descController.text, startDate!, endDate!);
+                          msg = await provider.adminCreateEvent(
+                              titleController.text,
+                              descController.text,
+                              startDate!,
+                              endDate!);
                         } else {
-                          msg = await provider.adminEditEvent(item['id'], titleController.text, descController.text, startDate!, endDate!);
+                          msg = await provider.adminEditEvent(
+                              item['id'],
+                              titleController.text,
+                              descController.text,
+                              startDate!,
+                              endDate!);
                         }
                       } else {
                         if (item == null) {
-                          msg = await provider.adminCreateProposal(titleController.text, descController.text, endDate!);
+                          msg = await provider.adminCreateProposal(
+                              titleController.text,
+                              descController.text,
+                              endDate!);
                         } else {
-                          msg = await provider.adminEditProposal(item['id'], titleController.text, descController.text, endDate!);
+                          msg = await provider.adminEditProposal(
+                              item['id'],
+                              titleController.text,
+                              descController.text,
+                              endDate!);
                         }
                       }
-                      
+
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text(msg)));
                       }
                     },
-                    child: const Text('Simpan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    child: const Text('Simpan',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16)),
                   ),
                   const SizedBox(height: 24),
                 ],
@@ -233,11 +293,15 @@ class _AdminGovernanceViewState extends State<AdminGovernanceView>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.folder_open_rounded, size: 64, color: Colors.grey.shade400),
+            Icon(Icons.folder_open_rounded,
+                size: 64, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             const Text(
               'Belum ada data',
-              style: TextStyle(color: Colors.grey, fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -249,10 +313,11 @@ class _AdminGovernanceViewState extends State<AdminGovernanceView>
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-        final String title = isEvent ? (item['name'] ?? 'Event') : (item['title'] ?? 'Proposal');
+        final String title =
+            isEvent ? (item['name'] ?? 'Event') : (item['title'] ?? 'Proposal');
         final String desc = item['description'] ?? '';
         final String status = item['status'] ?? '';
-        
+
         DateTime? date;
         if (isEvent && item['startDate'] != null) {
           date = DateTime.tryParse(item['startDate']);
@@ -289,7 +354,10 @@ class _AdminGovernanceViewState extends State<AdminGovernanceView>
                   Expanded(
                     child: Text(
                       title,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF0F172A)),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Color(0xFF0F172A)),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -297,7 +365,8 @@ class _AdminGovernanceViewState extends State<AdminGovernanceView>
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    icon: const Icon(Icons.edit_rounded, color: Colors.grey, size: 20),
+                    icon: const Icon(Icons.edit_rounded,
+                        color: Colors.grey, size: 20),
                     onPressed: () => _showForm(item: item),
                   ),
                 ],
@@ -314,20 +383,27 @@ class _AdminGovernanceViewState extends State<AdminGovernanceView>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       status.toUpperCase().replaceAll('_', ' '),
-                      style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: statusColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                   if (date != null)
                     Text(
                       '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}',
-                      style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold),
                     ),
                 ],
               ),

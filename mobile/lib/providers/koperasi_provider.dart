@@ -1169,7 +1169,8 @@ class KoperasiProvider extends ChangeNotifier {
 
   // ============ ADMIN GOVERNANCE ============
 
-  Future<String> adminCreateEvent(String name, String description, DateTime startDate, DateTime endDate) async {
+  Future<String> adminCreateEvent(String name, String description,
+      DateTime startDate, DateTime endDate) async {
     try {
       final body = await _postAction({
         'action': 'admin-create-event',
@@ -1188,7 +1189,8 @@ class KoperasiProvider extends ChangeNotifier {
     }
   }
 
-  Future<String> adminEditEvent(int eventId, String name, String description, DateTime startDate, DateTime endDate) async {
+  Future<String> adminEditEvent(int eventId, String name, String description,
+      DateTime startDate, DateTime endDate) async {
     try {
       final body = await _postAction({
         'action': 'admin-edit-event',
@@ -1208,7 +1210,8 @@ class KoperasiProvider extends ChangeNotifier {
     }
   }
 
-  Future<String> adminCreateProposal(String title, String description, DateTime? endDate) async {
+  Future<String> adminCreateProposal(
+      String title, String description, DateTime? endDate) async {
     try {
       final body = await _postAction({
         'action': 'admin-create-proposal',
@@ -1226,7 +1229,8 @@ class KoperasiProvider extends ChangeNotifier {
     }
   }
 
-  Future<String> adminEditProposal(int proposalId, String title, String description, DateTime? endDate) async {
+  Future<String> adminEditProposal(int proposalId, String title,
+      String description, DateTime? endDate) async {
     try {
       final body = await _postAction({
         'action': 'admin-edit-proposal',

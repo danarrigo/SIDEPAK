@@ -40,10 +40,10 @@
 
 Platform ini menargetkan *Koperasi Merah Putih Desa* — koperasi tingkat desa yang menjadi tulang punggung keuangan masyarakat pedesaan di Indonesia. Dua aplikasi klien berbagi backend Supabase (PostgreSQL) yang sama:
 
-| Klien | Pengguna | Tujuan |
-|---|---|---|
-| **Dashboard Admin Desktop** (`desktop/`) | Pengurus, Staf Koperasi | Mengelola anggota, memantau transaksi, membuat event, memantau tata kelola & kesehatan koperasi |
-| **Aplikasi Web/Mobile Anggota** (`mobile/`) | Anggota Koperasi | Melihat tabungan, poin, misi harian, berbelanja di marketplace, mengikuti arena battle, mengedit profil |
+| Klien | Tujuan |
+|---|---|
+| **Aplikasi Mobile** (`mobile/`) | Untuk kenyamanan saat menggunakan HP |
+| **Aplikasi Website** (`desktop/`) | Untuk jika tidak ingin melakukan download atau sedang tidak menggunakan handphone |
 
 Panduan setup aplikasi:
 - [Panduan Dashboard Web Desktop & API](./desktop/README.md)

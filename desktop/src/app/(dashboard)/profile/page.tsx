@@ -294,7 +294,7 @@ export default async function Page() {
         
         <div className="w-full space-y-6 mt-12 animate-slide-up delay-300">
           <h3 className="font-headline-md text-headline-md text-on-surface px-2">Pengaturan Akun</h3>
-          <ProfileSettings currentPhone={currentMember.nomorHp} />
+          <ProfileSettings currentPhone={currentMember.nomorHp} notifications={{ notifyIuran: currentMember.notifyIuran ?? true, notifyShu: currentMember.notifyShu ?? true, notifyPromo: currentMember.notifyPromo ?? true }} />
           
           <div className="mt-8 px-2 pb-8">
             <form action={logout}>

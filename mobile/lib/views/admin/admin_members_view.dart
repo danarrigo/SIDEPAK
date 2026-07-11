@@ -10,6 +10,82 @@ class AdminMembersView extends StatefulWidget {
 }
 
 class _AdminMembersViewState extends State<AdminMembersView> {
+  void _showEditDialog(BuildContext context, Map<String, dynamic> member) {
+    final provider = context.read<KoperasiProvider>();
+    final namaCtrl = TextEditingController(text: member['namaLengkap']);
+    final phoneCtrl = TextEditingController(text: member['nomorHp']);
+    String status = member['statusAnggota'] == 'active' ? 'active' : 'pending_pokok';
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return AlertDialog(
+              title: const Text('Edit Anggota'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: namaCtrl,
+                      decoration: const InputDecoration(labelText: 'Nama Lengkap'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: phoneCtrl,
+                      decoration: const InputDecoration(labelText: 'Nomor HP'),
+                      keyboardType: TextInputType.phone,
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: status,
+                      decoration: const InputDecoration(labelText: 'Status'),
+                      items: const [
+                        DropdownMenuItem(value: 'active', child: Text('Aktif')),
+                        DropdownMenuItem(value: 'pending_pokok', child: Text('Menunggu Pokok')),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() => status = val);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(ctx);
+                    final msg = await provider.updateAdminMember(
+                      member['id'],
+                      {
+                        'namaLengkap': namaCtrl.text,
+                        'nomorHp': phoneCtrl.text,
+                        'statusAnggota': status,
+                      },
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(msg == 'success' ? 'Anggota diperbarui' : msg)),
+                      );
+                    }
+                  },
+                  child: const Text('Simpan'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<KoperasiProvider>();
@@ -136,16 +212,10 @@ class _AdminMembersViewState extends State<AdminMembersView> {
                                   ],
                                 ),
                               ),
-                              // TODO: Add Edit button action if needed via a Dialog
                               IconButton(
-                                icon: const Icon(Icons.edit_rounded,
-                                    color: Colors.grey),
+                                icon: const Icon(Icons.edit_rounded, color: Colors.grey),
                                 onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            'Fitur edit akan segera hadir untuk aplikasi mobile!')),
-                                  );
+                                  _showEditDialog(context, member);
                                 },
                               )
                             ],

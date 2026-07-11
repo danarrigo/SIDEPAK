@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateCurrentMemberPhone } from '@/actions/members';
+import { updateCurrentMemberPhone, updateCurrentMemberPassword, updateMemberNotifications } from '@/actions/members';
 
-export default function ProfileSettings({ currentPhone }: { currentPhone?: string | null }) {
+export default function ProfileSettings({ currentPhone, notifications = { notifyIuran: true, notifyShu: true, notifyPromo: true } }: { currentPhone?: string | null, notifications?: { notifyIuran: boolean, notifyShu: boolean, notifyPromo: boolean } }) {
   const router = useRouter();
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [showPhone, setShowPhone] = useState(false);
@@ -20,26 +20,32 @@ export default function ProfileSettings({ currentPhone }: { currentPhone?: strin
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [phoneMessage, setPhoneMessage] = useState<{type: 'error' | 'success', text: string} | null>(null);
 
+  const [notifyState, setNotifyState] = useState(notifications);
+
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       setMessage({ type: 'error', text: 'Password baru tidak cocok!' });
       return;
     }
     setLoading(true);
-    // Mock API Call
-    setTimeout(() => {
-      setLoading(false);
+    
+    const result = await updateCurrentMemberPassword(newPassword);
+    
+    setLoading(false);
+    if (result.success) {
       setMessage({ type: 'success', text: 'Password berhasil diperbarui.' });
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
       setTimeout(() => setMessage(null), 3000);
-    }, 1000);
+    } else {
+      setMessage({ type: 'error', text: result.error || 'Gagal mengubah kata sandi' });
+    }
   };
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
@@ -61,6 +67,12 @@ export default function ProfileSettings({ currentPhone }: { currentPhone?: strin
     } else {
       setPhoneMessage({ type: 'error', text: result.error || 'Gagal memperbarui nomor handphone.' });
     }
+  };
+
+  const handleNotificationToggle = async (key: keyof typeof notifyState) => {
+    const newState = { ...notifyState, [key]: !notifyState[key] };
+    setNotifyState(newState);
+    await updateMemberNotifications(newState);
   };
 
   const renderUnderDevelopment = () => (
@@ -263,7 +275,7 @@ export default function ProfileSettings({ currentPhone }: { currentPhone?: strin
                   <p className="font-body-sm text-body-sm text-on-surface-variant">Terima pengingat saat mendekati jatuh tempo</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" defaultChecked />
+                  <input type="checkbox" className="sr-only peer" checked={notifyState.notifyIuran} onChange={() => handleNotificationToggle('notifyIuran')} />
                   <div className="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                 </label>
               </div>
@@ -273,7 +285,7 @@ export default function ProfileSettings({ currentPhone }: { currentPhone?: strin
                   <p className="font-body-sm text-body-sm text-on-surface-variant">Info saat SHU sudah bisa dicairkan</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" defaultChecked />
+                  <input type="checkbox" className="sr-only peer" checked={notifyState.notifyShu} onChange={() => handleNotificationToggle('notifyShu')} />
                   <div className="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                 </label>
               </div>
@@ -283,7 +295,7 @@ export default function ProfileSettings({ currentPhone }: { currentPhone?: strin
                   <p className="font-body-sm text-body-sm text-on-surface-variant">Update item baru dan diskon di pasar poin</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" />
+                  <input type="checkbox" className="sr-only peer" checked={notifyState.notifyPromo} onChange={() => handleNotificationToggle('notifyPromo')} />
                   <div className="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                 </label>
               </div>

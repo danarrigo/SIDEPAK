@@ -132,6 +132,18 @@ class AdminProfileView extends StatelessWidget {
                             'Nama Koperasi',
                             provider.koperasiName ??
                                 'Koperasi belum terhubung'),
+                        const SizedBox(height: 16),
+                        _buildInfoRow(
+                            'Total Anggota',
+                            '${provider.adminStats?['totalMembers'] ?? 0} Orang'),
+                        const SizedBox(height: 16),
+                        _buildInfoRow(
+                            'Anggota Aktif',
+                            '${provider.adminStats?['activeMembers'] ?? 0} Orang'),
+                        const SizedBox(height: 16),
+                        _buildInfoRow(
+                            'Total Aset',
+                            'Rp ${provider.adminStats?['totalAssets']?.toString() ?? '0'}'),
                       ],
                     ),
                   ),

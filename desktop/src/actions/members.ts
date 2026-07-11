@@ -161,3 +161,44 @@ export async function updateCurrentAdminProfile(data: { namaLengkap?: string, ni
     return { success: false, error: "Internal Server Error" };
   }
 }
+
+export async function updateCurrentMemberPassword(password: string) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated" };
+
+    const { error: passwordError } = await supabase.auth.updateUser({ password });
+    if (passwordError) return { success: false, error: "Gagal mengubah kata sandi: " + passwordError.message };
+
+    return { success: true };
+  } catch (error) {
+    console.error("Update Password Error:", error);
+    return { success: false, error: "Internal Server Error" };
+  }
+}
+
+export async function updateMemberNotifications(data: { notifyIuran: boolean, notifyShu: boolean, notifyPromo: boolean }) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated" };
+
+    const [member] = await db.select().from(members).where(eq(members.userId, user.id));
+    if (!member) return { success: false, error: "Member not found" };
+
+    await db.update(members).set({
+      notifyIuran: data.notifyIuran,
+      notifyShu: data.notifyShu,
+      notifyPromo: data.notifyPromo
+    }).where(eq(members.id, member.id));
+
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/profile");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Update Notifications Error:", error);
+    return { success: false, error: "Internal Server Error" };
+  }
+}

@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, timestamp, uuid, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, timestamp, uuid, integer, boolean } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { cooperatives } from "./cooperatives";
 import { relations } from "drizzle-orm";
@@ -18,6 +18,9 @@ export const members = pgTable("members", {
   desa: varchar("desa", { length: 100 }),
   pekerjaan: varchar("pekerjaan", { length: 100 }),
   cooperativeId: integer("cooperative_id").references(() => cooperatives.id),
+  notifyIuran: boolean("notify_iuran").default(true).notNull(),
+  notifyShu: boolean("notify_shu").default(true).notNull(),
+  notifyPromo: boolean("notify_promo").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

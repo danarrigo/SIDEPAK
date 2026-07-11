@@ -2,10 +2,10 @@
 import { db } from "@/db";
 import { proposals, votes } from "@/db/schema/governance";
 import { members } from "@/db/schema/members";
-import { eq, and, desc, count, sum, ne, sql, inArray } from "drizzle-orm";
+import { eq, and, desc, count, sum, ne, sql, inArray, gte } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { savings, loans, dues } from "@/db/schema/financials";
-import { memberProgress } from "@/db/schema/gamification";
+import { memberProgress, marketplaceItems, marketplaceTransactions } from "@/db/schema/gamification";
 import { events, eventParticipants } from "@/db/schema/activities";
 import { incrementQuestProgress } from "@/actions/quests";
 
@@ -168,11 +168,37 @@ export async function getKoperasiStats(cooperativeId: number) {
     const asetKas = Number(totalSavingsRes[0].value || 0) * 0.6;
     const asetPinjaman = Number(totalLoansRes[0].value || 0);
 
+    const umkmRes = await db.select({ value: sql<number>`count(distinct ${marketplaceItems.sellerId})` })
+      .from(marketplaceItems)
+      .innerJoin(members, eq(marketplaceItems.sellerId, members.id))
+      .where(eq(members.cooperativeId, cooperativeId));
+    const umkmAktif = Number(umkmRes[0].value || 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dailySavingsRes = await db.select({ value: sum(savings.amount) })
+      .from(savings)
+      .innerJoin(members, eq(savings.memberId, members.id))
+      .where(and(eq(members.cooperativeId, cooperativeId), gte(savings.createdAt, today)));
+
+    const dailyLoansRes = await db.select({ value: sum(loans.amount) })
+      .from(loans)
+      .innerJoin(members, eq(loans.memberId, members.id))
+      .where(and(eq(members.cooperativeId, cooperativeId), gte(loans.createdAt, today)));
+
+    const dailyMarketplaceRes = await db.select({ value: sum(marketplaceTransactions.totalPrice) })
+      .from(marketplaceTransactions)
+      .innerJoin(members, eq(marketplaceTransactions.sellerId, members.id))
+      .where(and(eq(members.cooperativeId, cooperativeId), gte(marketplaceTransactions.createdAt, today)));
+
+    const omzetHarian = Number(dailySavingsRes[0].value || 0) + Number(dailyLoansRes[0].value || 0) + Number(dailyMarketplaceRes[0].value || 0);
+
     return {
       transaksi,
       anggotaBaru,
-      omzetHarian: transaksi > 0 ? transaksi * 500000 : 0, // Mock dynamic value based on transactions
-      umkmAktif: Math.max(1, Math.floor(anggotaBaru / 3)), // Mock dynamic value based on members
+      omzetHarian,
+      umkmAktif,
       asetKas,
       asetPinjaman
     };

@@ -807,12 +807,40 @@ class KoperasiProvider extends ChangeNotifier {
       });
       if (body['success'] == true) {
         await fetchData();
-        return 'Proposal berhasil diajukan untuk persetujuan admin.';
+        return 'success';
       }
-      return body['error']?.toString() ?? 'Gagal membuat proposal.';
+      return body['error']?.toString() ?? 'Gagal mengirim usulan.';
     } catch (e) {
-      print('Submit proposal error: $e');
+      print('Submit proposal err: $e');
       return 'Gagal menghubungi server.';
+    }
+  }
+
+  Future<String> updateAdminMember(int targetMemberId, Map<String, dynamic> data) async {
+    try {
+      final response = await _client.post(
+        Uri.parse(_apiUrl('/api/admin-member')),
+        headers: _headers(isJson: true),
+        body: json.encode({
+          'memberId': targetMemberId,
+          'data': data,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final res = json.decode(response.body);
+        if (res['success'] == true) {
+          await fetchData();
+          return 'success';
+        }
+        return res['error']?.toString() ?? 'Gagal memperbarui anggota.';
+      }
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        return 'Akses ditolak: Anda tidak memiliki izin.';
+      }
+      return 'Server error (HTTP ${response.statusCode}).';
+    } catch (e) {
+      print('Update admin member err: $e');
+      return 'Tidak dapat terhubung ke server.';
     }
   }
 

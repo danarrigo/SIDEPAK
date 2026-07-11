@@ -20,6 +20,14 @@ class AdminProfileView extends StatelessWidget {
             elevation: 0,
             pinned: true,
             expandedHeight: 80,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                onPressed: onLogout,
+                tooltip: 'Keluar (Logout)',
+              ),
+              const SizedBox(width: 8),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               titlePadding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
